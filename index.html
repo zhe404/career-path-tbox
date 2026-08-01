@@ -700,13 +700,10 @@
     'use strict';
 
     // ============================================================
-    // 配置：后端API地址
+    // 配置：API地址（使用相对路径，自动适配当前域名）
     // ============================================================
     const API_CONFIG = {
-      // 本地开发
-      baseUrl: 'http://localhost:3000',
-      // 如果是部署到服务器，修改为实际地址
-      // baseUrl: 'https://你的域名.com',
+      baseUrl: process.env.API_BASE_URL || '',
     };
 
     // ============================================================
@@ -812,13 +809,10 @@
 
     // 渲染时间轴
     function renderTimeline(path) {
-      // 安全检查：确保 path 是有效数组
       if (!path || !Array.isArray(path) || path.length === 0) {
-        // 保险：使用默认非空路径
         path = state.careerPath;
       }
       
-      // 再次检查确保不会为空
       if (!path || path.length === 0) {
         path = [
           { year: 1, title: '基础夯实期', goals: '掌握核心技能，建立专业基础', skills: ['专业技能', '学习方法'] },
@@ -861,17 +855,15 @@
       `;
     }
 
-    // 核心：生成个性化路径 (基于当前表单)
+    // 核心：生成个性化路径
     function generatePersonalizedPath() {
       const job = userJob.value.trim() || '产品经理';
       const years = parseInt(userYears.value) || 3;
       const skills = getSelectedSkills();
       const interest = userInterest.value.trim() || '职业发展';
       
-      // 确保技能非空
       const safeSkills = skills && skills.length > 0 ? skills : ['项目管理', '沟通协作'];
 
-      // 根据职业生成不同路径 (差异化)
       let basePath = [];
       if (job.includes('开发') || job.includes('工程师') || job.includes('技术')) {
         basePath = [
@@ -890,7 +882,6 @@
           { year: 5, title: '产品总监 · 行业影响', goals: '构建产品生态，对外输出方法论', skills: ['产品战略', '行业影响', '技术管理'] }
         ];
       } else {
-        // 通用 / 运营等
         basePath = [
           { year: 1, title: '业务熟悉 · 核心技能', goals: '熟悉业务流程，掌握核心工作方法', skills: ['业务理解', '沟通协作', '数据分析'] },
           { year: 2, title: '项目主导 · 效率提升', goals: '独立负责项目，优化工作流程', skills: ['项目管理', '流程优化', '团队协作'] },
@@ -900,32 +891,28 @@
         ];
       }
 
-      // 根据年限裁剪 (3~5年)
       const totalYears = Math.min(Math.max(years + 2, 3), 5);
       const path = basePath.slice(0, totalYears).map((item, index) => ({
         ...item,
         year: index + 1,
-        // 融入用户兴趣关键词 (简单增强)
         goals: item.goals + (interest ? ` · ${interest}` : '')
       }));
 
-      // 合并用户技能 (确保路径技能包含用户选择的部分)
       path.forEach(item => {
         const existing = item.skills || [];
         const merged = [...new Set([...existing, ...safeSkills.slice(0, 2)])];
-        item.skills = merged.slice(0, 4); // 最多4个
+        item.skills = merged.slice(0, 4);
       });
 
       state.careerPath = path;
       state._lastGenerated = path;
       
-      // 同步到参数
       setParam('careerPath', path);
       
       return path;
     }
 
-    // 应用调整 (动态更新)
+    // 应用调整
     function applyAdjustment() {
       const focus = adjustFocus.value;
       const year = parseInt(adjustYear.value);
@@ -935,9 +922,7 @@
         return;
       }
 
-      // 更新路径中对应年份
       const path = state.careerPath;
-      // 安全检查
       if (!path || !Array.isArray(path) || path.length === 0) {
         alert('暂无职业路径数据，请先生成路径');
         return;
@@ -946,7 +931,6 @@
       const idx = path.findIndex(p => p.year === year);
       if (idx === -1) return;
 
-      // 根据调整重点修改目标 & 技能
       const item = path[idx];
       const focusMap = {
         'management': '项目管理',
@@ -958,10 +942,8 @@
       };
       const focusSkill = focusMap[focus] || '综合能力';
       
-      // 更新目标描述
       item.goals = item.goals + '；调整：' + desc;
       
-      // 添加技能
       if (item.skills && Array.isArray(item.skills)) {
         if (!item.skills.includes(focusSkill)) {
           item.skills.push(focusSkill);
@@ -970,42 +952,28 @@
         item.skills = [focusSkill];
       }
       
-      // 限制数量
       if (item.skills.length > 5) item.skills = item.skills.slice(0, 5);
 
-      // 记录历史
       const now = new Date();
       const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
       state.adjustHistory.unshift({ time: '今天 ' + timeStr, desc: desc + ` (第${year}年, ${focusSkill})` });
       if (state.adjustHistory.length > 10) state.adjustHistory.pop();
 
-      // 同步到参数
       setParam('careerPath', state.careerPath);
       setParam('adjustHistory', state.adjustHistory);
       setParam('adjustFocus', focus);
       setParam('adjustYear', year.toString());
       setParam('adjustDesc', desc);
 
-      // 重新渲染
       renderTimeline(state.careerPath);
       renderHistory();
-      // 更新摘要
       updateSummary();
       
-      // 发送消息通知到百宝箱
-      if (window.tboxBridge) {
-        window.tboxBridge.sendQuery({
-          question_content: '我调整了职业发展路径：' + desc + ' (第' + year + '年, ' + focusSkill + ')'
-        });
-      }
-      
-      // 提示
       alert('✅ 路径已动态调整！');
     }
 
     function renderHistory() {
       const history = state.adjustHistory;
-      // 安全检查
       if (!history || !Array.isArray(history) || history.length === 0) {
         historyItems.innerHTML = '<div style="color:#6b8ab0; padding:8px;">暂无调整记录</div>';
         return;
@@ -1018,23 +986,11 @@
     }
 
     // ============================================================
-    // 4. AI咨询功能 (连接到百宝箱)
+    // 4. AI咨询功能
     // ============================================================
     async function consultAI(message, context) {
       try {
-        // 尝试使用百宝箱桥接（如果在百宝箱平台内）
-        if (window.tboxBridge) {
-          return new Promise((resolve, reject) => {
-            window.tboxBridge.sendQuery({
-              question_content: message,
-              onSuccess: (response) => resolve(response),
-              onError: (error) => reject(error)
-            });
-          });
-        }
-        
-        // 否则使用我们的后端代理
-        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai`, {
+        const response = await fetch('/api/consult-ai', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1083,7 +1039,6 @@
       
       document.body.appendChild(overlay);
       
-      // 点击背景关闭
       overlay.addEventListener('click', function(e) {
         if (e.target === this) {
           this.remove();
@@ -1099,16 +1054,13 @@
     skillTags.forEach(tag => {
       tag.addEventListener('click', function() {
         this.classList.toggle('active');
-        // 自动更新摘要
         updateSummary();
-        // 同步到参数
         setParam('skills', getSelectedSkills());
       });
     });
 
     // 生成路径
     generateBtn.addEventListener('click', function() {
-      // 从表单同步最新数据
       state.userName = userName.value.trim() || '用户';
       state.userJob = userJob.value.trim() || '未填写';
       state.userYears = parseInt(userYears.value) || 3;
@@ -1116,7 +1068,6 @@
       state.selectedSkills = getSelectedSkills();
       state.userInterest = userInterest.value.trim() || '职业发展';
 
-      // 同步到参数
       setParam('userName', state.userName);
       setParam('userJob', state.userJob);
       setParam('userYears', state.userYears);
@@ -1124,26 +1075,18 @@
       setParam('skills', state.selectedSkills);
       setParam('userInterest', state.userInterest);
 
-      // 生成新路径
       const newPath = generatePersonalizedPath();
-      
-      // 更新摘要
       updateSummary();
-      
-      // 渲染
       renderTimeline(newPath);
-      
-      // 切换到路径tab
       switchTab('tab2');
       
-      // 显示成功
       const btn = generateBtn;
       const orig = btn.innerHTML;
       btn.innerHTML = '<i class="fas fa-check"></i> 已生成';
       setTimeout(() => { btn.innerHTML = orig; }, 1200);
     });
 
-    // 刷新路径 (重新生成)
+    // 刷新路径
     refreshBtn.addEventListener('click', function() {
       const path = generatePersonalizedPath();
       renderTimeline(path);
@@ -1155,12 +1098,11 @@
       applyAdjustment();
     });
 
-    // 咨询AI助手（核心功能）
+    // 咨询AI助手
     sendQueryBtn.addEventListener('click', async function() {
       const summary = profileSummary.innerText.replace(/\s+/g, ' ').trim();
       const msg = `当前职业概况：${summary}\n路径已生成，请给出进一步建议。`;
       
-      // 获取当前用户信息作为上下文
       const context = {
         userName: userName.value.trim(),
         userJob: userJob.value.trim(),
@@ -1171,7 +1113,6 @@
         careerPath: state.careerPath
       };
       
-      // 显示加载状态
       const btn = sendQueryBtn;
       const origText = btn.innerHTML;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI思考中...';
@@ -1181,9 +1122,8 @@
         const result = await consultAI(msg, context);
         showAIResponse(result.reply);
       } catch (error) {
-        alert('咨询失败：' + error.message + '\n\n请确保后端服务已启动 (npm start)');
+        alert('咨询失败：' + error.message);
       } finally {
-        // 恢复按钮状态
         btn.innerHTML = origText;
         btn.disabled = false;
       }
@@ -1214,10 +1154,9 @@
     });
 
     // ============================================================
-    // 6. 渲染卡片 (暴露给外部调用)
+    // 6. 渲染卡片
     // ============================================================
     window.renderCard = function() {
-      // 从参数同步数据到表单
       const pName = getParam('userName');
       const pJob = getParam('userJob');
       const pYears = getParam('userYears');
@@ -1230,7 +1169,6 @@
       const pAdjustYear = getParam('adjustYear');
       const pAdjustDesc = getParam('adjustDesc');
 
-      // 同步表单值
       if (pName) userName.value = pName;
       if (pJob) userJob.value = pJob;
       if (pYears) userYears.value = pYears;
@@ -1240,22 +1178,18 @@
       if (pAdjustYear) adjustYear.value = pAdjustYear;
       if (pAdjustDesc) adjustDesc.value = pAdjustDesc;
 
-      // 同步技能标签
       if (pSkills && Array.isArray(pSkills)) {
         updateSkillTagsUI(pSkills);
         state.selectedSkills = pSkills;
       }
 
-      // 同步路径
       if (pPath && Array.isArray(pPath) && pPath.length > 0) {
         state.careerPath = pPath;
         renderTimeline(pPath);
       } else {
-        // 使用默认路径
         renderTimeline(state.careerPath);
       }
 
-      // 同步历史
       if (pHistory && Array.isArray(pHistory)) {
         state.adjustHistory = pHistory;
         renderHistory();
@@ -1263,10 +1197,7 @@
         renderHistory();
       }
 
-      // 更新摘要
       updateSummary();
-      
-      // 默认tab1
       window.switchTab('tab1');
     };
 
@@ -1274,22 +1205,19 @@
     // 7. 初始化
     // ============================================================
     function init() {
-      // 执行渲染
       window.renderCard();
       
       // 检查后端服务是否可用
-      fetch(`${API_CONFIG.baseUrl}/api/test`)
+      fetch('/api/test')
         .then(res => res.json())
         .then(data => {
           console.log('✅ 后端服务连接成功:', data);
         })
         .catch(err => {
-          console.warn('⚠️ 后端服务未启动，请运行: npm start');
-          console.warn('AI咨询功能将不可用');
+          console.warn('⚠️ 后端服务未启动或不可用');
         });
     }
 
-    // 页面加载完成后初始化
     document.addEventListener('DOMContentLoaded', init);
   })();
 </script>
