@@ -700,10 +700,10 @@
     'use strict';
 
     // ============================================================
-    // 配置：API地址（使用相对路径，自动适配当前域名）
+    // 配置：API地址
     // ============================================================
     const API_CONFIG = {
-      baseUrl: process.env.API_BASE_URL || '',
+      baseUrl: 'https://api.zheyu.online',
     };
 
     // ============================================================
@@ -990,7 +990,7 @@
     // ============================================================
     async function consultAI(message, context) {
       try {
-        const response = await fetch('/api/consult-ai', {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1208,7 +1208,7 @@
       window.renderCard();
       
       // 检查后端服务是否可用
-      fetch('/api/test')
+      fetch(`${API_CONFIG.baseUrl}/api/test`)
         .then(res => res.json())
         .then(data => {
           console.log('✅ 后端服务连接成功:', data);
