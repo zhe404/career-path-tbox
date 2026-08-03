@@ -5,18 +5,19 @@ const axios = require('axios');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('.'));
 
 // ==========================================
 // 百宝箱API配置
 // ==========================================
 const TBOX_CONFIG = {
   apiUrl: 'https://api.tbox.cn/api/chat',
-  // 使用你在百宝箱控制台生成的 inc- 开头的密钥
-  apiKey: 'inc-ak1e56da43c93029e7f6f13a63fe5b0cadf0deff0351694f5e1998cb4f590cb005',
+  // ✅ 优先读取环境变量，如果没有则使用默认值
+  apiKey: process.env.TBOX_API_KEY || 'inc-ak1e56da43c93029e7f6f13a63fe5b0cadf0deff0351694f5e1998cb4f590cb005',
 };
 
 // ============================================
-// 1. 咨询AI接口（使用非流式响应）
+// 1. 咨询AI接口（非流式响应，更稳定）
 // ============================================
 app.post('/api/consult-ai', async (req, res) => {
   try {
@@ -27,7 +28,7 @@ app.post('/api/consult-ai', async (req, res) => {
       appId: '202607APmEQJ20464969',
       query: message,
       userId: 'user_' + Date.now(),
-      stream: false,  // ✅ 使用非流式响应，更稳定
+      stream: false,
     };
 
     console.log('📤 请求体:', JSON.stringify(requestData, null, 2));
@@ -40,32 +41,26 @@ app.post('/api/consult-ai', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 30000,
+        timeout: 60000,
       }
     );
 
     console.log('✅ AI响应成功，状态码:', response.status);
-    console.log('📦 响应数据:', JSON.stringify(response.data, null, 2));
 
-    // ==========================================
-    // 解析非流式响应（根据百宝箱API文档）
-    // ==========================================
+    // 解析非流式响应
     let reply = '';
 
     if (response.data && response.data.data) {
       const data = response.data.data;
       
-      // data 是数组，包含多个 ChatResponse
       if (Array.isArray(data)) {
         for (const item of data) {
           if (item.result && Array.isArray(item.result)) {
             for (const result of item.result) {
               if (result.chunk) {
-                // 如果 mediaType 是 text，chunk 直接是文本
                 if (result.mediaType === 'text') {
                   reply += result.chunk;
                 } else {
-                  // 如果是其他类型，尝试解析 JSON
                   try {
                     const chunkData = typeof result.chunk === 'string' 
                       ? JSON.parse(result.chunk) 
@@ -80,7 +75,6 @@ app.post('/api/consult-ai', async (req, res) => {
           }
         }
       } else {
-        // 单个对象
         if (data.result && Array.isArray(data.result)) {
           for (const result of data.result) {
             if (result.chunk) {
@@ -102,7 +96,6 @@ app.post('/api/consult-ai', async (req, res) => {
       }
     }
 
-    // 如果上面没有提取到，尝试其他字段
     if (!reply || reply.trim() === '') {
       reply = response.data?.data?.reply || 
               response.data?.reply || 
@@ -132,7 +125,7 @@ app.post('/api/consult-ai', async (req, res) => {
       console.error('响应数据:', error.response.data);
       
       if (statusCode === 403) {
-        errorMsg = '授权令牌无效，请在百宝箱控制台重新生成 inc- 开头的密钥';
+        errorMsg = '授权令牌无效，请在百宝箱控制台重新生成密钥';
       } else if (statusCode === 400) {
         errorMsg = '请求参数错误，请检查API文档';
       } else if (statusCode === 404) {
@@ -166,7 +159,6 @@ app.get('/api/test', (req, res) => {
     config: {
       apiUrl: TBOX_CONFIG.apiUrl,
       hasApiKey: !!TBOX_CONFIG.apiKey,
-      apiKeyPrefix: TBOX_CONFIG.apiKey ? TBOX_CONFIG.apiKey.substring(0, 15) + '...' : '无'
     }
   });
 });
@@ -183,15 +175,10 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
-// 4. 静态文件
+// 4. 启动服务器
 // ============================================
-app.use(express.static('.'));
-
-// ============================================
-// 5. 启动
-// ============================================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(55));
   console.log('🚀 百宝箱代理服务已启动');
   console.log(`📡 本地地址: http://localhost:${PORT}`);
@@ -200,5 +187,5 @@ app.listen(PORT, () => {
   console.log(`📋 API地址: ${TBOX_CONFIG.apiUrl}`);
   console.log(`📱 AppID: 202607APmEQJ20464969`);
   console.log('='.repeat(55));
-  console.log('💡 访问: http://localhost:3000/index.html');
+  console.log('💡 访问: http://localhost:' + PORT + '/index.html');
 });
