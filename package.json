@@ -1,7 +1,7 @@
 {
   "name": "career-path-tbox",
   "version": "1.0.0",
-  "description": "职业路径生成器 - 百宝箱集成",
+  "description": "AI职业导航与终身学习伙伴系统 - 蚂蚁百宝箱",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,7 +15,7 @@
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": [],
+  "keywords": ["AI", "职业导航", "百宝箱", "学习伙伴"],
   "author": "",
   "license": "ISC",
   "type": "commonjs"

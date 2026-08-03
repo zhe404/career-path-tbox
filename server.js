@@ -5,19 +5,17 @@ const axios = require('axios');
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
 
 // ==========================================
 // 百宝箱API配置
 // ==========================================
 const TBOX_CONFIG = {
   apiUrl: 'https://api.tbox.cn/api/chat',
-  // ✅ 优先读取环境变量，如果没有则使用默认值
   apiKey: process.env.TBOX_API_KEY || 'inc-ak1e56da43c93029e7f6f13a63fe5b0cadf0deff0351694f5e1998cb4f590cb005',
 };
 
 // ============================================
-// 1. 咨询AI接口（非流式响应，更稳定）
+// 1. 咨询AI接口（非流式响应）
 // ============================================
 app.post('/api/consult-ai', async (req, res) => {
   try {
@@ -41,7 +39,7 @@ app.post('/api/consult-ai', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 60000,
+        timeout: 60000,  // 增加到60秒
       }
     );
 
@@ -175,9 +173,14 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
-// 4. 启动服务器
+// 4. 提供静态文件服务
 // ============================================
-const PORT = process.env.PORT || 8080;
+app.use(express.static('.'));
+
+// ============================================
+// 5. 启动服务器
+// ============================================
+const PORT = process.env.PORT || 8081;
 app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(55));
   console.log('🚀 百宝箱代理服务已启动');
