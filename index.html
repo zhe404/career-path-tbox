@@ -1072,7 +1072,7 @@
     }
 
     // ============================================================
-    // 🔥 咨询AI助手（包含完整用户信息）
+    // 🔥 咨询AI助手（精简版 - 避免超时）
     // ============================================================
     consultBtn.addEventListener('click', async function() {
       if (!currentPathData) {
@@ -1082,28 +1082,26 @@
 
       const userInput = getUserInput();
 
-      // 构建完整消息，包含用户信息和成长树
-      const msg = `你好！我是${userInput.name}，一名${userInput.job}，已有${userInput.years}年工作经验。
+      // 精简消息 - 只发关键信息
+      const msg = `我是${userInput.name}，${userInput.job}，${userInput.years}年经验。
+教育：${userInput.education}
+目标：${userInput.goal}
+兴趣：${userInput.interest}
+风格：${userInput.styleLabel}
+技能：${userInput.skills.join('、')}
 
-【我的背景信息】
-- 教育背景：${userInput.education}
-- 职业目标：${userInput.goal}
-- 职业兴趣：${userInput.interest}
-- 当前技能：${userInput.skills.join('、')}
-- 路径风格：${userInput.styleLabel}
-
-【我的5年成长计划】
+我的5年计划：
 ${currentPathData.tree.branches.map((b, i) => 
-  `第${b.year}年：${b.title}\n  目标：${b.goals}\n  核心技能：${(b.skills || []).join('、')}`
-).join('\n\n')}
+  `第${b.year}年：${b.title} → ${b.goals}`
+).join('\n')}
 
-请根据以上信息，给我具体的职业发展建议。`;
+请给我5条具体的职业发展建议，每条不超过50字。`;
 
       try {
         consultBtn.disabled = true;
         consultBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 咨询中...';
 
-        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai`, {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: msg, context: userInput })
