@@ -1,0 +1,2039 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>AI职业导航 · 成长与训练中心</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script><style>/*职业规划*/
+    /* ===== 全局重置 ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f4fc 0%, #e6edf7 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ===== 头部 ===== */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0 30px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #0b1e3a, #1d3b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header h1 i {
+      background: #1e3a6b;
+      padding: 12px;
+      border-radius: 16px;
+      color: white;
+      font-size: 22px;
+      -webkit-text-fill-color: white;
+      box-shadow: 0 4px 12px rgba(0,20,40,0.15);
+    }
+
+    .header .badge {
+      background: rgba(26, 67, 133, 0.12);
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1d3b6b;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    /* ===== 主卡片 ===== */
+    .main-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      border-radius: 40px;
+      padding: 32px 28px;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 20px 60px rgba(18, 34, 64, 0.1);
+      margin-bottom: 24px;
+    }
+
+    /* ===== Tab 导航 ===== */
+    .tab-nav {
+      display: flex;
+      gap: 6px;
+      background: rgba(220, 232, 248, 0.4);
+      padding: 6px;
+      border-radius: 60px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 8px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #2b4a77;
+      transition: all 0.2s;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: #0b1e3a;
+      box-shadow: 0 8px 20px rgba(18, 52, 106, 0.12);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== 表单 ===== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d3557;
+    }
+
+    .form-group label i {
+      margin-right: 6px;
+      color: #1e4a8a;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: white;
+      border: 1.5px solid #d9e2ef;
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-size: 15px;
+      transition: all 0.2s;
+      outline: none;
+      color: #0a1a33;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #1e4a8a;
+      box-shadow: 0 0 0 4px rgba(30, 74, 138, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    /* ===== 动态技能标签 ===== */
+    .skills-tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+      padding: 8px;
+      min-height: 50px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 16px;
+      border: 1.5px dashed #d9e2ef;
+      transition: all 0.3s;
+    }
+
+    .skills-tag-group.has-skills {
+      border-style: solid;
+      border-color: #c4d3e8;
+      background: rgba(255,255,255,0.5);
+    }
+
+    .skill-tag {
+      background: white;
+      border: 1.5px solid #d0dcee;
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1d3557;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .skill-tag:hover {
+      background: #eef4fc;
+      border-color: #8eb0da;
+      transform: scale(1.04);
+    }
+
+    .skill-tag.active {
+      background: #1e4a8a;
+      border-color: #1e4a8a;
+      color: white;
+      box-shadow: 0 4px 12px rgba(30, 74, 138, 0.25);
+    }
+
+    .skill-tag.ai-recommended {
+      animation: pulse-glow 0.6s ease;
+    }
+
+    @keyframes pulse-glow {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(30, 74, 138, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(30, 74, 138, 0.2); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(30, 74, 138, 0); }
+    }
+
+    .skill-tag.ai-recommended::after {
+      content: ' ✨';
+      font-size: 11px;
+    }
+
+    .empty-skills-hint {
+      color: #4a6f9c;
+      padding: 12px;
+      text-align: center;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    /* ===== AI 状态提示 ===== */
+    .ai-status {
+      font-size: 13px;
+      color: #4a6f9c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+    }
+
+    .ai-status .spinner-small {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e5edf8;
+      border-top-color: #1e4a8a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .ai-status .fa-check-circle { color: #28a745; }
+    .ai-status .fa-exclamation-circle { color: #dc3545; }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ===== 按钮 ===== */
+    .btn-primary {
+      background: linear-gradient(135deg, #1e4a8a, #2d6bb8);
+      border: none;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(30, 74, 138, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(30, 74, 138, 0.35);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid #c4d3e8;
+      color: #1d3b6b;
+      padding: 10px 22px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: white;
+      border-color: #8eb0da;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ===== 树形路径 ===== */
+    .tree-container {
+      padding: 20px 0 10px;
+      overflow-x: auto;
+    }
+
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 700px;
+    }
+
+    .tree-root {
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .tree-root .node {
+      background: linear-gradient(135deg, #1e4a8a, #2d6bb8);
+      color: white;
+      padding: 14px 36px;
+      border-radius: 60px;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 8px 30px rgba(30, 74, 138, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tree-root .node .sub-info {
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    .tree-branches {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+      padding-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .tree-branches::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      width: 2px;
+      height: 30px;
+      background: #1e4a8a;
+    }
+
+    .branch {
+      flex: 1;
+      min-width: 140px;
+      max-width: 190px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      padding-top: 20px;
+    }
+
+    .branch::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 20px;
+      background: #1e4a8a;
+    }
+
+    .branch:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      right: -50%;
+      height: 2px;
+      background: #1e4a8a;
+    }
+
+    .branch-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e4a8a;
+      margin-bottom: 8px;
+      background: rgba(30, 74, 138, 0.08);
+      padding: 2px 14px;
+      border-radius: 20px;
+    }
+
+    .branch .node {
+      background: white;
+      border: 2px solid #e5edf8;
+      border-radius: 20px;
+      padding: 14px 12px;
+      text-align: center;
+      width: 100%;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      position: relative;
+    }
+
+    .branch .node:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 28px rgba(30, 74, 138, 0.15);
+      border-color: #1e4a8a;
+    }
+
+    .branch .node .node-icon { font-size: 28px; margin-bottom: 4px; }
+    .branch .node .node-label { font-weight: 700; color: #0b1e3a; font-size: 14px; line-height: 1.3; }
+    .branch .node .node-goal { font-size: 12px; color: #4a6f9c; margin-top: 4px; line-height: 1.4; }
+
+    .branch .node .node-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .branch .node .node-skills .skill-tag {
+      font-size: 10px;
+      padding: 2px 10px;
+      background: #eef4fc;
+      border-color: transparent;
+      cursor: default;
+      border-radius: 20px;
+    }
+
+    .branch .node .milestone-badge {
+      margin-top: 6px;
+      font-size: 10px;
+      color: #1e4a8a;
+      background: rgba(30, 74, 138, 0.08);
+      padding: 2px 12px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    .branch .node.goal {
+      border-color: #ffd700;
+      background: linear-gradient(135deg, #fffbe6, #fff8e1);
+    }
+
+    .branch .node.goal .node-label { color: #b8860b; }
+
+    .branch .year-badge {
+      position: absolute;
+      top: -10px;
+      right: -8px;
+      background: #1e4a8a;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+
+    /* ===== 意外事件 ===== */
+    .event-card {
+      background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+      border-radius: 16px;
+      padding: 14px 20px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid #ffd700;
+    }
+
+    .event-card .event-icon { font-size: 24px; }
+    .event-card .event-text { font-size: 13px; color: #856404; font-weight: 500; }
+
+    /* ===== 雷达图 ===== */
+    .radar-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    .radar-container {
+      background: white;
+      border-radius: 20px;
+      padding: 16px;
+      border: 1px solid #e5edf8;
+      height: 280px;
+    }
+
+    .stats-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stat-item .stat-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d3557;
+      width: 80px;
+    }
+
+    .stat-item .stat-bar {
+      flex: 1;
+      height: 8px;
+      background: #e5edf8;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .stat-item .stat-bar .stat-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #1e4a8a, #4a8bc2);
+      transition: width 1s ease;
+      width: 0%;
+    }
+
+    .stat-item .stat-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e4a8a;
+      width: 40px;
+      text-align: right;
+    }
+
+    /* ===== 成就徽章 ===== */
+    .badges-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .badge-item {
+      background: white;
+      border-radius: 40px;
+      padding: 6px 16px 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1d3557;
+      border: 1.5px solid #e5edf8;
+    }
+
+    .badge-item.unlocked {
+      border-color: #ffd700;
+      background: linear-gradient(135deg, #fffbe6, #fff8e1);
+    }
+
+    .badge-item .badge-icon { font-size: 18px; }
+    .badge-item.locked { opacity: 0.4; }
+
+    /* ===== AI 回复模态框 ===== */
+    .ai-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .ai-modal-content {
+      background: white;
+      border-radius: 24px;
+      max-width: 550px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: auto;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .ai-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5edf8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: white;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .ai-modal-header span { font-weight: 700; font-size: 18px; color: #0b1e3a; }
+    .ai-modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+
+    .ai-modal-body {
+      padding: 24px;
+      line-height: 1.8;
+      color: #1a2f4e;
+      font-size: 15px;
+      white-space: pre-wrap;
+    }
+
+    .ai-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e5edf8;
+      text-align: right;
+    }
+
+    .ai-modal-footer button {
+      padding: 10px 30px;
+      background: #1e4a8a;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ===== Loading ===== */
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 40px 0;
+    }
+
+    .loading-spinner .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e5edf8;
+      border-top-color: #1e4a8a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-spinner .loading-text {
+      font-size: 16px;
+      color: #1d3557;
+      font-weight: 500;
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .radar-section { grid-template-columns: 1fr; }
+      .header h1 { font-size: 22px; }
+      .main-card { padding: 20px 16px; }
+      .tree { min-width: 500px; }
+      .branch { min-width: 100px; max-width: 150px; }
+      .tab-btn { font-size: 13px; padding: 10px 4px; }
+      .tab-btn i { font-size: 14px; }
+    }
+
+    @media (max-width: 480px) {
+      .tab-btn span { display: none; }
+      .tab-btn i { font-size: 20px; }
+      .tree { min-width: 380px; }
+      .branch { min-width: 80px; max-width: 120px; }
+      .branch .node { padding: 10px 8px; }
+      .branch .node .node-label { font-size: 12px; }
+    }
+
+    .mt-12 { margin-top: 12px; }
+    .mt-20 { margin-top: 20px; }
+    .flex { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .text-center { text-align: center; }
+    .text-muted { color: #4a6f9c; font-size: 14px; }
+    .w-full { width: 100%; }
+    .gap-8 { gap: 8px; }
+  /*职场模拟*/
+    :root {
+      --navy: #1c376f;
+      --blue: #315aa6;
+      --blue-2: #4776c4;
+      --bg: #eef3fc;
+      --panel: rgba(255,255,255,.86);
+      --line: #d7e1f3;
+      --text: #12254c;
+      --muted: #657493;
+      --success: #2c8c65;
+      --shadow: 0 18px 48px rgba(35, 64, 121, .12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      padding: 28px 18px;
+      color: var(--text);
+      font-family: Inter, "Microsoft YaHei", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 10% 5%, rgba(87,126,202,.13), transparent 27%),
+        radial-gradient(circle at 92% 12%, rgba(117,150,216,.12), transparent 25%),
+        linear-gradient(145deg, #f4f7fd, #e9effa);
+    }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { width: min(1180px, 100%); margin: 0 auto; }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin: 6px 4px 26px;
+    }
+    .brand { display: flex; align-items: center; gap: 16px; }
+    .logo {
+      width: 62px; height: 62px; border-radius: 20px;
+      display: grid; place-items: center; color: white; font-size: 27px;
+      background: linear-gradient(145deg, #1c376f, #3c66b2);
+      box-shadow: 0 12px 28px rgba(28,55,111,.25);
+    }
+    .brand h1 { font-size: clamp(24px, 3vw, 38px); letter-spacing: 1px; }
+    .brand p { margin-top: 5px; color: var(--muted); font-size: 14px; }
+    .version {
+      padding: 10px 22px; border-radius: 999px; color: var(--navy);
+      background: rgba(215,225,243,.8); font-weight: 700; white-space: nowrap;
+    }
+
+    .shell {
+      border: 1px solid rgba(255,255,255,.85);
+      border-radius: 36px; padding: 34px;
+      background: rgba(255,255,255,.64);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+    .progress {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-bottom: 28px; padding: 8px;
+      border-radius: 24px; background: #edf2fb;
+    }
+    .step {
+      padding: 14px 12px; text-align: center; border-radius: 18px;
+      color: #75829b; font-weight: 700; transition: .25s;
+    }
+    .step.active { color: var(--text); background: white; box-shadow: 0 8px 20px rgba(36,62,112,.1); }
+    .step.done { color: var(--success); }
+
+    .view { display: none; }
+    .view.active { display: block; animation: appear .28s ease; }
+    @keyframes appear { from { opacity: 0; transform: translateY(8px); } }
+
+    .hero {
+      display: grid; grid-template-columns: 1.05fr .95fr; gap: 28px;
+      align-items: stretch;
+    }
+    .intro, .setup-card, .chat-card, .result-card {
+      border: 1px solid var(--line); border-radius: 28px;
+      background: var(--panel); box-shadow: 0 10px 28px rgba(38,69,125,.07);
+    }
+    .intro { padding: 38px; display: flex; flex-direction: column; justify-content: center; }
+    .eyebrow { color: var(--blue); font-weight: 800; margin-bottom: 14px; }
+    .intro h2 { font-size: clamp(28px, 4vw, 46px); line-height: 1.2; }
+    .intro p { margin-top: 18px; line-height: 1.9; color: var(--muted); }
+    .abilities { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+    .chip { padding: 9px 13px; border-radius: 999px; background: #edf3ff; color: var(--navy); font-weight: 700; font-size: 13px; }
+
+    .setup-card { padding: 30px; }
+    .section-title { font-size: 21px; margin-bottom: 18px; }
+    label { display: block; font-weight: 800; margin: 18px 0 9px; }
+    .job-input {
+      width: 100%; padding: 16px 18px; border-radius: 16px;
+      border: 1px solid #cbd8ee; outline: none; color: var(--text);
+      background: white; transition: .2s;
+    }
+    .job-input:focus { border-color: var(--blue-2); box-shadow: 0 0 0 4px rgba(71,118,196,.12); }
+    .scene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .scene {
+      position: relative; border: 1px solid #d4def0; border-radius: 18px;
+      background: white; padding: 17px 15px; text-align: left; color: var(--text);
+      transition: .2s;
+    }
+    .scene:hover { transform: translateY(-2px); border-color: #9eb5dd; }
+    .scene.selected { color: white; border-color: var(--blue); background: linear-gradient(145deg, var(--blue), #244989); box-shadow: 0 10px 22px rgba(49,90,166,.23); }
+    .scene i { width: 24px; }
+    .scene small { display: block; margin: 7px 0 0 25px; opacity: .74; line-height: 1.5; }
+    .primary {
+      width: 100%; border: 0; margin-top: 24px; padding: 17px 20px;
+      border-radius: 17px; color: white; font-weight: 800; font-size: 16px;
+      background: linear-gradient(90deg, #284d91, #4776c4);
+      box-shadow: 0 12px 24px rgba(43,79,147,.22);
+    }
+    .primary:disabled { cursor: not-allowed; opacity: .5; }
+
+    .simulation-head {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; padding: 0 4px 18px;
+    }
+    .session-meta { display: flex; flex-wrap: wrap; gap: 9px; }
+    .meta { background: #eaf1fd; padding: 9px 13px; border-radius: 999px; font-size: 13px; font-weight: 750; }
+    .ghost {
+      border: 1px solid #c8d6ec; background: white; color: var(--navy);
+      padding: 10px 15px; border-radius: 14px; font-weight: 750;
+    }
+    .chat-card { overflow: hidden; }
+    .workplace-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px; color: white;
+      background: linear-gradient(90deg, #1b376e, #315aa6);
+    }
+    .online { font-size: 13px; opacity: .88; }
+    .online::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: #76e5af; }
+    .messages {
+      height: min(58vh, 610px); min-height: 430px; overflow-y: auto;
+      padding: 25px; background: linear-gradient(#f8faff, #f2f6fd);
+    }
+    .message { display: flex; gap: 11px; margin-bottom: 19px; }
+    .message.user { justify-content: flex-end; }
+    .avatar {
+      flex: 0 0 38px; height: 38px; display: grid; place-items: center;
+      border-radius: 13px; color: white; background: var(--navy);
+    }
+    .message.user .avatar { order: 2; background: #6b7b99; }
+    .bubble {
+      max-width: min(760px, 82%); padding: 15px 17px; border-radius: 18px;
+      line-height: 1.78; white-space: pre-wrap; overflow-wrap: anywhere;
+      color: #172c55; background: white; border: 1px solid #dde6f5;
+      box-shadow: 0 6px 18px rgba(32,62,113,.06);
+    }
+    .message.assistant .bubble { border-top-left-radius: 6px; }
+    .message.user .bubble { color: white; border: 0; border-top-right-radius: 6px; background: linear-gradient(145deg, #315aa6, #244989); }
+    .typing span { display: inline-block; width: 7px; height: 7px; margin: 0 2px; border-radius: 50%; background: #6f83aa; animation: blink 1.1s infinite; }
+    .typing span:nth-child(2) { animation-delay: .15s; }
+    .typing span:nth-child(3) { animation-delay: .3s; }
+    @keyframes blink { 50% { opacity: .25; transform: translateY(-2px); } }
+    .composer {
+      display: grid; grid-template-columns: 1fr auto; gap: 12px;
+      padding: 18px; border-top: 1px solid var(--line); background: white;
+    }
+    .composer textarea {
+      resize: none; min-height: 54px; max-height: 150px; padding: 15px 17px;
+      border: 1px solid #cfdaed; border-radius: 17px; outline: none;
+    }
+    .send {
+      align-self: end; min-width: 105px; height: 54px; border: 0; border-radius: 17px;
+      color: white; font-weight: 800; background: var(--blue);
+    }
+
+    .result-layout { display: grid; grid-template-columns: .92fr 1.08fr; gap: 24px; }
+    .result-card { padding: 26px; }
+    #radar { width: 100%; height: 390px; }
+    .score-list { display: grid; gap: 16px; margin-top: 12px; }
+    .score-row { display: grid; grid-template-columns: 110px 1fr 48px; align-items: center; gap: 12px; }
+    .bar { height: 11px; overflow: hidden; border-radius: 999px; background: #e5edf9; }
+    .bar > div { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #294f94, #6691d5); transition: width .7s ease; }
+    .evaluation {
+      margin-top: 22px; padding: 20px; border-radius: 20px;
+      line-height: 1.8; white-space: pre-wrap; max-height: 440px; overflow-y: auto;
+      background: #f6f9ff; border: 1px solid #dce6f5;
+    }
+    .result-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+    .result-actions button { padding: 13px 18px; border-radius: 15px; font-weight: 800; }
+    .back { border: 1px solid #c8d6ec; background: white; color: var(--navy); }
+    .again { border: 0; background: var(--blue); color: white; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 20px);
+      z-index: 20; padding: 13px 18px; border-radius: 14px; color: white;
+      background: rgba(21,39,74,.94); opacity: 0; pointer-events: none; transition: .25s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 850px) {
+      body { padding: 14px 10px; }
+      .header { align-items: flex-start; }
+      .version { display: none; }
+      .shell { padding: 18px; border-radius: 25px; }
+      .hero, .result-layout { grid-template-columns: 1fr; }
+      .scene-grid { grid-template-columns: 1fr; }
+      .progress { font-size: 13px; }
+      .intro { padding: 28px; }
+      .messages { height: 55vh; }
+    }
+  /*统一外壳*/
+html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!important;color:#12254c;font-family:Inter,"Microsoft YaHei",system-ui,sans-serif;background:radial-gradient(circle at 10% 5%,rgba(87,126,202,.13),transparent 27%),radial-gradient(circle at 92% 12%,rgba(117,150,216,.12),transparent 25%),linear-gradient(145deg,#f4f7fd,#e9effa)!important}.global-app{width:min(1180px,100%);margin:0 auto}.global-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:6px 4px 24px;flex-wrap:wrap}.global-brand{display:flex;align-items:center;gap:16px}.global-logo{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;color:#fff;font-size:27px;background:linear-gradient(145deg,#1c376f,#3c66b2);box-shadow:0 12px 28px rgba(28,55,111,.25)}.global-brand h1{margin:0;font-size:clamp(24px,3vw,38px);letter-spacing:1px}.global-brand p{margin:5px 0 0;color:#657493;font-size:14px}.global-badge{padding:10px 22px;border-radius:999px;color:#18366f;background:rgba(215,225,243,.8);font-weight:700;white-space:nowrap}.global-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;padding:8px;border-radius:26px;background:#edf2fb;border:1px solid rgba(255,255,255,.85);box-shadow:0 10px 28px rgba(35,64,121,.08)}.global-tab{border:0;padding:16px 18px;border-radius:20px;background:transparent;color:#73809a;font-weight:800;font-size:18px;cursor:pointer;transition:.22s}.global-tab i{margin-right:9px}.global-tab.active{background:#fff;color:#18366f;box-shadow:0 8px 20px rgba(36,62,112,.10)}.module-panel{display:none}.module-panel.active{display:block;animation:moduleAppear .25s ease}@keyframes moduleAppear{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}#careerModule .container{max-width:1100px;margin:0 auto}#simulationModule .app{width:min(1180px,100%);margin:0 auto}#careerModule .main-card,#simulationModule .shell{margin-top:0}@media(max-width:700px){body{padding:14px 10px 28px!important}.global-badge{display:none}.global-tab{font-size:15px;padding:14px 10px}}
+</style></head><body><main class="global-app"><header class="global-header"><div class="global-brand"><div class="global-logo"><i class="fa-solid fa-compass"></i></div><div><h1>AI职业导航 · 成长与训练中心</h1><p>从职业路径规划到远程协作训练，在同一页面完成成长闭环</p></div></div><div class="global-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 驱动</div></header><nav class="global-nav"><button class="global-tab active" data-module="career"><i class="fa-solid fa-tree"></i>职业规划</button><button class="global-tab" data-module="simulation"><i class="fa-solid fa-building-user"></i>职场模拟</button></nav><section id="careerModule" class="module-panel active">
+<div class="container">
+<!-- ===== 头部 ===== -->
+
+<!-- ===== 主卡片 ===== -->
+<div class="main-card">
+<!-- Tab 导航 -->
+<div class="tab-nav">
+<button class="tab-btn active" data-tab="tab1"><i class="fas fa-pen-to-square"></i> <span>信息采集</span></button>
+<button class="tab-btn" data-tab="tab2"><i class="fas fa-tree"></i> <span>成长树</span></button>
+</div>
+<!-- ===== TAB 1: 信息采集 ===== -->
+<div class="tab-content active" id="tab1">
+<div style="font-size:18px;font-weight:700;color:#0b1e3a;margin-bottom:20px;">
+<i class="fas fa-user-astronaut" style="color:#1e4a8a;"></i> 你的职业画像
+      </div>
+<!-- AI 状态提示 -->
+<div class="ai-status hidden" id="aiSkillStatus">
+<span class="spinner-small"></span>
+<span>AI 正在分析该职业的核心技能...</span>
+</div>
+<div class="form-grid">
+<div class="form-group">
+<label><i class="fas fa-user"></i> 姓名 / 昵称</label>
+<input id="userName" placeholder="你的名字" type="text" value="张明"/>
+</div>
+<div class="form-group">
+<label><i class="fas fa-briefcase"></i> 当前职业 <span style="color:#1e4a8a;font-size:12px;">(输入后AI自动推荐技能)</span></label>
+<input id="userJob" placeholder="例如：产品经理 / 教师 / 医生" type="text" value="产品经理"/>
+</div>
+<div class="form-group">
+<label><i class="far fa-calendar"></i> 工作年限</label>
+<input id="userYears" max="40" min="0" type="number" value="3"/>
+</div>
+<div class="form-group">
+<label><i class="fas fa-graduation-cap"></i> 教育背景</label>
+<input id="userEdu" placeholder="计算机本科 / 硕士 / 其他" type="text" value="计算机本科"/>
+</div>
+<div class="form-group full-width">
+<label><i class="fas fa-bullseye"></i> 职业目标（5年后想成为什么？）</label>
+<input id="userGoal" placeholder="例如：技术总监 / 产品负责人 / 创业者" type="text" value="技术总监"/>
+</div>
+<div class="form-group full-width">
+<label><i class="fas fa-compass"></i> 职业兴趣 / 方向（AI将融入路径）</label>
+<textarea id="userInterest" placeholder="例如：我想用AI赋能传统行业，成为懂技术的产品领导者" rows="2">技术管理 + 数据驱动 + AI探索</textarea>
+</div>
+<div class="form-group">
+<label><i class="fas fa-clock"></i> 规划周期</label>
+<select id="targetYears">
+<option value="3">3年</option>
+<option selected="" value="5">5年</option>
+<option value="10">10年</option>
+</select>
+</div>
+<div class="form-group">
+<label><i class="fas fa-route"></i> 路径风格</label>
+<select id="pathStyle">
+<option value="default">🌱 稳妥晋升 · 稳扎稳打</option>
+<option value="cross">🌉 跨界融合 · 破圈成长</option>
+<option value="ideal">✨ 理想主义 · 追随热爱</option>
+<option value="balanced">⚖️ 均衡发展 · 全面开花</option>
+</select>
+</div>
+<div class="form-group full-width">
+<label>
+<i class="fas fa-tags"></i> 核心技能
+            <span style="font-size:12px;color:#4a6f9c;font-weight:400;">
+              （AI根据职业自动推荐，点击可切换选择）
+            </span>
+</label>
+<div class="skills-tag-group" id="skillTags">
+<div class="empty-skills-hint">
+<i class="fas fa-info-circle"></i> 输入职业后，AI 将自动推荐核心技能
+            </div>
+</div>
+</div>
+</div>
+<button class="btn-primary mt-20" id="generateBtn">
+<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树
+      </button>
+</div>
+<!-- ===== TAB 2: 成长树 ===== -->
+<div class="tab-content" id="tab2">
+<div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;border:1px solid rgba(255,255,255,0.6);">
+<span><strong>👤 张明</strong> · 产品经理 · 3年</span>
+<span><strong>🎓</strong> 计算机本科</span>
+<span><strong>🎯</strong> 技术总监</span>
+<span><strong>📌</strong> 技术管理 + 数据驱动</span>
+<span><strong>🌳</strong> 成长树已生成</span>
+</div>
+<div id="treeContainer">
+<div class="hidden" id="loadingTree">
+<div class="loading-spinner">
+<div class="spinner"></div>
+<div class="loading-text">🌱 AI 正在为你规划成长路径...</div>
+</div>
+</div>
+<div class="tree-container" id="treeDisplay"></div>
+</div>
+<div id="eventContainer"></div>
+<div class="radar-section">
+<div class="radar-container" id="radarContainer"></div>
+<div class="stats-container" id="statsContainer">
+<div class="stat-item"><span class="stat-label">💪 专业技能</span><div class="stat-bar"><div class="stat-fill" style="width:0%"></div></div><span class="stat-value">0%</span></div>
+<div class="stat-item"><span class="stat-label">📋 工作经验</span><div class="stat-bar"><div class="stat-fill" style="width:0%"></div></div><span class="stat-value">0%</span></div>
+<div class="stat-item"><span class="stat-label">📚 学习能力</span><div class="stat-bar"><div class="stat-fill" style="width:0%"></div></div><span class="stat-value">0%</span></div>
+<div class="stat-item"><span class="stat-label">🔄 适应能力</span><div class="stat-bar"><div class="stat-fill" style="width:0%"></div></div><span class="stat-value">0%</span></div>
+<div class="stat-item"><span class="stat-label">👥 领导力</span><div class="stat-bar"><div class="stat-fill" style="width:0%"></div></div><span class="stat-value">0%</span></div>
+</div>
+</div>
+<div class="mt-20">
+<div style="font-weight:600;color:#1d3557;margin-bottom:8px;"><i class="fas fa-medal" style="color:#ffd700;"></i> 已解锁成就</div>
+<div class="badges-container" id="badgesContainer">
+<span class="badge-item locked"><span class="badge-icon">🔒</span> 待解锁</span>
+</div>
+</div>
+<div class="flex mt-20">
+<button class="btn-secondary" id="regenerateBtn"><i class="fas fa-rotate-right"></i> 重新生成</button>
+<button class="btn-secondary" id="consultBtn"><i class="fas fa-paper-plane"></i> 咨询AI助手</button>
+</div>
+</div>
+</div>
+</div>
+
+</section><section id="simulationModule" class="module-panel">
+<main class="app">
+
+<section class="shell">
+<nav class="progress">
+<div class="step active" id="step1"><i class="fa-solid fa-id-badge"></i> 训练准备</div>
+<div class="step" id="step2"><i class="fa-solid fa-comments"></i> 情境模拟</div>
+<div class="step" id="step3"><i class="fa-solid fa-chart-radar"></i> 能力评价</div>
+</nav>
+<section class="view active" id="setupView">
+<div class="hero">
+<article class="intro">
+<div class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> 沉浸式远程协作训练</div>
+<h2>不是背标准答案，<br/>而是在事件中作出你的判断。</h2>
+<p>选择目标岗位与训练场景。AI将扮演与你协作的同事、负责人或外部对接人，根据你的真实决策推进事件，并在结束后形成能力评价。</p>
+<div class="abilities">
+<span class="chip">沟通表达</span><span class="chip">团队协作</span>
+<span class="chip">任务协调</span><span class="chip">信息管理</span>
+<span class="chip">问题分析</span><span class="chip">应变能力</span>
+</div>
+</article>
+<article class="setup-card">
+<h3 class="section-title"><i class="fa-solid fa-briefcase"></i> 创建本次训练</h3>
+<label for="jobInput">目标岗位</label>
+<input autocomplete="off" class="job-input" id="jobInput" placeholder="例如：软件工程师、护士、会计、物流调度员"/>
+<label>训练场景</label>
+<div class="scene-grid" id="sceneGrid">
+<button class="scene" data-scene="任务延期"><i class="fa-solid fa-clock"></i> 任务延期<small>处理节点变化与交付风险</small></button>
+<button class="scene" data-scene="信息不同步"><i class="fa-solid fa-arrows-rotate"></i> 信息不同步<small>统一版本、状态与执行口径</small></button>
+<button class="scene" data-scene="工作对接"><i class="fa-solid fa-people-arrows"></i> 工作对接<small>明确交付、责任与承接条件</small></button>
+<button class="scene" data-scene="线上沟通误解"><i class="fa-solid fa-comment-slash"></i> 线上沟通误解<small>澄清表达并修复协作</small></button>
+<button class="scene" data-scene="远程参与度"><i class="fa-solid fa-users-viewfinder"></i> 远程参与度<small>推动异步团队有效参与</small></button>
+</div>
+<button class="primary" disabled="" id="startBtn"><i class="fa-solid fa-door-open"></i> 进入工作现场</button>
+</article>
+</div>
+</section>
+<section class="view" id="chatView">
+<div class="simulation-head">
+<div class="session-meta">
+<span class="meta" id="jobMeta"></span>
+<span class="meta" id="sceneMeta"></span>
+<span class="meta"><i class="fa-regular fa-circle-dot"></i> 模拟进行中</span>
+</div>
+<button class="ghost" id="resetBtn"><i class="fa-solid fa-rotate-right"></i> 重新开始</button>
+</div>
+<article class="chat-card">
+<div class="workplace-bar">
+<strong><i class="fa-solid fa-headset"></i> 远程协作工作台</strong>
+<span class="online">Agent 在线</span>
+</div>
+<div class="messages" id="messages"></div>
+<div class="composer">
+<textarea id="messageInput" placeholder="输入你的判断、处理思路或具体行动……"></textarea>
+<button class="send" id="sendBtn"><i class="fa-solid fa-paper-plane"></i> 发送</button>
+</div>
+</article>
+</section>
+<section class="view" id="resultView">
+<div class="result-layout">
+<article class="result-card">
+<h3 class="section-title"><i class="fa-solid fa-chart-pie"></i> 本次能力画像</h3>
+<div id="radar"></div>
+</article>
+<article class="result-card">
+<h3 class="section-title"><i class="fa-solid fa-ranking-star"></i> 六维能力评分</h3>
+<div class="score-list" id="scoreList"></div>
+<h3 class="section-title" style="margin-top:26px;"><i class="fa-solid fa-file-circle-check"></i> Agent评价</h3>
+<div class="evaluation" id="evaluationText"></div>
+<div class="result-actions">
+<button class="again" id="againBtn"><i class="fa-solid fa-repeat"></i> 再训练一次</button>
+<button class="back" id="backToChatBtn"><i class="fa-solid fa-comments"></i> 查看对话</button>
+</div>
+</article>
+</div>
+</section>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+</section></main><script>(function(){const tabs=[...document.querySelectorAll('.global-tab')];const modules={career:document.getElementById('careerModule'),simulation:document.getElementById('simulationModule')};function showModule(name){tabs.forEach(t=>t.classList.toggle('active',t.dataset.module===name));Object.entries(modules).forEach(([k,m])=>m.classList.toggle('active',k===name));setTimeout(()=>window.dispatchEvent(new Event('resize')),80)}tabs.forEach(t=>t.addEventListener('click',()=>showModule(t.dataset.module)))})();</script><script>/*职业规划逻辑*/
+  (function() {
+    'use strict';
+
+    // ============================================================
+    // 配置
+    // ============================================================
+    const API_CONFIG = {
+      baseUrl: '',
+    };
+
+    // ============================================================
+    // DOM 引用
+    // ============================================================
+    const $ = id => document.getElementById(id);
+    const userName = $('userName');
+    const userJob = $('userJob');
+    const userYears = $('userYears');
+    const userEdu = $('userEdu');
+    const userGoal = $('userGoal');
+    const userInterest = $('userInterest');
+    const targetYears = $('targetYears');
+    const pathStyle = $('pathStyle');
+    const skillTagsContainer = $('skillTags');
+    const generateBtn = $('generateBtn');
+    const regenerateBtn = $('regenerateBtn');
+    const consultBtn = $('consultBtn');
+    const treeDisplay = $('treeDisplay');
+    const loadingTree = $('loadingTree');
+    const profileSummary = $('profileSummary');
+    const eventContainer = $('eventContainer');
+    const badgesContainer = $('badgesContainer');
+    const statsContainer = $('statsContainer');
+    const aiSkillStatus = $('aiSkillStatus');
+
+    let currentPathData = null;
+    let radarChart = null;
+    let isGeneratingSkills = false;
+
+    // ============================================================
+    // 工具函数
+    // ============================================================
+    function getSelectedSkills() {
+      const tags = skillTagsContainer.querySelectorAll('.skill-tag.active');
+      return Array.from(tags).map(el => el.dataset.skill || el.textContent.trim());
+    }
+
+    function getUserInput() {
+      return {
+        name: userName.value.trim() || '用户',
+        job: userJob.value.trim() || '产品经理',
+        years: parseInt(userYears.value) || 0,
+        education: userEdu.value.trim() || '未填写',
+        goal: userGoal.value.trim() || '职业发展',
+        interest: userInterest.value.trim() || '职业成长',
+        targetYears: parseInt(targetYears.value) || 5,
+        style: pathStyle.value,
+        skills: getSelectedSkills(),
+      };
+    }
+
+    function updateSummary(data) {
+      const skillsText = data.skills && data.skills.length > 0
+        ? data.skills.slice(0, 4).join(' · ') + (data.skills.length > 4 ? ' ...' : '')
+        : '未选择';
+      profileSummary.innerHTML = `
+        <span><strong>👤 ${data.name || '用户'}</strong> · ${data.job || '未填写'} · ${data.years || 0}年</span>
+        <span><strong>🎓</strong> ${data.education || '未填写'}</span>
+        <span><strong>🎯</strong> ${data.goal || '未填写'}</span>
+        <span><strong>📌</strong> ${data.interest || '未填写'}</span>
+        <span><strong>🧩</strong> ${skillsText}</span>
+        <span><strong>🌳</strong> 成长树已生成</span>
+      `;
+    }
+
+    // ============================================================
+    // 🔥 AI 自动推荐并替换技能标签（核心改进）
+    // ============================================================
+    async function autoRecommendSkills(job) {
+      if (!job || job.trim() === '' || isGeneratingSkills) return;
+      if (job.trim().length < 2) return;
+
+      isGeneratingSkills = true;
+      aiSkillStatus.classList.remove('hidden');
+      aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析「' + job.trim() + '」的核心技能...</span>';
+
+      const prompt = `
+你是一位职业规划专家。请列出「${job.trim()}」这个职业最核心的 6-10 项技能。
+
+要求：
+1. 只返回技能名称列表，用逗号分隔
+2. 技能名称要精炼、准确（2-6个字）
+3. 不要包含"、"或"及"等连接词
+4. 技能要覆盖该职业的各个维度（硬技能+软技能）
+
+示例输出：临床诊断,医疗技术,医患沟通,循证医学,医疗管理,团队协作,持续学习
+      `;
+
+      try {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/career/consult-ai`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: prompt,
+            context: { job: job.trim() }
+          })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || 'AI推荐失败');
+
+        // 解析 AI 返回的技能列表
+        let skills = [];
+        const text = data.reply || '';
+        // 尝试多种解析方式
+        const match = text.match(/[\u4e00-\u9fa5a-zA-Z\/\s,，、]+/);
+        if (match) {
+          skills = match[0].split(/[,，、\s]+/).filter(s => s.trim().length > 0 && s.trim().length < 10);
+        } else {
+          skills = text.split(/[,，、\s]+/).filter(s => s.trim().length > 0 && s.trim().length < 10);
+        }
+
+        // 限制 6-10 个
+        if (skills.length > 10) skills = skills.slice(0, 10);
+        if (skills.length < 4) {
+          // 如果 AI 返回太少，使用备选
+          skills = getFallbackSkills(job.trim());
+        }
+
+        // 🔥 动态替换技能标签
+        renderSkillTags(skills);
+
+        // 更新状态
+        aiSkillStatus.innerHTML = `
+          <i class="fas fa-check-circle"></i>
+          <span>✅ 已为「${job.trim()}」推荐 <strong>${skills.length}</strong> 项核心技能</span>
+        `;
+        setTimeout(() => {
+          aiSkillStatus.classList.add('hidden');
+        }, 2500);
+
+      } catch (error) {
+        console.error('AI技能推荐失败:', error);
+        // 使用备选技能
+        const fallback = getFallbackSkills(job.trim());
+        renderSkillTags(fallback);
+        aiSkillStatus.innerHTML = `
+          <i class="fas fa-exclamation-circle"></i>
+          <span>AI 推荐失败，已使用备选技能，可手动调整</span>
+        `;
+        setTimeout(() => {
+          aiSkillStatus.classList.add('hidden');
+        }, 2000);
+      } finally {
+        isGeneratingSkills = false;
+      }
+    }
+
+    // ============================================================
+    // 渲染技能标签
+    // ============================================================
+    function renderSkillTags(skills) {
+      skillTagsContainer.innerHTML = '';
+      if (!skills || skills.length === 0) {
+        skillTagsContainer.innerHTML = `
+          <div class="empty-skills-hint">
+            <i class="fas fa-info-circle"></i> 暂无技能，请重新输入职业
+          </div>
+        `;
+        return;
+      }
+
+      skills.forEach(skill => {
+        const tag = document.createElement('span');
+        tag.className = 'skill-tag active';
+        tag.dataset.skill = skill;
+        tag.textContent = skill;
+        tag.addEventListener('click', function() {
+          this.classList.toggle('active');
+        });
+        skillTagsContainer.appendChild(tag);
+      });
+
+      skillTagsContainer.classList.add('has-skills');
+    }
+
+    // ============================================================
+    // 备选技能（当 AI 不可用时）
+    // ============================================================
+    function getFallbackSkills(job) {
+      const map = {
+        '医生': ['临床诊断', '医疗技术', '医患沟通', '循证医学', '医疗管理', '团队协作', '持续学习'],
+        '护士': ['护理技术', '患者关怀', '医疗记录', '急救技能', '沟通协作', '健康宣教'],
+        '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈'],
+        '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '商业分析', '沟通协作'],
+        '软件开发': ['编程语言', '系统设计', '数据库', '算法', '调试测试', '团队协作'],
+        '设计师': ['UI设计', 'UX研究', '设计工具', '设计思维', '用户测试', '创意表达'],
+        '律师': ['法律研究', '法律写作', '诉讼技巧', '谈判能力', '客户沟通', '法律伦理'],
+        '金融分析师': ['财务分析', '投资研究', '风险管理', '数据建模', '行业分析', '商业洞察'],
+        '建筑师': ['建筑设计', '空间规划', '建筑技术', '项目管理', '可持续设计', '沟通协作'],
+        '人力资源': ['招聘管理', '绩效管理', '人才发展', '员工关系', '组织发展', '沟通协调'],
+        '运营': ['用户运营', '数据分析', '增长策略', '内容策划', '项目管理', '沟通协作'],
+        '市场营销': ['品牌营销', '数字营销', '市场分析', '内容创作', '活动策划', '数据分析'],
+        '心理咨询师': ['心理评估', '咨询技巧', '危机干预', '伦理规范', '自我觉察', '沟通共情'],
+      };
+      // 模糊匹配
+      for (const [key, value] of Object.entries(map)) {
+        if (job.includes(key) || key.includes(job)) {
+          return value;
+        }
+      }
+      // 默认返回
+      return ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
+    }
+
+    // ============================================================
+    // 监听职业输入
+    // ============================================================
+    let skillRecommendTimer = null;
+    userJob.addEventListener('input', function() {
+      const job = this.value.trim();
+      if (job.length < 2) {
+        // 清空技能
+        skillTagsContainer.innerHTML = `
+          <div class="empty-skills-hint">
+            <i class="fas fa-info-circle"></i> 输入职业后，AI 将自动推荐核心技能
+          </div>
+        `;
+        skillTagsContainer.classList.remove('has-skills');
+        aiSkillStatus.classList.add('hidden');
+        return;
+      }
+
+      clearTimeout(skillRecommendTimer);
+      skillRecommendTimer = setTimeout(() => {
+        autoRecommendSkills(job);
+      }, 600);
+    });
+
+    // ============================================================
+    // AI 路径生成
+    // ============================================================
+    async function generateTree(userInput) {
+      loadingTree.classList.remove('hidden');
+      treeDisplay.innerHTML = '';
+
+      const prompt = `
+你是一位顶级的职业规划专家。请根据以下用户信息，生成一份个性化的职业成长树路径。
+
+用户信息：
+- 姓名：${userInput.name}
+- 当前职业：${userInput.job}
+- 工作年限：${userInput.years}年
+- 教育背景：${userInput.education}
+- 职业目标（5年后）：${userInput.goal}
+- 职业兴趣：${userInput.interest}
+- 已有技能：${userInput.skills.join('、')}
+- 规划周期：${userInput.targetYears}年
+- 路径风格：${userInput.style}
+
+请生成一份${userInput.targetYears}年的职业发展路径，以树形结构展示。
+
+要求：
+1. 每个阶段包含：年份、阶段标题（有创意）、阶段目标（具体可执行）、核心技能（3-5个）、里程碑事件
+2. 根据用户的职业兴趣，将兴趣融入到每个阶段的描述中
+3. 推荐3-5个用户应该学习的新技能
+4. 生成5个维度的能力评估值（专业技能、工作经验、学习能力、适应能力、领导力），范围0-100
+5. 生成一个"意外事件"（一个职业机遇或挑战）
+6. 生成3个成就徽章
+
+输出格式为 JSON：
+{
+  "tree": {
+    "branches": [
+      { "year": 1, "icon": "📚", "title": "...", "goals": "...", "skills": ["..."], "milestone": "..." }
+    ]
+  },
+  "recommendedSkills": ["技能1", "技能2"],
+  "radarData": { "skill": 60, "experience": 50, "learning": 70, "adaptability": 55, "leadership": 40 },
+  "event": { "icon": "⚡", "text": "..." },
+  "badges": ["徽章1", "徽章2", "徽章3"]
+}
+
+只返回JSON，不要其他文字。
+      `;
+
+      try {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/career/consult-ai`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: prompt, context: userInput })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || 'AI生成失败');
+
+        let result;
+        try {
+          let text = data.reply;
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            result = JSON.parse(jsonMatch[0]);
+          } else {
+            result = JSON.parse(text);
+          }
+        } catch (e) {
+          console.error('JSON解析失败:', e);
+          result = getDefaultTree(userInput);
+        }
+
+        return result;
+      } catch (error) {
+        console.error('AI生成失败:', error);
+        return getDefaultTree(userInput);
+      } finally {
+        loadingTree.classList.add('hidden');
+      }
+    }
+
+    // ============================================================
+    // 默认树形数据（降级方案）
+    // ============================================================
+    function getDefaultTree(userInput) {
+      const job = userInput.job || '产品经理';
+      const interest = userInput.interest || '职业发展';
+      const years = userInput.targetYears || 5;
+
+      const branchTemplates = {
+        '产品经理': [
+          { year: 1, icon: '📚', title: '产品筑基 · 用户洞察', goals: '深入用户研究，建立产品思维', skills: ['用户研究', '产品设计', '数据分析'], milestone: '完成1个完整PRD' },
+          { year: 2, icon: '📊', title: '数据驱动 · 产品迭代', goals: '用数据驱动决策，独立负责产品线', skills: ['数据分析', '项目管理', '沟通协作'], milestone: '上线1个独立负责的功能' },
+          { year: 3, icon: '💡', title: '商业思维 · 战略规划', goals: '理解商业模式，制定产品路线图', skills: ['商业分析', '战略规划', '领导力'], milestone: '完成1次战略汇报' },
+          { year: 4, icon: '👥', title: '团队领导 · 管理进阶', goals: '带领团队，培养跨部门协作能力', skills: ['团队管理', '创新思维', '市场洞察'], milestone: '团队成功交付项目' },
+          { year: 5, icon: '🏆', title: '产品总监 · 行业影响', goals: '构建产品生态，输出方法论', skills: ['产品战略', '行业洞察', '技术管理'], milestone: '完成1次行业分享' }
+        ],
+        'default': [
+          { year: 1, icon: '📚', title: '基础夯实 · 专业入门', goals: '掌握核心技能，建立专业基础', skills: ['专业技能', '学习方法', '沟通协作'], milestone: '完成1个完整项目' },
+          { year: 2, icon: '📊', title: '能力提升 · 项目主导', goals: '独立承担任务，拓展综合能力', skills: ['项目管理', '团队协作', '问题解决'], milestone: '独立完成1个项目' },
+          { year: 3, icon: '💡', title: '专业突破 · 策略思维', goals: '成为团队骨干，建立专业影响力', skills: ['战略思维', '领导力', '创新思维'], milestone: '完成1次重要汇报' },
+          { year: 4, icon: '👥', title: '管理进阶 · 团队领导', goals: '带领团队，培养下属能力', skills: ['团队管理', '决策能力', '跨部门协作'], milestone: '团队项目成功' },
+          { year: 5, icon: '🏆', title: '行业专家 · 影响构建', goals: '成为领域专家，输出方法论', skills: ['行业洞察', '影响力', '战略规划'], milestone: '完成1次行业分享' }
+        ]
+      };
+
+      const template = branchTemplates[job] || branchTemplates['default'];
+      const branches = [];
+      for (let i = 0; i < Math.min(years, template.length); i++) {
+        const t = template[i];
+        branches.push({
+          year: t.year,
+          icon: t.icon,
+          title: t.title,
+          goals: t.goals + ' · ' + interest.substring(0, 20),
+          skills: t.skills,
+          milestone: t.milestone
+        });
+      }
+
+      return {
+        tree: { branches },
+        recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
+        radarData: { skill: 60, experience: 50, learning: 70, adaptability: 55, leadership: 40 },
+        event: { icon: '⚡', text: '你被邀请参加一个行业峰会，结识了关键人脉' },
+        badges: ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
+      };
+    }
+
+    // ============================================================
+    // 渲染树形路径
+    // ============================================================
+    function renderTree(pathData, userInput) {
+      if (!pathData || !pathData.tree || !pathData.tree.branches || pathData.tree.branches.length === 0) {
+        treeDisplay.innerHTML = '<div class="text-center text-muted" style="padding:40px;">暂无数据，请先生成</div>';
+        return;
+      }
+
+      const branches = pathData.tree.branches;
+      const isGoal = (index) => index === branches.length - 1;
+
+      let html = `
+        <div class="tree">
+          <div class="tree-root">
+            <div class="node">
+              <span>📍</span>
+              <span>${userInput.job || '当前职业'}</span>
+              <span class="sub-info">· ${userInput.years || 0}年经验</span>
+            </div>
+          </div>
+          <div class="tree-branches">
+      `;
+
+      branches.forEach((branch, index) => {
+        const yearLabel = ['🌱', '🌿', '🌳', '🌲', '🌟'][index] || '🌱';
+        const skillsHtml = (branch.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+
+        html += `
+          <div class="branch">
+            <div class="branch-label">${yearLabel} 第${branch.year}年</div>
+            <div class="node ${isGoal(index) ? 'goal' : ''}">
+              <div class="year-badge">第${branch.year}年</div>
+              <div class="node-icon">${branch.icon || '📌'}</div>
+              <div class="node-label">${branch.title || '阶段目标'}</div>
+              <div class="node-goal">${branch.goals || ''}</div>
+              <div class="node-skills">${skillsHtml}</div>
+              <div class="milestone-badge">🎯 ${branch.milestone || ''}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+      treeDisplay.innerHTML = html;
+
+      // 渲染意外事件
+      if (pathData.event) {
+        eventContainer.innerHTML = `
+          <div class="event-card">
+            <span class="event-icon">${pathData.event.icon || '⚡'}</span>
+            <span class="event-text">${pathData.event.text || '你遇到了一个职业机遇！'}</span>
+          </div>
+        `;
+      } else {
+        eventContainer.innerHTML = '';
+      }
+
+      // 渲染徽章
+      if (pathData.badges && pathData.badges.length > 0) {
+        const badgesHtml = pathData.badges.map((b, i) => `
+          <span class="badge-item unlocked">
+            <span class="badge-icon">${['🌟', '🚀', '👑', '💎', '🏅'][i % 5] || '🏅'}</span>
+            ${b}
+          </span>
+        `).join('');
+        badgesContainer.innerHTML = badgesHtml;
+      }
+
+      // 渲染雷达图
+      if (pathData.radarData) {
+        renderRadar(pathData.radarData);
+        updateStats(pathData.radarData);
+      }
+
+      updateSummary(userInput);
+    }
+
+    // ============================================================
+    // 雷达图
+    // ============================================================
+    function renderRadar(data) {
+      const container = document.getElementById('radarContainer');
+      if (!radarChart) {
+        radarChart = echarts.init(container);
+      }
+
+      const values = [
+        data.skill || 0,
+        data.experience || 0,
+        data.learning || 0,
+        data.adaptability || 0,
+        data.leadership || 0
+      ];
+
+      const option = {
+        radar: {
+          indicator: [
+            { name: '专业技能', max: 100 },
+            { name: '工作经验', max: 100 },
+            { name: '学习能力', max: 100 },
+            { name: '适应能力', max: 100 },
+            { name: '领导力', max: 100 }
+          ],
+          center: ['50%', '50%'],
+          radius: '65%',
+          axisName: { color: '#1d3557', fontSize: 12, fontWeight: 600 },
+          splitArea: {
+            areaStyle: { color: ['rgba(30, 74, 138, 0.02)', 'rgba(30, 74, 138, 0.04)'] }
+          }
+        },
+        series: [{
+          type: 'radar',
+          data: [{
+            value: values,
+            name: '当前能力',
+            areaStyle: { color: 'rgba(30, 74, 138, 0.3)' },
+            lineStyle: { color: '#1e4a8a', width: 2 },
+            itemStyle: { color: '#1e4a8a' }
+          }]
+        }]
+      };
+
+      radarChart.setOption(option);
+      radarChart.resize();
+    }
+
+    function updateStats(data) {
+      const items = [
+        { key: 'skill', label: '专业技能' },
+        { key: 'experience', label: '工作经验' },
+        { key: 'learning', label: '学习能力' },
+        { key: 'adaptability', label: '适应能力' },
+        { key: 'leadership', label: '领导力' }
+      ];
+
+      const bars = statsContainer.querySelectorAll('.stat-fill');
+      const values = statsContainer.querySelectorAll('.stat-value');
+
+      items.forEach((item, index) => {
+        const val = data[item.key] || 0;
+        if (bars[index]) bars[index].style.width = val + '%';
+        if (values[index]) values[index].textContent = val + '%';
+      });
+    }
+
+    // ============================================================
+    // 主流程
+    // ============================================================
+    async function generateAndRender() {
+      const userInput = getUserInput();
+
+      if (!userInput.job || userInput.job.trim() === '') {
+        alert('请输入当前职业');
+        return;
+      }
+
+      // 如果没有选中的技能，提示
+      const selectedSkills = getSelectedSkills();
+      if (selectedSkills.length === 0) {
+        alert('请至少选择一项核心技能');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI生成中...';
+
+      try {
+        const pathData = await generateTree(userInput);
+        currentPathData = pathData;
+        renderTree(pathData, userInput);
+        switchTab('tab2');
+      } catch (error) {
+        console.error('生成失败:', error);
+        alert('生成失败，请重试');
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';
+      }
+    }
+
+    // ============================================================
+    // Tab 切换
+    // ============================================================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === tabId);
+      });
+    }
+
+    // ============================================================
+    // 事件绑定
+    // ============================================================
+    generateBtn.addEventListener('click', generateAndRender);
+    regenerateBtn.addEventListener('click', generateAndRender);
+
+    consultBtn.addEventListener('click', async function() {
+      if (!currentPathData) {
+        alert('请先生成职业成长树');
+        return;
+      }
+
+      const userInput = getUserInput();
+      const msg = `我的职业成长树已生成，路径如下：\n${JSON.stringify(currentPathData, null, 2)}\n\n请给我一些具体的职业发展建议。`;
+
+      try {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/career/consult-ai`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, context: userInput })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          showAIResponse(data.reply);
+        } else {
+          alert('咨询失败：' + (data.error || '未知错误'));
+        }
+      } catch (error) {
+        alert('咨询失败：' + error.message);
+      }
+    });
+
+    function showAIResponse(reply) {
+      const overlay = document.createElement('div');
+      overlay.className = 'ai-modal-overlay';
+      overlay.innerHTML = `
+        <div class="ai-modal-content">
+          <div class="ai-modal-header">
+            <span>🤖 AI 职业建议</span>
+            <button onclick="this.closest('.ai-modal-overlay').remove()">✕</button>
+          </div>
+          <div class="ai-modal-body">${reply}</div>
+          <div class="ai-modal-footer">
+            <button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        switchTab(this.dataset.tab);
+        if (this.dataset.tab === 'tab2' && currentPathData && currentPathData.radarData) {
+          setTimeout(() => { if (radarChart) radarChart.resize(); }, 200);
+        }
+      });
+    });
+
+    // ============================================================
+    // 初始化
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+      // 页面加载后自动为默认职业推荐技能
+      setTimeout(() => {
+        autoRecommendSkills(userJob.value.trim());
+      }, 600);
+
+      // 延迟生成树
+      setTimeout(generateAndRender, 1200);
+    });
+
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (radarChart) radarChart.resize();
+      }, 300);
+    });
+
+  })();
+</script><script>/*职场模拟逻辑*/
+  const API_BASE = "";
+  const abilityNames = ["沟通表达", "团队协作", "任务协调", "信息管理", "问题分析", "应变能力"];
+  
+  let selectedScene = "";
+  let sessionUserId = "";
+  let sessionConversationId = "";
+  let currentJob = "";
+  let conversation = [];
+  let latestEvaluation = "";
+
+  const $ = id => document.getElementById(id);
+  const views = { setup: $("setupView"), chat: $("chatView"), result: $("resultView") };
+
+  function showView(name) {
+    Object.values(views).forEach(v => v.classList.remove("active"));
+    views[name].classList.add("active");
+    ["step1","step2","step3"].forEach((id, i) => {
+      $(id).classList.remove("active","done");
+      const target = {setup:0, chat:1, result:2}[name];
+      if (i < target) $(id).classList.add("done");
+      if (i === target) $(id).classList.add("active");
+    });
+  }
+
+  function uuid() {
+    return (crypto.randomUUID ? crypto.randomUUID() : "user-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+  }
+
+  function toast(text) {
+    $("toast").textContent = text;
+    $("toast").classList.add("show");
+    setTimeout(() => $("toast").classList.remove("show"), 2200);
+  }
+
+  function validateSetup() {
+    $("startBtn").disabled = !$("jobInput").value.trim() || !selectedScene;
+  }
+
+  document.querySelectorAll(".scene").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".scene").forEach(x => x.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedScene = btn.dataset.scene;
+      validateSetup();
+    });
+  });
+  $("jobInput").addEventListener("input", validateSetup);
+
+  function addMessage(role, text, temporary=false) {
+    const row = document.createElement("div");
+    row.className = "message " + role;
+    if (temporary) row.dataset.temporary = "true";
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.innerHTML = role === "user" ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-robot"></i>';
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    if (temporary) bubble.innerHTML = '<span class="typing"><span></span><span></span><span></span></span>';
+    else bubble.textContent = text;
+    row.append(avatar, bubble);
+    $("messages").appendChild(row);
+    $("messages").scrollTop = $("messages").scrollHeight;
+    return row;
+  }
+
+  async function requestAgent(query) {
+    const pending = addMessage("assistant", "", true);
+    setSending(true);
+    try {
+      const res = await fetch(API_BASE + "/api/simulation/chat", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          query,
+          userId: sessionUserId,
+          conversationId: sessionConversationId
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "请求失败");
+      pending.remove();
+	  if (data.conversationId) {
+	      sessionConversationId = data.conversationId;
+	      console.log("conversationId:", sessionConversationId);
+	  }
+      const answer = String(data.answer || "").trim() || "Agent 未返回有效内容。";
+      addMessage("assistant", answer);
+      conversation.push({role:"assistant", content:answer});
+      if (isEvaluation(answer)) {
+        latestEvaluation = answer;
+        setTimeout(() => renderResult(answer), 550);
+      }
+    } catch (err) {
+      pending.remove();
+      addMessage("assistant", "连接 Agent 失败：" + err.message);
+      toast("请求失败，请检查后端配置");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  function setSending(flag) {
+    $("sendBtn").disabled = flag;
+    $("messageInput").disabled = flag;
+    $("sendBtn").style.opacity = flag ? ".55" : "1";
+  }
+
+  $("startBtn").addEventListener("click", async () => {
+    currentJob = $("jobInput").value.trim();
+    if (!currentJob || !selectedScene) return;
+    sessionUserId = uuid();
+    conversation = [];
+    latestEvaluation = "";
+    $("messages").innerHTML = "";
+    $("jobMeta").innerHTML = '<i class="fa-solid fa-briefcase"></i> ' + currentJob;
+    $("sceneMeta").innerHTML = '<i class="fa-solid fa-bullseye"></i> ' + selectedScene;
+    showView("chat");
+    const initial = `【目标岗位】${currentJob}\n【训练场景】${selectedScene}\n请直接按照既定规则开始本次远程协作职场模拟。`;
+    conversation.push({role:"user", content:initial});
+    await requestAgent(initial);
+  });
+
+  async function sendCurrentMessage() {
+    const text = $("messageInput").value.trim();
+    if (!text) return;
+    $("messageInput").value = "";
+    addMessage("user", text);
+    conversation.push({role:"user", content:text});
+    await requestAgent(text);
+  }
+  $("sendBtn").addEventListener("click", sendCurrentMessage);
+  $("messageInput").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendCurrentMessage();
+    }
+  });
+
+  function resetAll() {
+    selectedScene = "";
+    sessionUserId = "";
+	sessionConversationId = "";
+    currentJob = "";
+    conversation = [];
+    latestEvaluation = "";
+    $("jobInput").value = "";
+    $("messages").innerHTML = "";
+    document.querySelectorAll(".scene").forEach(x => x.classList.remove("selected"));
+    validateSetup();
+    showView("setup");
+  }
+  $("resetBtn").addEventListener("click", resetAll);
+  $("againBtn").addEventListener("click", resetAll);
+  $("backToChatBtn").addEventListener("click", () => showView("chat"));
+  
+ document.querySelectorAll(".step").forEach((step, index) => {
+   step.addEventListener("click", () => {
+ 
+     if (index === 0) {
+       showView("setup");
+       return;
+     }
+ 
+     if (index === 1) {
+       if (!currentJob) {
+         toast("请先开始训练");
+         return;
+       }
+       showView("chat");
+       return;
+     }
+ 
+     if (index === 2) {
+       if (!latestEvaluation) {
+         toast("请先完成一次模拟");
+         return;
+       }
+       renderResult(latestEvaluation);
+       return;
+     }
+ 
+   });
+ });
+
+  function isEvaluation(text) {
+    return text.includes("【模拟结果】") &&
+      (text.includes("【能力评价】") || text.includes("【改进建议】"));
+  }
+
+  function extractScores(text) {
+    const aliases = {
+      "沟通表达": ["沟通表达","沟通能力"],
+      "团队协作": ["团队协作","协作能力"],
+      "任务协调": ["任务协调","协调能力"],
+      "信息管理": ["信息管理","信息同步"],
+      "问题分析": ["问题分析","分析能力"],
+      "应变能力": ["应变能力","应急能力","风险应对"]
+    };
+    const levelMap = {"优秀":90, "良好":78, "较好":78, "一般":63, "较弱":48, "未充分体现":55};
+    const scores = {};
+    for (const [canonical, names] of Object.entries(aliases)) {
+      let score = null;
+      for (const name of names) {
+        const numeric = text.match(new RegExp(name + "[^\\n\\r]{0,35}?(100|[1-9]?\\d)\\s*(?:分|/100|%)"));
+        if (numeric) { score = Math.max(0, Math.min(100, Number(numeric[1]))); break; }
+        for (const [level, value] of Object.entries(levelMap)) {
+          const levelRegex = new RegExp(name + "[^\\n\\r]{0,30}?" + level);
+          if (levelRegex.test(text)) { score = value; break; }
+        }
+        if (score !== null) break;
+      }
+      scores[canonical] = score ?? 0;
+    }
+    return scores;
+  }
+
+  function renderResult(text) {
+    const scores = extractScores(text);
+    $("evaluationText").textContent = text;
+    $("scoreList").innerHTML = abilityNames.map(name => `
+      <div class="score-row">
+        <strong>${name}</strong>
+        <div class="bar"><div data-score="${scores[name]}"></div></div>
+        <b>${scores[name]}</b>
+      </div>`).join("");
+    requestAnimationFrame(() => document.querySelectorAll(".bar > div").forEach(x => x.style.width = x.dataset.score + "%"));
+    showView("result");
+    setTimeout(() => drawRadar(scores), 80);
+  }
+
+  function drawRadar(scores) {
+    const chart = echarts.init($("radar"));
+    chart.setOption({
+      tooltip: {},
+      radar: {
+        radius: "66%",
+        indicator: abilityNames.map(name => ({name, max:100})),
+        splitNumber: 5,
+        axisName: {color:"#18366f", fontWeight:700},
+        splitArea: {areaStyle:{color:["#f8faff","#edf3fc"]}},
+        splitLine: {lineStyle:{color:"#cbd8ed"}},
+        axisLine: {lineStyle:{color:"#cbd8ed"}}
+      },
+      series: [{
+        type:"radar",
+        data:[{ value: abilityNames.map(n => scores[n]), name:"本次表现",
+          areaStyle:{color:"rgba(49,90,166,.28)"},
+          lineStyle:{color:"#315aa6", width:3},
+          itemStyle:{color:"#315aa6"} }]
+      }]
+    });
+    window.addEventListener("resize", () => chart.resize(), {once:true});
+  }
+</script></body></html>
