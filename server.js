@@ -49,7 +49,7 @@ app.post('/api/consult-ai', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 60000,
+        timeout: 2000000,
       }
     );
 
