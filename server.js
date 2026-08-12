@@ -320,7 +320,11 @@ app.post('/api/generate-tree', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
+<<<<<<< HEAD
         timeout: 2000000,
+=======
+        timeout: 2000000,  // 20秒超时
+>>>>>>> 09cefee31f3104fb3330423e4edf2d899415e5b1
       }
     );
 
@@ -470,4 +474,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📡 端口: ${PORT}`);
   console.log(`🌐 访问: http://localhost:${PORT}`);
   console.log('='.repeat(55));
+<<<<<<< HEAD
 });
+=======
+  console.log('💡 访问: http://localhost:' + PORT + '/index.html');
+});
+>>>>>>> 09cefee31f3104fb3330423e4edf2d899415e5b1
