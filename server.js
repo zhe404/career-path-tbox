@@ -189,7 +189,7 @@ app.post('/api/generate-quick', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 20000,  // 20秒超时
+        timeout: 2000000,  // 20秒超时
       }
     );
 
