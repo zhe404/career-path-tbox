@@ -1877,8 +1877,16 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
       }
     } catch (err) {
       pending.remove();
-      addMessage("assistant", "连接 Agent 失败：" + err.message);
-      toast("请求失败，请检查后端配置");
+    
+      const msg = String(err.message || "");
+    
+      if (msg.includes("upstream error") || msg.includes("Unexpected token")) {
+        addMessage("assistant", "Agent 暂时响应失败，请稍后重试。");
+        toast("Agent 暂时不可用，请重试");
+      } else {
+        addMessage("assistant", "连接 Agent 失败：" + msg);
+        toast("请求失败，请检查网络或后端配置");
+      }
     } finally {
       setSending(false);
     }
