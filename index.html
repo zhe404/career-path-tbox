@@ -7,834 +7,123 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
-    /* ===== 全局重置 ===== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    body {
-      background: linear-gradient(145deg, #f0f4fc 0%, #e6edf7 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    /* ===== 头部 ===== */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 0 30px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #0b1e3a, #1d3b6b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .header h1 i {
-      background: #1e3a6b;
-      padding: 12px;
-      border-radius: 16px;
-      color: white;
-      font-size: 22px;
-      -webkit-text-fill-color: white;
-      box-shadow: 0 4px 12px rgba(0,20,40,0.15);
-    }
-
-    .header .badge {
-      background: rgba(26, 67, 133, 0.12);
-      padding: 6px 18px;
-      border-radius: 40px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #1d3b6b;
-      border: 1px solid rgba(255,255,255,0.5);
-    }
-
-    /* ===== 主卡片 ===== */
-    .main-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      border-radius: 40px;
-      padding: 32px 28px;
-      border: 1px solid rgba(255,255,255,0.5);
-      box-shadow: 0 20px 60px rgba(18, 34, 64, 0.1);
-      margin-bottom: 24px;
-    }
-
-    /* ===== Tab 导航 ===== */
-    .tab-nav {
-      display: flex;
-      gap: 6px;
-      background: rgba(220, 232, 248, 0.4);
-      padding: 6px;
-      border-radius: 60px;
-      margin-bottom: 28px;
-      border: 1px solid rgba(255,255,255,0.6);
-    }
-
-    .tab-btn {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 12px 8px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 15px;
-      color: #2b4a77;
-      transition: all 0.2s;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .tab-btn.active {
-      background: white;
-      color: #0b1e3a;
-      box-shadow: 0 8px 20px rgba(18, 52, 106, 0.12);
-    }
-
-    .tab-btn:hover:not(.active) {
-      background: rgba(255,255,255,0.3);
-    }
-
-    .tab-content {
-      display: none;
-      animation: fadeUp 0.4s ease;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ===== 表单 ===== */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px 20px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
-
-    .form-group label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1d3557;
-    }
-
-    .form-group label i {
-      margin-right: 6px;
-      color: #1e4a8a;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      background: white;
-      border: 1.5px solid #d9e2ef;
-      border-radius: 16px;
-      padding: 12px 16px;
-      font-size: 15px;
-      transition: all 0.2s;
-      outline: none;
-      color: #0a1a33;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      border-color: #1e4a8a;
-      box-shadow: 0 0 0 4px rgba(30, 74, 138, 0.1);
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
-
-    /* ===== 路径风格卡片选择 ===== */
-    .style-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 4px;
-    }
-
-    .style-card {
-      background: white;
-      border: 2px solid #d9e2ef;
-      border-radius: 14px;
-      padding: 12px 14px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      text-align: center;
-      position: relative;
-    }
-
-    .style-card:hover {
-      border-color: #8eb0da;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-
-    .style-card.selected {
-      border-color: #1e4a8a;
-      background: #f0f7ff;
-      box-shadow: 0 0 0 3px rgba(30, 74, 138, 0.15);
-    }
-
-    .style-card .style-icon {
-      font-size: 24px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .style-card .style-name {
-      font-weight: 600;
-      font-size: 13px;
-      color: #0b1e3a;
-    }
-
-    .style-card .style-desc {
-      font-size: 11px;
-      color: #4a6f9c;
-      margin-top: 2px;
-    }
-
-    .style-card .style-check {
-      position: absolute;
-      top: 6px;
-      right: 8px;
-      color: #1e4a8a;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .style-card.selected .style-check {
-      opacity: 1;
-    }
-
-    /* ===== 动态技能标签 ===== */
-    .skills-tag-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-      padding: 8px;
-      min-height: 50px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 16px;
-      border: 1.5px dashed #d9e2ef;
-      transition: all 0.3s;
-    }
-
-    .skills-tag-group.has-skills {
-      border-style: solid;
-      border-color: #c4d3e8;
-      background: rgba(255,255,255,0.5);
-    }
-
-    .skill-tag {
-      background: white;
-      border: 1.5px solid #d0dcee;
-      border-radius: 40px;
-      padding: 6px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #1d3557;
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
-    }
-
-    .skill-tag:hover {
-      background: #eef4fc;
-      border-color: #8eb0da;
-      transform: scale(1.04);
-    }
-
-    .skill-tag.active {
-      background: #1e4a8a;
-      border-color: #1e4a8a;
-      color: white;
-      box-shadow: 0 4px 12px rgba(30, 74, 138, 0.25);
-    }
-
-    .skill-tag.ai-recommended {
-      animation: pulse-glow 0.6s ease;
-    }
-
-    @keyframes pulse-glow {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(30, 74, 138, 0.4); }
-      50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(30, 74, 138, 0.2); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(30, 74, 138, 0); }
-    }
-
-    .skill-tag.ai-recommended::after {
-      content: ' ✨';
-      font-size: 11px;
-    }
-
-    .empty-skills-hint {
-      color: #4a6f9c;
-      padding: 12px;
-      text-align: center;
-      width: 100%;
-      font-size: 14px;
-    }
-
-    /* ===== AI 状态提示 ===== */
-    .ai-status {
-      font-size: 13px;
-      color: #4a6f9c;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 0;
-    }
-
-    .ai-status .spinner-small {
-      width: 16px;
-      height: 16px;
-      border: 2px solid #e5edf8;
-      border-top-color: #1e4a8a;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: inline-block;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: linear-gradient(145deg, #f0f4fc 0%, #e6edf7 100%); min-height: 100vh; padding: 20px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 12px; }
+    .header h1 { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #0b1e3a, #1d3b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 12px; }
+    .header h1 i { background: #1e3a6b; padding: 12px; border-radius: 16px; color: white; font-size: 22px; -webkit-text-fill-color: white; box-shadow: 0 4px 12px rgba(0,20,40,0.15); }
+    .header .badge { background: rgba(26, 67, 133, 0.12); padding: 6px 18px; border-radius: 40px; font-size: 13px; font-weight: 600; color: #1d3b6b; border: 1px solid rgba(255,255,255,0.5); }
+    .main-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border-radius: 40px; padding: 32px 28px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 20px 60px rgba(18, 34, 64, 0.1); margin-bottom: 24px; }
+    .tab-nav { display: flex; gap: 6px; background: rgba(220, 232, 248, 0.4); padding: 6px; border-radius: 60px; margin-bottom: 28px; border: 1px solid rgba(255,255,255,0.6); }
+    .tab-btn { flex: 1; border: none; background: transparent; padding: 12px 8px; border-radius: 40px; font-weight: 600; font-size: 15px; color: #2b4a77; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .tab-btn.active { background: white; color: #0b1e3a; box-shadow: 0 8px 20px rgba(18, 52, 106, 0.12); }
+    .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.3); }
+    .tab-content { display: none; animation: fadeUp 0.4s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { font-size: 14px; font-weight: 600; color: #1d3557; }
+    .form-group label i { margin-right: 6px; color: #1e4a8a; }
+    .form-group input, .form-group select, .form-group textarea { background: white; border: 1.5px solid #d9e2ef; border-radius: 16px; padding: 12px 16px; font-size: 15px; transition: all 0.2s; outline: none; color: #0a1a33; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1e4a8a; box-shadow: 0 0 0 4px rgba(30, 74, 138, 0.1); }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .style-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+    .style-card { background: white; border: 2px solid #d9e2ef; border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: all 0.25s ease; text-align: center; position: relative; }
+    .style-card:hover { border-color: #8eb0da; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .style-card.selected { border-color: #1e4a8a; background: #f0f7ff; box-shadow: 0 0 0 3px rgba(30, 74, 138, 0.15); }
+    .style-card .style-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+    .style-card .style-name { font-weight: 600; font-size: 13px; color: #0b1e3a; }
+    .style-card .style-desc { font-size: 11px; color: #4a6f9c; margin-top: 2px; }
+    .style-card .style-check { position: absolute; top: 6px; right: 8px; color: #1e4a8a; font-size: 14px; opacity: 0; transition: opacity 0.2s; }
+    .style-card.selected .style-check { opacity: 1; }
+    .skills-tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; padding: 8px; min-height: 50px; background: rgba(255,255,255,0.3); border-radius: 16px; border: 1.5px dashed #d9e2ef; transition: all 0.3s; }
+    .skills-tag-group.has-skills { border-style: solid; border-color: #c4d3e8; background: rgba(255,255,255,0.5); }
+    .skill-tag { background: white; border: 1.5px solid #d0dcee; border-radius: 40px; padding: 6px 16px; font-size: 13px; font-weight: 500; color: #1d3557; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .skill-tag:hover { background: #eef4fc; border-color: #8eb0da; transform: scale(1.04); }
+    .skill-tag.active { background: #1e4a8a; border-color: #1e4a8a; color: white; box-shadow: 0 4px 12px rgba(30, 74, 138, 0.25); }
+    .empty-skills-hint { color: #4a6f9c; padding: 12px; text-align: center; width: 100%; font-size: 14px; }
+    .ai-status { font-size: 13px; color: #4a6f9c; display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+    .ai-status .spinner-small { width: 16px; height: 16px; border: 2px solid #e5edf8; border-top-color: #1e4a8a; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .ai-status .fa-check-circle { color: #28a745; }
     .ai-status .fa-exclamation-circle { color: #dc3545; }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* ===== 按钮 ===== */
-    .btn-primary {
-      background: linear-gradient(135deg, #1e4a8a, #2d6bb8);
-      border: none;
-      color: white;
-      padding: 14px 28px;
-      border-radius: 60px;
-      font-weight: 700;
-      font-size: 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-      width: 100%;
-      box-shadow: 0 8px 24px rgba(30, 74, 138, 0.25);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(30, 74, 138, 0.35);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-secondary {
-      background: rgba(255,255,255,0.7);
-      border: 1px solid #c4d3e8;
-      color: #1d3b6b;
-      padding: 10px 22px;
-      border-radius: 60px;
-      font-weight: 600;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-secondary:hover {
-      background: white;
-      border-color: #8eb0da;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-    }
-
-    .btn-secondary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* ===== 树形路径 ===== */
-    .tree-container {
-      padding: 20px 0 10px;
-      overflow-x: auto;
-    }
-
-    .tree {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 700px;
-    }
-
-    .tree-root {
-      margin-bottom: 30px;
-      position: relative;
-    }
-
-    .tree-root .node {
-      background: linear-gradient(135deg, #1e4a8a, #2d6bb8);
-      color: white;
-      padding: 14px 36px;
-      border-radius: 60px;
-      font-size: 18px;
-      font-weight: 700;
-      box-shadow: 0 8px 30px rgba(30, 74, 138, 0.3);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .tree-root .node .sub-info {
-      font-size: 13px;
-      font-weight: 400;
-      opacity: 0.8;
-    }
-
-    .tree-branches {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      position: relative;
-      padding-top: 30px;
-      flex-wrap: wrap;
-    }
-
-    .tree-branches::before {
-      content: '';
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      width: 2px;
-      height: 30px;
-      background: #1e4a8a;
-    }
-
-    .branch {
-      flex: 1;
-      min-width: 140px;
-      max-width: 190px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      padding-top: 20px;
-    }
-
-    .branch::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 2px;
-      height: 20px;
-      background: #1e4a8a;
-    }
-
-    .branch:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      right: -50%;
-      height: 2px;
-      background: #1e4a8a;
-    }
-
-    .branch-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: #1e4a8a;
-      margin-bottom: 8px;
-      background: rgba(30, 74, 138, 0.08);
-      padding: 2px 14px;
-      border-radius: 20px;
-    }
-
-    .branch .node {
-      background: white;
-      border: 2px solid #e5edf8;
-      border-radius: 20px;
-      padding: 14px 12px;
-      text-align: center;
-      width: 100%;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      position: relative;
-    }
-
-    .branch .node:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 8px 28px rgba(30, 74, 138, 0.15);
-      border-color: #1e4a8a;
-    }
-
+    .hidden { display: none !important; }
+    .btn-primary { background: linear-gradient(135deg, #1e4a8a, #2d6bb8); border: none; color: white; padding: 14px 28px; border-radius: 60px; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.3s; width: 100%; box-shadow: 0 8px 24px rgba(30, 74, 138, 0.25); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(30, 74, 138, 0.35); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: rgba(255,255,255,0.7); border: 1px solid #c4d3e8; color: #1d3b6b; padding: 10px 22px; border-radius: 60px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { background: white; border-color: #8eb0da; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+    .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tree-container { padding: 20px 0 10px; overflow-x: auto; }
+    .tree { display: flex; flex-direction: column; align-items: center; min-width: 700px; }
+    .tree-root { margin-bottom: 30px; position: relative; }
+    .tree-root .node { background: linear-gradient(135deg, #1e4a8a, #2d6bb8); color: white; padding: 14px 36px; border-radius: 60px; font-size: 18px; font-weight: 700; box-shadow: 0 8px 30px rgba(30, 74, 138, 0.3); display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
+    .tree-root .node .sub-info { font-size: 13px; font-weight: 400; opacity: 0.8; }
+    .tree-branches { display: flex; justify-content: center; gap: 16px; position: relative; padding-top: 30px; flex-wrap: wrap; }
+    .tree-branches::before { content: ''; position: absolute; top: -30px; left: 50%; width: 2px; height: 30px; background: #1e4a8a; }
+    .branch { flex: 1; min-width: 140px; max-width: 190px; display: flex; flex-direction: column; align-items: center; position: relative; padding-top: 20px; }
+    .branch::before { content: ''; position: absolute; top: 0; left: 50%; width: 2px; height: 20px; background: #1e4a8a; }
+    .branch:not(:last-child)::after { content: ''; position: absolute; top: 0; left: 50%; right: -50%; height: 2px; background: #1e4a8a; }
+    .branch-label { font-size: 12px; font-weight: 700; color: #1e4a8a; margin-bottom: 8px; background: rgba(30, 74, 138, 0.08); padding: 2px 14px; border-radius: 20px; }
+    .branch .node { background: white; border: 2px solid #e5edf8; border-radius: 20px; padding: 14px 12px; text-align: center; width: 100%; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.04); position: relative; }
+    .branch .node:hover { transform: translateY(-6px); box-shadow: 0 8px 28px rgba(30, 74, 138, 0.15); border-color: #1e4a8a; }
     .branch .node .node-icon { font-size: 28px; margin-bottom: 4px; }
     .branch .node .node-label { font-weight: 700; color: #0b1e3a; font-size: 14px; line-height: 1.3; }
     .branch .node .node-goal { font-size: 12px; color: #4a6f9c; margin-top: 4px; line-height: 1.4; }
-
-    .branch .node .node-skills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      justify-content: center;
-      margin-top: 6px;
-    }
-
-    .branch .node .node-skills .skill-tag {
-      font-size: 10px;
-      padding: 2px 10px;
-      background: #eef4fc;
-      border-color: transparent;
-      cursor: default;
-      border-radius: 20px;
-    }
-
-    .branch .node .milestone-badge {
-      margin-top: 6px;
-      font-size: 10px;
-      color: #1e4a8a;
-      background: rgba(30, 74, 138, 0.08);
-      padding: 2px 12px;
-      border-radius: 20px;
-      display: inline-block;
-    }
-
-    .branch .node.goal {
-      border-color: #ffd700;
-      background: linear-gradient(135deg, #fffbe6, #fff8e1);
-    }
-
+    .branch .node .node-skills { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 6px; }
+    .branch .node .node-skills .skill-tag { font-size: 10px; padding: 2px 10px; background: #eef4fc; border-color: transparent; cursor: default; border-radius: 20px; }
+    .branch .node .milestone-badge { margin-top: 6px; font-size: 10px; color: #1e4a8a; background: rgba(30, 74, 138, 0.08); padding: 2px 12px; border-radius: 20px; display: inline-block; }
+    .branch .node.goal { border-color: #ffd700; background: linear-gradient(135deg, #fffbe6, #fff8e1); }
     .branch .node.goal .node-label { color: #b8860b; }
-
-    .branch .year-badge {
-      position: absolute;
-      top: -10px;
-      right: -8px;
-      background: #1e4a8a;
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 10px;
-      border-radius: 20px;
-    }
-
-    /* ===== 意外事件 ===== */
-    .event-card {
-      background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-      border-radius: 16px;
-      padding: 14px 20px;
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border: 1px solid #ffd700;
-    }
-
+    .branch .year-badge { position: absolute; top: -10px; right: -8px; background: #1e4a8a; color: white; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
+    .event-card { background: linear-gradient(135deg, #fff3cd, #ffeaa7); border-radius: 16px; padding: 14px 20px; margin-top: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #ffd700; }
     .event-card .event-icon { font-size: 24px; }
     .event-card .event-text { font-size: 13px; color: #856404; font-weight: 500; }
-
-    /* ===== 雷达图 ===== */
-    .radar-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-top: 20px;
-    }
-
-    .radar-container {
-      background: white;
-      border-radius: 20px;
-      padding: 16px;
-      border: 1px solid #e5edf8;
-      height: 280px;
-      min-height: 280px;
-    }
-
-    .stats-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .stat-item .stat-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1d3557;
-      width: 80px;
-    }
-
-    .stat-item .stat-bar {
-      flex: 1;
-      height: 8px;
-      background: #e5edf8;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .stat-item .stat-bar .stat-fill {
-      height: 100%;
-      border-radius: 10px;
-      background: linear-gradient(90deg, #1e4a8a, #4a8bc2);
-      transition: width 0.8s ease;
-      width: 0%;
-    }
-
-    .stat-item .stat-value {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1e4a8a;
-      width: 40px;
-      text-align: right;
-    }
-
-    /* ===== 成就徽章 ===== */
-    .badges-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .badge-item {
-      background: white;
-      border-radius: 40px;
-      padding: 6px 16px 6px 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #1d3557;
-      border: 1.5px solid #e5edf8;
-    }
-
-    .badge-item.unlocked {
-      border-color: #ffd700;
-      background: linear-gradient(135deg, #fffbe6, #fff8e1);
-    }
-
+    .radar-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+    .radar-container { background: white; border-radius: 20px; padding: 16px; border: 1px solid #e5edf8; height: 280px; min-height: 280px; }
+    .stats-container { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+    .stat-item { display: flex; align-items: center; gap: 12px; }
+    .stat-item .stat-label { font-size: 14px; font-weight: 600; color: #1d3557; width: 80px; }
+    .stat-item .stat-bar { flex: 1; height: 8px; background: #e5edf8; border-radius: 10px; overflow: hidden; }
+    .stat-item .stat-bar .stat-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #1e4a8a, #4a8bc2); transition: width 0.8s ease; width: 0%; }
+    .stat-item .stat-value { font-size: 14px; font-weight: 700; color: #1e4a8a; width: 40px; text-align: right; }
+    .badges-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge-item { background: white; border-radius: 40px; padding: 6px 16px 6px 10px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #1d3557; border: 1.5px solid #e5edf8; }
+    .badge-item.unlocked { border-color: #ffd700; background: linear-gradient(135deg, #fffbe6, #fff8e1); }
     .badge-item .badge-icon { font-size: 18px; }
     .badge-item.locked { opacity: 0.4; }
-
-    /* ===== AI 回复模态框 ===== */
-    .ai-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .ai-modal-content {
-      background: white;
-      border-radius: 24px;
-      max-width: 550px;
-      width: 90%;
-      max-height: 80vh;
-      overflow: auto;
-      animation: slideUp 0.3s ease;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-
-    .ai-modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #e5edf8;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      background: white;
-      border-radius: 24px 24px 0 0;
-    }
-
+    .ai-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; animation: fadeIn 0.3s ease; }
+    .ai-modal-content { background: white; border-radius: 24px; max-width: 650px; width: 90%; max-height: 80vh; overflow: auto; animation: slideUp 0.3s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .ai-modal-header { padding: 20px 24px; border-bottom: 1px solid #e5edf8; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; border-radius: 24px 24px 0 0; }
     .ai-modal-header span { font-weight: 700; font-size: 18px; color: #0b1e3a; }
     .ai-modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-
-    .ai-modal-body {
-      padding: 24px;
-      line-height: 1.8;
-      color: #1a2f4e;
-      font-size: 15px;
-      white-space: pre-wrap;
-    }
-
-    .ai-modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid #e5edf8;
-      text-align: right;
-    }
-
-    .ai-modal-footer button {
-      padding: 10px 30px;
-      background: #1e4a8a;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* ===== Loading ===== */
-    .loading-spinner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 40px 0;
-    }
-
-    .loading-spinner .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid #e5edf8;
-      border-top-color: #1e4a8a;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    .loading-spinner .loading-text {
-      font-size: 16px;
-      color: #1d3557;
-      font-weight: 500;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #4a6f9c;
-    }
-
-    .empty-state .empty-icon {
-      font-size: 64px;
-      color: #c4d3e8;
-      margin-bottom: 16px;
-    }
-
-    .empty-state .empty-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1d3557;
-      margin-bottom: 8px;
-    }
-
-    .empty-state .empty-desc {
-      font-size: 14px;
-      color: #4a6f9c;
-    }
-
-    .style-tag {
-      display: inline-block;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-left: 6px;
-    }
-
+    .ai-modal-body { padding: 24px; line-height: 1.8; color: #1a2f4e; font-size: 15px; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; }
+    .ai-modal-body h3 { color: #1e4a8a; margin: 16px 0 8px 0; font-size: 16px; }
+    .ai-modal-body h3:first-child { margin-top: 0; }
+    .ai-modal-body ul, .ai-modal-body ol { padding-left: 20px; margin: 8px 0; }
+    .ai-modal-body li { margin: 4px 0; }
+    .ai-modal-footer { padding: 16px 24px; border-top: 1px solid #e5edf8; text-align: right; }
+    .ai-modal-footer button { padding: 10px 30px; background: #1e4a8a; color: white; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .ai-modal-footer button:hover { background: #2d6bb8; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .loading-spinner { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 40px 0; }
+    .loading-spinner .spinner { width: 48px; height: 48px; border: 4px solid #e5edf8; border-top-color: #1e4a8a; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .loading-spinner .loading-text { font-size: 16px; color: #1d3557; font-weight: 500; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #4a6f9c; }
+    .empty-state .empty-icon { font-size: 64px; color: #c4d3e8; margin-bottom: 16px; }
+    .empty-state .empty-title { font-size: 20px; font-weight: 600; color: #1d3557; margin-bottom: 8px; }
+    .empty-state .empty-desc { font-size: 14px; color: #4a6f9c; }
+    .style-tag { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 6px; }
     .style-tag.default { background: #e8f0fe; color: #1e4a8a; }
     .style-tag.cross { background: #fef3e8; color: #b86a1e; }
     .style-tag.ideal { background: #f0e8fe; color: #6a1eb8; }
     .style-tag.balanced { background: #e8fef0; color: #1eb86a; }
-
-    /* ===== 响应式 ===== */
-    @media (max-width: 768px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .radar-section { grid-template-columns: 1fr; }
-      .style-cards { grid-template-columns: 1fr 1fr; }
-      .header h1 { font-size: 22px; }
-      .main-card { padding: 20px 16px; }
-      .tree { min-width: 500px; }
-      .branch { min-width: 100px; max-width: 150px; }
-      .tab-btn { font-size: 13px; padding: 10px 4px; }
-      .tab-btn i { font-size: 14px; }
-    }
-
-    @media (max-width: 480px) {
-      .tab-btn span { display: none; }
-      .tab-btn i { font-size: 20px; }
-      .style-cards { grid-template-columns: 1fr; }
-      .tree { min-width: 380px; }
-      .branch { min-width: 80px; max-width: 120px; }
-      .branch .node { padding: 10px 8px; }
-      .branch .node .node-label { font-size: 12px; }
-    }
-
+    @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .radar-section { grid-template-columns: 1fr; } .style-cards { grid-template-columns: 1fr 1fr; } .header h1 { font-size: 22px; } .main-card { padding: 20px 16px; } .tree { min-width: 500px; } .branch { min-width: 100px; max-width: 150px; } .tab-btn { font-size: 13px; padding: 10px 4px; } .tab-btn i { font-size: 14px; } .ai-modal-content { max-width: 95%; } }
+    @media (max-width: 480px) { .tab-btn span { display: none; } .tab-btn i { font-size: 20px; } .style-cards { grid-template-columns: 1fr; } .tree { min-width: 380px; } .branch { min-width: 80px; max-width: 120px; } .branch .node { padding: 10px 8px; } .branch .node .node-label { font-size: 12px; } }
     .mt-12 { margin-top: 12px; }
     .mt-20 { margin-top: 20px; }
     .flex { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -847,27 +136,23 @@
 <body>
 
 <div class="container">
-  <!-- ===== 头部 ===== -->
   <div class="header">
     <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
     <span class="badge"><i class="fas fa-sparkles"></i> v3.0 · AI驱动</span>
   </div>
 
-  <!-- ===== 主卡片 ===== -->
   <div class="main-card">
-    <!-- Tab 导航 -->
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="tab1"><i class="fas fa-pen-to-square"></i> <span>信息采集</span></button>
       <button class="tab-btn" data-tab="tab2"><i class="fas fa-tree"></i> <span>成长树</span></button>
     </div>
 
-    <!-- ===== TAB 1: 信息采集 ===== -->
+    <!-- TAB 1 -->
     <div id="tab1" class="tab-content active">
       <div style="font-size:18px;font-weight:700;color:#0b1e3a;margin-bottom:20px;">
         <i class="fas fa-user-astronaut" style="color:#1e4a8a;"></i> 你的职业画像
       </div>
 
-      <!-- AI 状态提示 -->
       <div id="aiSkillStatus" class="ai-status hidden">
         <span class="spinner-small"></span>
         <span>AI 正在分析你的职业画像...</span>
@@ -955,7 +240,7 @@
       </button>
     </div>
 
-    <!-- ===== TAB 2: 成长树 ===== -->
+    <!-- TAB 2 -->
     <div id="tab2" class="tab-content">
       <div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;border:1px solid rgba(255,255,255,0.6);">
         <span><strong>👤 张明</strong> · 计算机老师 · 3年</span>
@@ -1014,7 +299,7 @@
     'use strict';
 
     // ============================================================
-    // 配置 - 指向本地代理服务
+    // 配置
     // ============================================================
     const API_CONFIG = {
       baseUrl: 'https://zheyu.online',
@@ -1061,7 +346,6 @@
       card.classList.add('selected');
       selectedStyle = card.dataset.style;
 
-      // 如果职业已输入，重新推荐技能
       const job = userJob.value.trim();
       if (job.length >= 2) {
         autoRecommendSkills(
@@ -1074,22 +358,11 @@
       }
     });
 
-    function getPathStyle() {
-      return selectedStyle;
-    }
+    function getPathStyle() { return selectedStyle; }
 
     function getStyleLabel(style) {
-      const map = {
-        'default': '稳妥晋升',
-        'cross': '跨界融合',
-        'ideal': '理想主义',
-        'balanced': '均衡发展'
-      };
+      const map = { 'default': '稳妥晋升', 'cross': '跨界融合', 'ideal': '理想主义', 'balanced': '均衡发展' };
       return map[style] || '稳妥晋升';
-    }
-
-    function getStyleClass(style) {
-      return 'style-tag ' + style;
     }
 
     // ============================================================
@@ -1132,7 +405,7 @@
     }
 
     // ============================================================
-    // 🔥 AI 智能推荐技能（结合所有字段 + 路径风格）
+    // AI 智能推荐技能
     // ============================================================
     async function autoRecommendSkills(job, education, goal, interest, style) {
       if (!job || job.trim() === '' || isGeneratingSkills) return;
@@ -1165,14 +438,8 @@
 1. 只返回技能名称列表，用逗号分隔
 2. 技能名称要精炼、准确（2-6个字）
 3. 技能要紧密结合用户的职业、教育、目标和兴趣
-4. 根据路径风格调整技能侧重点：
-   - 稳妥晋升：侧重基础扎实、专业深耕
-   - 跨界融合：侧重跨领域、多元化
-   - 理想主义：侧重创新、突破
-   - 均衡发展：侧重全面、综合
+4. 根据路径风格调整技能侧重点
 5. 覆盖硬技能和软技能
-
-示例输出（计算机老师，稳妥晋升）：教学设计,课堂管理,编程教学,教育心理学,课程开发,教育技术,教学研究,学生指导,沟通表达,持续学习
 
 只返回技能列表，不要其他文字。
       `;
@@ -1216,11 +483,9 @@
 
         aiSkillStatus.innerHTML = `
           <i class="fas fa-check-circle"></i>
-          <span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能（路径风格：${getStyleLabel(style)}），请选择你当前具备的</span>
+          <span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能，请选择你当前具备的</span>
         `;
-        setTimeout(() => {
-          aiSkillStatus.classList.add('hidden');
-        }, 3000);
+        setTimeout(() => aiSkillStatus.classList.add('hidden'), 3000);
 
       } catch (error) {
         console.error('AI技能推荐失败:', error);
@@ -1230,16 +495,14 @@
           <i class="fas fa-exclamation-circle"></i>
           <span>AI 推荐失败，已使用备选技能，请手动选择</span>
         `;
-        setTimeout(() => {
-          aiSkillStatus.classList.add('hidden');
-        }, 2000);
+        setTimeout(() => aiSkillStatus.classList.add('hidden'), 2000);
       } finally {
         isGeneratingSkills = false;
       }
     }
 
     // ============================================================
-    // 智能备选技能（结合所有字段 + 路径风格）
+    // 备选技能
     // ============================================================
     function getFallbackSkills(job, education, goal, interest, style) {
       const baseMap = {
@@ -1268,7 +531,6 @@
         }
       }
 
-      // 根据教育背景补充
       let eduSkills = [];
       if (education) {
         const eduLower = education.toLowerCase();
@@ -1283,7 +545,6 @@
         }
       }
 
-      // 根据目标补充
       let goalSkills = [];
       if (goal) {
         if (goal.includes('管理') || goal.includes('负责') || goal.includes('总监')) {
@@ -1300,7 +561,6 @@
         }
       }
 
-      // 根据兴趣补充
       let interestSkills = [];
       if (interest) {
         if (interest.includes('AI') || interest.includes('智能') || interest.includes('数据')) {
@@ -1320,7 +580,6 @@
         }
       }
 
-      // 根据路径风格调整
       let styleSkills = [];
       if (style === 'cross') {
         styleSkills = ['跨领域协作', '多元化思维', '资源整合', '创新融合'];
@@ -1367,7 +626,7 @@
     }
 
     // ============================================================
-    // 监听所有输入变化 - 触发智能推荐
+    // 监听输入变化
     // ============================================================
     function triggerRecommend() {
       const job = userJob.value.trim();
@@ -1396,7 +655,7 @@
     });
 
     // ============================================================
-    // 默认树形数据（根据路径风格调整）
+    // 默认树形数据
     // ============================================================
     function getDefaultTree(userInput) {
       const job = userInput.job || '产品经理';
@@ -1467,10 +726,7 @@
         }
       };
 
-      // 获取匹配的模板
       let template = branchTemplates['default']['default'];
-      let found = false;
-
       for (const [jobKey, styleMap] of Object.entries(branchTemplates)) {
         if (job.includes(jobKey) || jobKey.includes(job)) {
           if (styleMap[style]) {
@@ -1478,14 +734,8 @@
           } else {
             template = styleMap['default'] || branchTemplates['default']['default'];
           }
-          found = true;
           break;
         }
-      }
-
-      if (!found) {
-        const defaultStyleMap = branchTemplates['default'];
-        template = defaultStyleMap[style] || defaultStyleMap['default'];
       }
 
       const branches = [];
@@ -1511,7 +761,7 @@
     }
 
     // ============================================================
-    // 🚀 生成成长树（结合路径风格）
+    // 生成成长树
     // ============================================================
     async function generateTree(userInput) {
       if (isGeneratingTree) return;
@@ -1546,30 +796,13 @@
 要求：
 1. 每个阶段包含：年份、阶段标题（有创意）、阶段目标（具体可执行）、核心技能（3-5个）、里程碑事件
 2. 根据用户的职业兴趣，将兴趣融入到每个阶段的描述中
-3. 路径风格必须体现在每个阶段的标题、目标和技能中：
-   - 稳妥晋升：标题体现"筑基/深耕/稳进"，目标体现"扎实/稳步"
-   - 跨界融合：标题体现"跨界/融合/突破"，目标体现"多元/创新"
-   - 理想主义：标题体现"理想/卓越/极致"，目标体现"追求/突破"
-   - 均衡发展：标题体现"均衡/综合/全面"，目标体现"平衡/多元"
+3. 路径风格必须体现在每个阶段的标题、目标和技能中
 4. 推荐3-5个用户应该学习的新技能
 5. 生成5个维度的能力评估值（专业技能、工作经验、学习能力、适应能力、领导力），范围0-100
 6. 生成一个"意外事件"（一个职业机遇或挑战）
 7. 生成3个成就徽章
 
-输出格式为 JSON：
-{
-  "tree": {
-    "branches": [
-      { "year": 1, "icon": "📚", "title": "...", "goals": "...", "skills": ["..."], "milestone": "..." }
-    ]
-  },
-  "recommendedSkills": ["技能1", "技能2"],
-  "radarData": { "skill": 60, "experience": 50, "learning": 70, "adaptability": 55, "leadership": 40 },
-  "event": { "icon": "⚡", "text": "..." },
-  "badges": ["徽章1", "徽章2", "徽章3"]
-}
-
-只返回JSON，不要其他文字。
+输出格式为 JSON，只返回JSON，不要其他文字。
       `;
 
       try {
@@ -1685,7 +918,7 @@
     }
 
     // ============================================================
-    // 稳定的雷达图渲染
+    // 雷达图渲染
     // ============================================================
     function renderRadarStable(data) {
       const container = document.getElementById('radarContainer');
@@ -1839,7 +1072,7 @@
     }
 
     // ============================================================
-    // 咨询AI助手
+    // 🔥 咨询AI助手（包含完整用户信息）
     // ============================================================
     consultBtn.addEventListener('click', async function() {
       if (!currentPathData) {
@@ -1848,9 +1081,28 @@
       }
 
       const userInput = getUserInput();
-      const msg = `我的职业成长树已生成，路径如下：\n${JSON.stringify(currentPathData, null, 2)}\n\n请给我一些具体的职业发展建议。`;
+
+      // 构建完整消息，包含用户信息和成长树
+      const msg = `你好！我是${userInput.name}，一名${userInput.job}，已有${userInput.years}年工作经验。
+
+【我的背景信息】
+- 教育背景：${userInput.education}
+- 职业目标：${userInput.goal}
+- 职业兴趣：${userInput.interest}
+- 当前技能：${userInput.skills.join('、')}
+- 路径风格：${userInput.styleLabel}
+
+【我的5年成长计划】
+${currentPathData.tree.branches.map((b, i) => 
+  `第${b.year}年：${b.title}\n  目标：${b.goals}\n  核心技能：${(b.skills || []).join('、')}`
+).join('\n\n')}
+
+请根据以上信息，给我具体的职业发展建议。`;
 
       try {
+        consultBtn.disabled = true;
+        consultBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 咨询中...';
+
         const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1865,25 +1117,52 @@
         }
       } catch (error) {
         alert('咨询失败：' + error.message);
+      } finally {
+        consultBtn.disabled = false;
+        consultBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 咨询AI助手';
       }
     });
 
+    // ============================================================
+    // 显示AI回复
+    // ============================================================
     function showAIResponse(reply) {
+      if (!reply || reply.trim() === '') {
+        reply = 'AI没有返回有效内容，请重试。';
+      }
+
       const overlay = document.createElement('div');
       overlay.className = 'ai-modal-overlay';
+
+      let formattedReply = reply
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/^### (.*)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.*)$/gm, '<h3>$1</h3>')
+        .replace(/^# (.*)$/gm, '<h3>$1</h3>')
+        .replace(/^\* (.*)$/gm, '• $1')
+        .replace(/^\- (.*)$/gm, '• $1')
+        .replace(/^\d+\. (.*)$/gm, '<br><strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+
       overlay.innerHTML = `
         <div class="ai-modal-content">
           <div class="ai-modal-header">
             <span>🤖 AI 职业建议</span>
             <button onclick="this.closest('.ai-modal-overlay').remove()">✕</button>
           </div>
-          <div class="ai-modal-body">${reply}</div>
+          <div class="ai-modal-body">${formattedReply}</div>
           <div class="ai-modal-footer">
             <button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button>
           </div>
         </div>
       `;
       document.body.appendChild(overlay);
+
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.remove();
+        }
+      });
     }
 
     // ============================================================
@@ -1902,11 +1181,9 @@
     // 初始化
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
-      // 设置默认选中的风格卡
       const defaultCard = styleCards.querySelector('[data-style="default"]');
       if (defaultCard) defaultCard.classList.add('selected');
 
-      // 自动推荐技能
       setTimeout(() => {
         const job = userJob.value.trim();
         const edu = userEdu.value.trim();
