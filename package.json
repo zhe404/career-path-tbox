@@ -8,15 +8,28 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "axios": "^1.6.0"
+    "axios": "^1.19.0",
+    "cors": "^2.8.6",
+    "express": "^4.22.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["AI", "职业导航", "百宝箱", "学习伙伴"],
+  "keywords": [
+    "AI",
+    "职业导航",
+    "百宝箱",
+    "学习伙伴"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhe404/career-path-tbox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zhe404/career-path-tbox/issues"
+  },
+  "homepage": "https://github.com/zhe404/career-path-tbox#readme"
 }
