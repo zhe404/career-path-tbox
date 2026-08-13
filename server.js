@@ -83,7 +83,7 @@ app.post('/api/consult-ai', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 60000,
+        timeout: 600000,
       }
     );
 
@@ -141,7 +141,7 @@ app.post('/api/consult-ai-fast', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 30000,
+        timeout: 300000,
       }
     );
 
@@ -190,7 +190,7 @@ app.post('/api/recommend-skills', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 20000,
+        timeout: 200000,
       }
     );
 
@@ -280,7 +280,7 @@ app.post('/api/generate-tree', async (req, res) => {
               'Content-Type': 'application/json',
               'Authorization': TBOX_CONFIG.apiKey,
             },
-            timeout: 30000,
+            timeout: 300000,
           }
         );
 
