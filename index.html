@@ -27,20 +27,7 @@
     .form-group.full-width { grid-column: 1 / -1; }
     .form-group label { font-size: 14px; font-weight: 600; color: #1d3557; }
     .form-group label i { margin-right: 6px; color: #1e4a8a; }
-    .form-group input, .form-group select, .form-group textarea { 
-      background: white; 
-      border: 1.5px solid #d9e2ef; 
-      border-radius: 16px; 
-      padding: 12px 16px; 
-      font-size: 15px; 
-      transition: all 0.2s; 
-      outline: none; 
-      color: #0a1a33; 
-    }
-    .form-group input::placeholder, .form-group textarea::placeholder {
-      color: #b0c4de;
-      font-weight: 400;
-    }
+    .form-group input, .form-group select, .form-group textarea { background: white; border: 1.5px solid #d9e2ef; border-radius: 16px; padding: 12px 16px; font-size: 15px; transition: all 0.2s; outline: none; color: #0a1a33; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1e4a8a; box-shadow: 0 0 0 4px rgba(30, 74, 138, 0.1); }
     .form-group textarea { resize: vertical; min-height: 60px; }
     .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231d3557' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
@@ -60,18 +47,17 @@
     .skill-tag:hover { background: #eef4fc; border-color: #8eb0da; transform: scale(1.04); }
     .skill-tag.active { background: #1e4a8a; border-color: #1e4a8a; color: white; box-shadow: 0 4px 12px rgba(30, 74, 138, 0.25); }
     .empty-skills-hint { color: #4a6f9c; padding: 12px; text-align: center; width: 100%; font-size: 14px; }
-    .ai-status { font-size: 13px; color: #4a6f9c; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255,255,255,0.5); border-radius: 12px; margin-top: 8px; }
-    .ai-status .spinner-small { width: 16px; height: 16px; border: 2px solid #e5edf8; border-top-color: #1e4a8a; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
+    .ai-status { font-size: 13px; color: #4a6f9c; display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+    .ai-status .spinner-small { width: 16px; height: 16px; border: 2px solid #e5edf8; border-top-color: #1e4a8a; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .ai-status .fa-check-circle { color: #28a745; }
     .ai-status .fa-exclamation-circle { color: #dc3545; }
-    .ai-status .fa-spinner { color: #1e4a8a; animation: spin 0.8s linear infinite; }
     .hidden { display: none !important; }
     .btn-primary { background: linear-gradient(135deg, #1e4a8a, #2d6bb8); border: none; color: white; padding: 14px 28px; border-radius: 60px; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.3s; width: 100%; box-shadow: 0 8px 24px rgba(30, 74, 138, 0.25); }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(30, 74, 138, 0.35); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(30, 74, 138, 0.35); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .btn-secondary { background: rgba(255,255,255,0.7); border: 1px solid #c4d3e8; color: #1d3b6b; padding: 10px 22px; border-radius: 60px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
-    .btn-secondary:hover:not(:disabled) { background: white; border-color: #8eb0da; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+    .btn-secondary:hover { background: white; border-color: #8eb0da; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
     .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
     .tree-container { padding: 20px 0 10px; overflow-x: auto; }
     .tree { display: flex; flex-direction: column; align-items: center; min-width: 700px; }
@@ -114,9 +100,9 @@
     .badge-item.locked { opacity: 0.4; }
     .ai-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; animation: fadeIn 0.3s ease; }
     .ai-modal-content { background: white; border-radius: 24px; max-width: 650px; width: 90%; max-height: 80vh; overflow: auto; animation: slideUp 0.3s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-    .ai-modal-header { padding: 20px 24px; border-bottom: 1px solid #e5edf8; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; border-radius: 24px 24px 0 0; z-index: 1; }
+    .ai-modal-header { padding: 20px 24px; border-bottom: 1px solid #e5edf8; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; border-radius: 24px 24px 0 0; }
     .ai-modal-header span { font-weight: 700; font-size: 18px; color: #0b1e3a; }
-    .ai-modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; padding: 4px 8px; }
+    .ai-modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
     .ai-modal-body { padding: 24px; line-height: 1.8; color: #1a2f4e; font-size: 15px; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; }
     .ai-modal-body h3 { color: #1e4a8a; margin: 16px 0 8px 0; font-size: 16px; }
     .ai-modal-body h3:first-child { margin-top: 0; }
@@ -139,7 +125,6 @@
     .style-tag.cross { background: #fef3e8; color: #b86a1e; }
     .style-tag.ideal { background: #f0e8fe; color: #6a1eb8; }
     .style-tag.balanced { background: #e8fef0; color: #1eb86a; }
-    .required-star { color: #dc3545; margin-left: 2px; }
     @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .radar-section { grid-template-columns: 1fr; } .style-cards { grid-template-columns: 1fr 1fr; } .header h1 { font-size: 22px; } .main-card { padding: 20px 16px; } .tree { min-width: 500px; } .branch { min-width: 100px; max-width: 150px; } .tab-btn { font-size: 13px; padding: 10px 4px; } .tab-btn i { font-size: 14px; } .ai-modal-content { max-width: 95%; } }
     @media (max-width: 480px) { .tab-btn span { display: none; } .tab-btn i { font-size: 20px; } .style-cards { grid-template-columns: 1fr; } .tree { min-width: 380px; } .branch { min-width: 80px; max-width: 120px; } .branch .node { padding: 10px 8px; } .branch .node .node-label { font-size: 12px; } }
     .mt-12 { margin-top: 12px; }
@@ -149,14 +134,6 @@
     .text-muted { color: #4a6f9c; font-size: 14px; }
     .w-full { width: 100%; }
     .gap-8 { gap: 8px; }
-    .validation-hint { font-size: 12px; color: #dc3545; margin-top: 4px; display: none; }
-    .validation-hint.show { display: block; }
-    .field-required .form-group input, 
-    .field-required .form-group select, 
-    .field-required .form-group textarea {
-      border-color: #dc3545;
-      background: #fff8f8;
-    }
   </style>
 </head>
 <body>
@@ -177,9 +154,6 @@
     <div id="tab1" class="tab-content active">
       <div style="font-size:18px;font-weight:700;color:#0b1e3a;margin-bottom:20px;">
         <i class="fas fa-user-astronaut" style="color:#1e4a8a;"></i> 你的职业画像
-        <span style="font-size:14px;font-weight:400;color:#4a6f9c;margin-left:12px;">
-          <span class="required-star">*</span> 为必填项
-        </span>
       </div>
 
       <div id="aiSkillStatus" class="ai-status hidden">
@@ -188,7 +162,6 @@
       </div>
 
       <div class="form-grid">
-<<<<<<< HEAD
         <div class="form-group">
           <label><i class="fas fa-user"></i> 姓名 / 昵称</label>
           <input type="text" id="userName" placeholder="你的名字">
@@ -203,22 +176,6 @@
         </div>
         <div class="form-group">
           <label><i class="fas fa-graduation-cap"></i> 教育背景</label>
-=======
-        <div class="form-group field-required">
-          <label><i class="fas fa-user"></i> 姓名 / 昵称 <span class="required-star">*</span></label>
-          <input type="text" id="userName" placeholder="请输入你的姓名或昵称" value="">
-        </div>
-        <div class="form-group field-required">
-          <label><i class="fas fa-briefcase"></i> 当前职业 <span class="required-star">*</span></label>
-          <input type="text" id="userJob" placeholder="例如：产品经理 / 教师 / 医生" value="">
-        </div>
-        <div class="form-group field-required">
-          <label><i class="far fa-calendar"></i> 工作年限 <span class="required-star">*</span></label>
-          <input type="number" id="userYears" placeholder="请输入工作年限" min="0" max="40" value="">
-        </div>
-        <div class="form-group field-required">
-          <label><i class="fas fa-graduation-cap"></i> 教育背景 <span class="required-star">*</span></label>
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
           <select id="userEdu">
             <option value="">请选择教育背景</option>
             <option value="高中及以下">高中及以下</option>
@@ -229,7 +186,6 @@
             <option value="博士后">博士后</option>
           </select>
         </div>
-<<<<<<< HEAD
         <div class="form-group full-width">
           <label><i class="fas fa-bullseye"></i> 职业目标（5年后想成为什么？）</label>
           <input type="text" id="userGoal" placeholder="例如：技术总监 / 产品负责人 / 创业者 / 安全专家">
@@ -237,26 +193,17 @@
         <div class="form-group full-width">
           <label><i class="fas fa-compass"></i> 职业兴趣 / 方向</label>
           <textarea id="userInterest" rows="2" placeholder="例如：我想用AI赋能传统行业，成为懂技术的产品领导者"></textarea>
-=======
-        <div class="form-group full-width field-required">
-          <label><i class="fas fa-bullseye"></i> 职业目标 <span class="required-star">*</span></label>
-          <input type="text" id="userGoal" placeholder="5年后你想成为什么？例如：技术总监 / 产品负责人" value="">
         </div>
-        <div class="form-group full-width field-required">
-          <label><i class="fas fa-compass"></i> 职业兴趣 / 方向 <span class="required-star">*</span></label>
-          <textarea id="userInterest" rows="2" placeholder="例如：我想用AI赋能教育行业，成为懂技术的教育领导者"></textarea>
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
-        </div>
-        <div class="form-group field-required">
-          <label><i class="fas fa-clock"></i> 规划周期 <span class="required-star">*</span></label>
+        <div class="form-group">
+          <label><i class="fas fa-clock"></i> 规划周期</label>
           <select id="targetYears">
             <option value="3">3年</option>
             <option value="5" selected>5年</option>
             <option value="10">10年</option>
           </select>
         </div>
-        <div class="form-group field-required">
-          <label><i class="fas fa-route"></i> 路径风格 <span class="required-star">*</span></label>
+        <div class="form-group">
+          <label><i class="fas fa-route"></i> 路径风格</label>
           <div class="style-cards" id="styleCards">
             <div class="style-card selected" data-style="default">
               <span class="style-check">✓</span>
@@ -288,16 +235,13 @@
           <label>
             <i class="fas fa-tags"></i> 核心技能
             <span style="font-size:12px;color:#4a6f9c;font-weight:400;">
-              （AI将根据你的信息推荐，请至少选择3项）
+              （点击选择你当前具备的核心技能，至少选3项）
             </span>
           </label>
           <div class="skills-tag-group" id="skillTags">
             <div class="empty-skills-hint">
-              <i class="fas fa-info-circle"></i> 请填写完整信息后，AI将为你推荐核心技能
+              <i class="fas fa-info-circle"></i> 输入职业后，AI 将根据你的教育背景、职业目标、兴趣和路径风格推荐技能
             </div>
-          </div>
-          <div id="skillValidation" class="validation-hint">
-            <i class="fas fa-exclamation-circle"></i> 请至少选择3项核心技能
           </div>
         </div>
       </div>
@@ -393,7 +337,6 @@
     const statsContainer = $('statsContainer');
     const aiSkillStatus = $('aiSkillStatus');
     const styleCards = $('styleCards');
-    const skillValidation = $('skillValidation');
 
     let currentPathData = null;
     let currentSessionId = null;
@@ -401,7 +344,6 @@
     let isGeneratingSkills = false;
     let isGeneratingTree = false;
     let selectedStyle = 'default';
-    let hasGeneratedSkills = false;
 
     // ============================================================
     // 路径风格选择
@@ -414,8 +356,15 @@
       card.classList.add('selected');
       selectedStyle = card.dataset.style;
 
-      if (checkAllFieldsFilled()) {
-        autoRecommendSkills();
+      const job = userJob.value.trim();
+      if (job.length >= 2) {
+        autoRecommendSkills(
+          job,
+          userEdu.value.trim(),
+          userGoal.value.trim(),
+          userInterest.value.trim(),
+          selectedStyle
+        );
       }
     });
 
@@ -425,79 +374,6 @@
       const map = { 'default': '稳妥晋升', 'cross': '跨界融合', 'ideal': '理想主义', 'balanced': '均衡发展' };
       return map[style] || '稳妥晋升';
     }
-
-    // ============================================================
-    // 检查所有必填字段
-    // ============================================================
-    function checkAllFieldsFilled() {
-      const name = userName.value.trim();
-      const job = userJob.value.trim();
-      const years = userYears.value.trim();
-      const edu = userEdu.value;
-      const goal = userGoal.value.trim();
-      const interest = userInterest.value.trim();
-
-      return name.length > 0 && job.length > 0 && years.length > 0 && 
-             edu !== '' && goal.length > 0 && interest.length > 0;
-    }
-
-    function markRequiredFields() {
-      const fields = [
-        { el: userName, id: 'userName' },
-        { el: userJob, id: 'userJob' },
-        { el: userYears, id: 'userYears' },
-        { el: userEdu, id: 'userEdu' },
-        { el: userGoal, id: 'userGoal' },
-        { el: userInterest, id: 'userInterest' }
-      ];
-
-      fields.forEach(({ el, id }) => {
-        const container = el.closest('.form-group');
-        if (!container) return;
-        const val = el.value.trim ? el.value.trim() : el.value;
-        if (!val || val === '' || val === '请选择教育背景') {
-          container.classList.add('field-required');
-        } else {
-          container.classList.remove('field-required');
-        }
-      });
-    }
-
-    // ============================================================
-    // 监听所有输入字段
-    // ============================================================
-    const allFields = [userName, userJob, userYears, userEdu, userGoal, userInterest];
-    let recommendTimer = null;
-
-    allFields.forEach(el => {
-      el.addEventListener('input', function() {
-        markRequiredFields();
-        clearTimeout(recommendTimer);
-        if (checkAllFieldsFilled()) {
-          recommendTimer = setTimeout(() => {
-            autoRecommendSkills();
-          }, 800);
-        } else {
-          if (!hasGeneratedSkills) {
-            skillTagsContainer.innerHTML = `
-              <div class="empty-skills-hint">
-                <i class="fas fa-info-circle"></i> 请填写完整信息后，AI将为你推荐核心技能
-              </div>
-            `;
-            skillTagsContainer.classList.remove('has-skills');
-          }
-        }
-      });
-      el.addEventListener('change', function() {
-        markRequiredFields();
-        clearTimeout(recommendTimer);
-        if (checkAllFieldsFilled()) {
-          recommendTimer = setTimeout(() => {
-            autoRecommendSkills();
-          }, 500);
-        }
-      });
-    });
 
     // ============================================================
     // 工具函数
@@ -541,22 +417,13 @@
     // ============================================================
     // AI 智能推荐技能
     // ============================================================
-    async function autoRecommendSkills() {
-      if (isGeneratingSkills) return;
-
-      const job = userJob.value.trim();
-      const education = userEdu.value;
-      const goal = userGoal.value.trim();
-      const interest = userInterest.value.trim();
-      const name = userName.value.trim();
-      const years = userYears.value.trim();
-
-      if (!checkAllFieldsFilled()) return;
+    async function autoRecommendSkills(job, education, goal, interest, style) {
+      if (!job || job.trim() === '' || isGeneratingSkills) return;
+      if (job.trim().length < 2) return;
 
       isGeneratingSkills = true;
-      hasGeneratedSkills = false;
       aiSkillStatus.classList.remove('hidden');
-      aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析你的职业画像，推荐核心技能...</span>';
+      aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析你的职业画像...</span>';
 
       const styleDesc = {
         'default': '稳扎稳打，按部就班，注重基础技能的扎实掌握',
@@ -565,16 +432,15 @@
         'balanced': '全面开花，综合成长，注重各方面均衡发展'
       };
 
-      const prompt = `你是一位资深的职业规划专家。请根据以下用户信息，推荐适合的核心技能。
+      const prompt = `
+你是一位资深的职业规划专家。请根据以下用户信息，推荐适合的核心技能。
 
 用户信息：
-- 姓名：${name}
-- 当前职业：${job}
-- 工作年限：${years}年
-- 教育背景：${education}
-- 职业目标：${goal}
-- 职业兴趣：${interest}
-- 路径风格：${styleDesc[selectedStyle] || '稳扎稳打，按部就班'}
+- 当前职业：${job.trim()}
+- 教育背景：${education || '未填写'}
+- 职业目标：${goal || '未填写'}
+- 职业兴趣：${interest || '未填写'}
+- 路径风格：${styleDesc[style] || '稳扎稳打，按部就班'}
 
 请列出 8-12 项最适合该用户的核心技能。
 
@@ -585,7 +451,8 @@
 4. 根据路径风格调整技能侧重点
 5. 覆盖硬技能和软技能
 
-只返回技能列表，不要其他文字。`;
+只返回技能列表，不要其他文字。
+      `;
 
       try {
         const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
@@ -593,7 +460,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: prompt,
-            context: { job, education, goal, interest, style: selectedStyle }
+            context: { job: job.trim(), education, goal, interest, style }
           })
         });
 
@@ -619,28 +486,26 @@
 
         if (skills.length > 12) skills = skills.slice(0, 12);
         if (skills.length < 4) {
-          skills = getFallbackSkills(job, education, goal, interest, selectedStyle);
+          skills = getFallbackSkills(job.trim(), education, goal, interest, style);
         }
 
         renderSkillTags(skills, false);
-        hasGeneratedSkills = true;
 
         aiSkillStatus.innerHTML = `
           <i class="fas fa-check-circle"></i>
-          <span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能，请选择你当前具备的（至少3项）</span>
+          <span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能，请选择你当前具备的</span>
         `;
-        setTimeout(() => aiSkillStatus.classList.add('hidden'), 4000);
+        setTimeout(() => aiSkillStatus.classList.add('hidden'), 3000);
 
       } catch (error) {
         console.error('AI技能推荐失败:', error);
-        const fallback = getFallbackSkills(job, education, goal, interest, selectedStyle);
+        const fallback = getFallbackSkills(job.trim(), education, goal, interest, style);
         renderSkillTags(fallback, false);
-        hasGeneratedSkills = true;
         aiSkillStatus.innerHTML = `
           <i class="fas fa-exclamation-circle"></i>
           <span>AI 推荐失败，已使用备选技能，请手动选择</span>
         `;
-        setTimeout(() => aiSkillStatus.classList.add('hidden'), 3000);
+        setTimeout(() => aiSkillStatus.classList.add('hidden'), 2000);
       } finally {
         isGeneratingSkills = false;
       }
@@ -651,7 +516,6 @@
     // ============================================================
     function getFallbackSkills(job, education, goal, interest, style) {
       const baseMap = {
-<<<<<<< HEAD
         '计算机老师': ['编程教学', '课程设计', '教育技术', '教学管理', '教育心理学', 'Python编程', '在线教学', '教学研究', '信息技术', '学生指导'],
         '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
         '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
@@ -659,23 +523,17 @@
         '网络安全工程师': ['网络协议基础', 'Web安全攻防', '日志分析与审计', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '安全策略', '系统安全'],
         '安全工程师': ['网络安全', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '安全策略'],
         '医生': ['临床诊断', '医疗技术', '医患沟通', '循证医学', '医疗管理', '团队协作', '持续学习'],
-=======
-        '计算机老师': ['编程教学', '课程设计', '教育技术', '教学管理', '教育心理学', 'Python编程', '在线教学', '教学研究'],
-        '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术'],
-        '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术'],
-        '医生': ['临床诊断', '医疗技术', '医患沟通', '循证医学', '医疗管理', '团队协作'],
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
         '护士': ['护理技术', '患者关怀', '医疗记录', '急救技能', '沟通协作', '健康宣教'],
         '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '商业分析', '沟通协作'],
         '软件开发': ['编程语言', '系统设计', '数据库', '算法', '调试测试', '团队协作'],
         '设计师': ['UI设计', 'UX研究', '设计工具', '设计思维', '用户测试', '创意表达'],
-        '律师': ['法律研究', '法律写作', '诉讼技巧', '谈判能力', '客户沟通'],
-        '金融分析师': ['财务分析', '投资研究', '风险管理', '数据建模', '行业分析'],
-        '建筑师': ['建筑设计', '空间规划', '建筑技术', '项目管理', '可持续设计'],
-        '人力资源': ['招聘管理', '绩效管理', '人才发展', '员工关系', '组织发展'],
-        '运营': ['用户运营', '数据分析', '增长策略', '内容策划', '项目管理'],
-        '市场营销': ['品牌营销', '数字营销', '市场分析', '内容创作', '活动策划'],
-        '心理咨询师': ['心理评估', '咨询技巧', '危机干预', '伦理规范', '自我觉察']
+        '律师': ['法律研究', '法律写作', '诉讼技巧', '谈判能力', '客户沟通', '法律伦理'],
+        '金融分析师': ['财务分析', '投资研究', '风险管理', '数据建模', '行业分析', '商业洞察'],
+        '建筑师': ['建筑设计', '空间规划', '建筑技术', '项目管理', '可持续设计', '沟通协作'],
+        '人力资源': ['招聘管理', '绩效管理', '人才发展', '员工关系', '组织发展', '沟通协调'],
+        '运营': ['用户运营', '数据分析', '增长策略', '内容策划', '项目管理', '沟通协作'],
+        '市场营销': ['品牌营销', '数字营销', '市场分析', '内容创作', '活动策划', '数据分析'],
+        '心理咨询师': ['心理评估', '咨询技巧', '危机干预', '伦理规范', '自我觉察', '沟通共情'],
       };
 
       let baseSkills = ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
@@ -686,7 +544,6 @@
         }
       }
 
-<<<<<<< HEAD
       let eduSkills = [];
       if (education) {
         const eduLower = education.toLowerCase();
@@ -754,9 +611,6 @@
       }
 
       const allSkills = [...baseSkills, ...eduSkills, ...goalSkills, ...interestSkills, ...styleSkills];
-=======
-      const allSkills = [...baseSkills];
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
       const uniqueSkills = [...new Set(allSkills)].filter(s => s && s.length > 0);
 
       return uniqueSkills.length > 12 ? uniqueSkills.slice(0, 12) : uniqueSkills;
@@ -770,10 +624,9 @@
       if (!skills || skills.length === 0) {
         skillTagsContainer.innerHTML = `
           <div class="empty-skills-hint">
-            <i class="fas fa-info-circle"></i> 暂无技能推荐，请完善信息
+            <i class="fas fa-info-circle"></i> 暂无技能，请重新输入职业
           </div>
         `;
-        skillTagsContainer.classList.remove('has-skills');
         return;
       }
 
@@ -784,7 +637,6 @@
         tag.textContent = skill;
         tag.addEventListener('click', function() {
           this.classList.toggle('active');
-          validateSkills();
         });
         skillTagsContainer.appendChild(tag);
       });
@@ -793,21 +645,35 @@
     }
 
     // ============================================================
-    // 技能验证
+    // 监听输入变化
     // ============================================================
-    function validateSkills() {
-      const selected = getSelectedSkills();
-      if (selected.length < 3) {
-        skillValidation.classList.add('show');
-        return false;
-      } else {
-        skillValidation.classList.remove('show');
-        return true;
+    function triggerRecommend() {
+      const job = userJob.value.trim();
+      if (job.length >= 2) {
+        autoRecommendSkills(
+          job,
+          userEdu.value.trim(),
+          userGoal.value.trim(),
+          userInterest.value.trim(),
+          getPathStyle()
+        );
       }
     }
 
+    let recommendTimer = null;
+    ['userJob', 'userEdu', 'userGoal', 'userInterest'].forEach(id => {
+      const el = $(id);
+      el.addEventListener('input', function() {
+        clearTimeout(recommendTimer);
+        recommendTimer = setTimeout(triggerRecommend, 500);
+      });
+      el.addEventListener('change', function() {
+        clearTimeout(recommendTimer);
+        recommendTimer = setTimeout(triggerRecommend, 300);
+      });
+    });
+
     // ============================================================
-<<<<<<< HEAD
     // 默认树形数据（本地fallback）
     // ============================================================
     function getDefaultTree(userInput) {
@@ -900,9 +766,6 @@
 
     // ============================================================
     // 生成成长树（秒开版 - 调用 /api/generate-tree）
-=======
-    // 生成成长树（秒开版）
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
     // ============================================================
     async function generateTree(userInput) {
       if (isGeneratingTree) return;
@@ -923,23 +786,14 @@
         const data = await response.json();
         if (!data.success) throw new Error(data.error || '生成失败');
 
-<<<<<<< HEAD
         if (data.sessionId) {
           currentSessionId = data.sessionId;
-=======
-        if (data.template) {
-          console.log('📋 使用模板数据，后台AI优化中...');
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
         }
 
         return data.data;
       } catch (error) {
         console.error('生成失败:', error);
-<<<<<<< HEAD
         return getDefaultTree(userInput);
-=======
-        return getPersonalizedTemplate(userInput);
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
       } finally {
         loadingTree.classList.add('hidden');
         isGeneratingTree = false;
@@ -947,7 +801,6 @@
     }
 
     // ============================================================
-<<<<<<< HEAD
     // 获取优化版
     // ============================================================
     optimizeBtn.addEventListener('click', async function() {
@@ -980,156 +833,18 @@
         optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
       }
     });
-=======
-    // 个性化模板（与后端保持一致）
-    // ============================================================
-    function getPersonalizedTemplate(userInput) {
-      const job = userInput.job || '产品经理';
-      const years = userInput.years || 0;
-      const targetYears = userInput.targetYears || 5;
-      const interest = userInput.interest || '职业发展';
-      const styleLabel = userInput.styleLabel || '稳妥晋升';
-      const skills = userInput.skills || [];
-      
-      const templates = {
-        '高中教师': {
-          branches: [
-            { year: 1, icon: '📚', title: '教学精进', goals: '深入研究教材，优化教学方法', skills: ['教学设计', '课堂管理', '学科研究'], milestone: '完成教学反思报告' },
-            { year: 2, icon: '📝', title: '科研起步', goals: '开展教育科研，撰写教学论文', skills: ['教育研究', '学术写作', '数据分析'], milestone: '发表教学论文' },
-            { year: 3, icon: '💡', title: '特色形成', goals: '形成个人教学风格，打造特色课程', skills: ['课程开发', '创新教学', '教育技术'], milestone: '完成特色课程设计' },
-            { year: 4, icon: '👥', title: '引领示范', goals: '带领教研团队，培养青年教师', skills: ['团队管理', '教研引领', '教学指导'], milestone: '指导青年教师获奖' },
-            { year: 5, icon: '🏆', title: '特级教师', goals: '成为特级教师，发挥示范引领作用', skills: ['教学领导', '学术影响', '教育创新'], milestone: '完成市级公开课' }
-          ],
-          radarData: { skill: 70, experience: 60, learning: 75, adaptability: 55, leadership: 45 },
-          challenges: { icon: '⚡', text: `作为${job}，${years}年经验后可能面临教学创新与科研突破的双重挑战，需要在传统教学与新技术应用之间找到平衡点` },
-          badges: ['📖 教学能手', '🔬 科研新秀', '🌟 教育先锋']
-        },
-        '计算机老师': {
-          branches: [
-            { year: 1, icon: '📚', title: '教学筑基', goals: '掌握教学方法，建立课堂管理', skills: ['教学设计', '课堂管理', '编程教学'], milestone: '完成完整课程教学' },
-            { year: 2, icon: '💻', title: '技术融合', goals: '编程技术与教学深度融合', skills: ['教育技术', '在线教学', '课程开发'], milestone: '开发在线编程课程' },
-            { year: 3, icon: '📊', title: '教学研究', goals: '开展教学研究，形成个人特色', skills: ['教育研究', '学术写作', '数据驱动'], milestone: '完成教学研究论文' },
-            { year: 4, icon: '👥', title: '团队引领', goals: '带领学科团队，推动课程改革', skills: ['团队管理', '学科建设', '教学管理'], milestone: '完成教学改革项目' },
-            { year: 5, icon: '🏆', title: '学科带头人', goals: '成为学科带头人，推动教育创新', skills: ['学科引领', '教育战略', '行业影响'], milestone: '完成区域学术报告' }
-          ],
-          radarData: { skill: 75, experience: 55, learning: 80, adaptability: 60, leadership: 50 },
-          challenges: { icon: '⚡', text: `作为${job}，${years}年经验后需要应对技术快速迭代的挑战，可能在编程教学与AI应用之间找到融合点` },
-          badges: ['💻 技术达人', '📚 教学能手', '🚀 创新先锋']
-        },
-        '老师': {
-          branches: [
-            { year: 1, icon: '📚', title: '教学入门', goals: '掌握教学基本功，建立课堂秩序', skills: ['教学设计', '课堂管理', '教育心理学'], milestone: '完成完整课程' },
-            { year: 2, icon: '📝', title: '教学精进', goals: '优化教学方法，设计创新课程', skills: ['课程设计', '教育技术', '评估反馈'], milestone: '开发新课程' },
-            { year: 3, icon: '💡', title: '教育研究', goals: '开展教学研究，形成个人风格', skills: ['教育研究', '创新教学', '教育技术'], milestone: '发表教学论文' },
-            { year: 4, icon: '👥', title: '教研引领', goals: '带领教研团队，培养青年教师', skills: ['教研管理', '团队领导', '课程体系'], milestone: '指导青年教师' },
-            { year: 5, icon: '🏆', title: '教育专家', goals: '成为教育专家，引领教育改革', skills: ['教育战略', '课程体系', '教育领导力'], milestone: '完成区域讲座' }
-          ],
-          radarData: { skill: 65, experience: 55, learning: 70, adaptability: 50, leadership: 40 },
-          challenges: { icon: '⚡', text: `作为${job}，${years}年经验后可能面临教育理念更新与教学方法改革的挑战，需要持续学习适应新要求` },
-          badges: ['📖 教学能手', '🌟 成长之星', '🎯 教育追梦人']
-        },
-        '产品经理': {
-          branches: [
-            { year: 1, icon: '📚', title: '产品筑基', goals: '深入用户研究，建立产品思维', skills: ['用户研究', '产品设计', '数据分析'], milestone: '完成完整PRD' },
-            { year: 2, icon: '📊', title: '数据驱动', goals: '数据驱动决策，独立负责产品线', skills: ['数据分析', '项目管理', '沟通协作'], milestone: '上线独立功能' },
-            { year: 3, icon: '💡', title: '商业思维', goals: '理解商业模式，制定产品路线图', skills: ['商业分析', '战略规划', '领导力'], milestone: '完成战略汇报' },
-            { year: 4, icon: '👥', title: '团队领导', goals: '带领产品团队，培养协作能力', skills: ['团队管理', '创新思维', '市场洞察'], milestone: '团队交付项目' },
-            { year: 5, icon: '🏆', title: '产品总监', goals: '构建产品生态，输出方法论', skills: ['产品战略', '行业洞察', '技术管理'], milestone: '完成行业分享' }
-          ],
-          radarData: { skill: 70, experience: 60, learning: 65, adaptability: 70, leadership: 55 },
-          challenges: { icon: '⚡', text: `作为${job}，${years}年经验后可能面临产品创新与市场竞争的双重压力，需要在用户体验与商业价值之间找到平衡` },
-          badges: ['📱 产品思维', '📊 数据驱动', '🚀 增长黑客']
-        }
-      };
-
-      let template = templates['产品经理'];
-      for (const [key, value] of Object.entries(templates)) {
-        if (job.includes(key) || key.includes(job)) {
-          template = value;
-          break;
-        }
-      }
-
-      const interestMap = {
-        'AI': { addSkills: ['AI应用', '机器学习'], addBadges: ['🤖 AI探索者'] },
-        '教育': { addSkills: ['教育技术', '课程设计'], addBadges: ['📚 教育创新者'] },
-        '管理': { addSkills: ['团队管理', '组织发展'], addBadges: ['👥 团队领袖'] },
-        '创新': { addSkills: ['创新思维', '设计思维'], addBadges: ['💡 创新先锋'] }
-      };
-
-      let extraSkills = [];
-      let extraBadges = [];
-      for (const [key, value] of Object.entries(interestMap)) {
-        if (interest.includes(key)) {
-          extraSkills = value.addSkills;
-          extraBadges = value.addBadges;
-          break;
-        }
-      }
-
-      const branches = [];
-      for (let i = 0; i < Math.min(targetYears, template.branches.length); i++) {
-        const t = template.branches[i];
-        const allSkills = [...t.skills, ...extraSkills].slice(0, 5);
-        branches.push({
-          year: t.year,
-          icon: t.icon,
-          title: t.title + (interest.includes('AI') ? ' · AI赋能' : ''),
-          goals: t.goals + ' · ' + interest.substring(0, 15),
-          skills: allSkills,
-          milestone: t.milestone
-        });
-      }
-
-      const styleMap = {
-        '跨界融合': { prefix: '跨界·' },
-        '理想主义': { prefix: '卓越·' },
-        '均衡发展': { prefix: '均衡·' },
-        '稳妥晋升': { prefix: '' }
-      };
-      const styleConfig = styleMap[styleLabel] || styleMap['稳妥晋升'];
-      if (styleConfig.prefix && branches.length > 0) {
-        branches[0].title = styleConfig.prefix + branches[0].title;
-      }
-
-      let challengeText = template.challenges.text;
-      if (skills.length > 8) {
-        challengeText += '，已有较强技能基础，可向更高层次突破';
-      } else if (skills.length < 4) {
-        challengeText += '，需要先夯实基础技能，再寻求突破';
-      }
-
-      const badges = [
-        ...template.badges.slice(0, 2),
-        ...extraBadges,
-        '🏆 ' + (styleLabel || '稳妥晋升')
-      ].slice(0, 3);
-
-      return {
-        tree: { branches },
-        recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-        radarData: template.radarData,
-        challenges: { icon: '⚡', text: challengeText },
-        badges: badges
-      };
-    }
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
 
     // ============================================================
     // 渲染树形路径
     // ============================================================
     function renderTree(pathData, userInput) {
       if (!pathData || !pathData.tree || !pathData.tree.branches || pathData.tree.branches.length === 0) {
-        treeDisplay.innerHTML = '<div class="text-center text-muted" style="padding:40px;">暂无数据，请重新生成</div>';
+        treeDisplay.innerHTML = '<div class="text-center text-muted" style="padding:40px;">暂无数据，请先生成</div>';
         return;
       }
 
       const branches = pathData.tree.branches;
       const isGoal = (index) => index === branches.length - 1;
-<<<<<<< HEAD
-=======
-      
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
       const isTemplate = pathData._isTemplate || false;
 
       let html = `
@@ -1168,10 +883,6 @@
       html += `</div></div>`;
       treeDisplay.innerHTML = html;
 
-<<<<<<< HEAD
-=======
-      // 渲染挑战与机遇
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
       if (pathData.challenges) {
         eventContainer.innerHTML = `
           <div class="event-card">
@@ -1184,14 +895,9 @@
         eventContainer.innerHTML = '';
       }
 
-      // 渲染徽章
       if (pathData.badges && pathData.badges.length > 0) {
         const badgesHtml = pathData.badges.map((b, i) => {
-<<<<<<< HEAD
           const icon = b.match(/^.{1,2}/)?.[0] || ['🌟', '🚀', '👑', '💎', '🏅'][i % 5] || '🏅';
-=======
-          const icon = b.match(/^.{1,2}/)?.[0] || ['🌟', '🚀', '👑'][i % 3] || '🏅';
->>>>>>> 709bd669e972f5cbc1df0b6a2b3e5613bb8fca34
           return `
             <span class="badge-item unlocked">
               <span class="badge-icon">${icon}</span>
@@ -1202,7 +908,6 @@
         badgesContainer.innerHTML = badgesHtml;
       }
 
-      // 渲染雷达图
       if (pathData.radarData) {
         renderRadarStable(pathData.radarData);
         updateStats(pathData.radarData);
@@ -1313,19 +1018,18 @@
     // 主流程
     // ============================================================
     async function generateAndRender() {
-      if (!checkAllFieldsFilled()) {
-        markRequiredFields();
-        alert('请填写所有必填字段（带 * 的字段）');
-        return;
-      }
-
-      if (!validateSkills()) {
-        skillValidation.classList.add('show');
-        alert('请至少选择3项核心技能');
-        return;
-      }
-
       const userInput = getUserInput();
+
+      if (!userInput.job || userInput.job.trim() === '') {
+        alert('请输入当前职业');
+        return;
+      }
+
+      const selectedSkills = getSelectedSkills();
+      if (selectedSkills.length < 3) {
+        alert('请至少选择3项核心技能（点击技能标签切换选中状态）');
+        return;
+      }
 
       generateBtn.disabled = true;
       generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
@@ -1337,7 +1041,11 @@
         switchTab('tab2');
       } catch (error) {
         console.error('生成失败:', error);
-        alert('生成失败，请稍后重试');
+        alert('生成失败，使用默认数据');
+        const fallback = getDefaultTree(userInput);
+        currentPathData = fallback;
+        renderTree(fallback, userInput);
+        switchTab('tab2');
       } finally {
         generateBtn.disabled = false;
         generateBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';
@@ -1472,15 +1180,15 @@ ${currentPathData.tree.branches.map((b, i) =>
       const defaultCard = styleCards.querySelector('[data-style="default"]');
       if (defaultCard) defaultCard.classList.add('selected');
 
-      markRequiredFields();
-
-      skillTagsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('skill-tag')) {
-          setTimeout(validateSkills, 50);
+      setTimeout(() => {
+        const job = userJob.value.trim();
+        const edu = userEdu.value.trim();
+        const goal = userGoal.value.trim();
+        const interest = userInterest.value.trim();
+        if (job.length >= 2) {
+          autoRecommendSkills(job, edu, goal, interest, getPathStyle());
         }
-      });
-
-      console.log('🌳 AI职业导航已加载完成');
+      }, 500);
     });
 
     let resizeTimer;
