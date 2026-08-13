@@ -16,22 +16,6 @@ const TBOX_CONFIG = {
 };
 
 // ============================================
-// 工具函数：提取JSON
-// ============================================
-function extractJSON(text) {
-  if (!text) return null;
-  const match = text.match(/\{[\s\S]*\}/);
-  if (match) {
-    try {
-      return JSON.parse(match[0]);
-    } catch (e) {
-      return null;
-    }
-  }
-  return null;
-}
-
-// ============================================
 // 工具函数：解析AI回复
 // ============================================
 function parseAIResponse(data) {
@@ -66,7 +50,6 @@ app.post('/api/consult-ai', async (req, res) => {
     const { message, context } = req.body;
     console.log('📨 收到咨询请求:', message.substring(0, 50) + '...');
 
-    // 智能截取
     let query = message;
     if (message.length > 1500) {
       const lines = message.split('\n');
@@ -115,17 +98,15 @@ app.post('/api/consult-ai', async (req, res) => {
 });
 
 // ============================================
-// 2. 快速咨询接口（优化版）
+// 2. 快速咨询接口
 // ============================================
 app.post('/api/consult-ai-fast', async (req, res) => {
   try {
     const { message, context } = req.body;
     console.log('⚡ 快速咨询');
 
-    // 智能精简消息
     let query = message;
     if (message.length > 500) {
-      // 提取关键信息
       const lines = message.split('\n');
       const important = lines.filter(line => 
         line.includes('我是') || line.includes('职业') || 
@@ -135,7 +116,6 @@ app.post('/api/consult-ai-fast', async (req, res) => {
       );
       query = important.join('\n').substring(0, 500);
       
-      // 如果提取后太短，保留前300字符
       if (query.length < 50) {
         query = message.substring(0, 300);
       }
@@ -181,16 +161,15 @@ app.post('/api/recommend-skills', async (req, res) => {
     const { job, education, goal, interest, style } = req.body;
     console.log('🎯 技能推荐:', job);
 
-    // 构建精简的prompt
-    const styleDesc = {
-      'default': '稳扎稳打，注重基础',
-      'cross': '跨界融合，多元发展',
-      'ideal': '创新突破，追求极致',
-      'balanced': '全面均衡，综合成长'
+    // 极简prompt - 只传用户填写的信息
+    const styleMap = {
+      'default': '稳妥',
+      'cross': '跨界',
+      'ideal': '创新',
+      'balanced': '均衡'
     };
-
-    const prompt = `职业：${job}，教育：${education}，目标：${goal}，兴趣：${interest}，风格：${styleDesc[style] || '稳扎稳打'}。
-请推荐8-12项核心技能，只返回技能名称，用逗号分隔，不要其他文字。`;
+    
+    const prompt = `职业:${job},教育:${education},目标:${goal},兴趣:${interest},风格:${styleMap[style]||'稳妥'}。推荐8-12项核心技能，只返回技能名称用逗号分隔`;
 
     const requestData = {
       appId: '202607APmEQJ20464969',
@@ -213,15 +192,12 @@ app.post('/api/recommend-skills', async (req, res) => {
 
     let reply = parseAIResponse(response.data);
     
-    // 解析技能列表
     let skills = [];
     if (reply) {
-      // 尝试提取中文技能
       const matches = reply.match(/[\u4e00-\u9fa5]{2,6}/g);
       if (matches && matches.length > 0) {
         skills = matches.slice(0, 12);
       } else {
-        // 按逗号分割
         skills = reply.split(/[,，、\s]+/).filter(s => {
           const trimmed = s.trim();
           return trimmed.length > 0 && trimmed.length < 15 && !/^[0-9]+$/.test(trimmed);
@@ -230,7 +206,6 @@ app.post('/api/recommend-skills', async (req, res) => {
     }
 
     if (skills.length < 4) {
-      // 如果AI返回的技能太少，使用备选
       skills = getFallbackSkills(job, education, goal, interest, style);
     }
 
@@ -241,7 +216,6 @@ app.post('/api/recommend-skills', async (req, res) => {
 
   } catch (error) {
     console.error('❌ 技能推荐失败:', error.message);
-    // 返回备选技能
     const { job, education, goal, interest, style } = req.body;
     const skills = getFallbackSkills(job, education, goal, interest, style);
     res.json({
@@ -281,41 +255,6 @@ function getFallbackSkills(job, education, goal, interest, style) {
     }
   }
 
-  // 根据兴趣添加技能
-  const interestSkills = [];
-  if (interest) {
-    if (interest.includes('AI') || interest.includes('智能') || interest.includes('数据')) {
-      interestSkills.push('数据分析', 'AI应用');
-    }
-    if (interest.includes('教育') || interest.includes('教学') || interest.includes('学习')) {
-      interestSkills.push('教学能力', '教育技术');
-    }
-    if (interest.includes('管理') || interest.includes('领导')) {
-      interestSkills.push('团队管理', '领导力');
-    }
-    if (interest.includes('编程') || interest.includes('开发')) {
-      interestSkills.push('编程能力', '技术架构');
-    }
-    if (interest.includes('设计') || interest.includes('创新')) {
-      interestSkills.push('创新思维', '设计能力');
-    }
-  }
-
-  // 根据目标添加技能
-  const goalSkills = [];
-  if (goal) {
-    if (goal.includes('管理') || goal.includes('总监') || goal.includes('负责')) {
-      goalSkills.push('战略规划', '团队管理');
-    }
-    if (goal.includes('专家') || goal.includes('研究') || goal.includes('学术')) {
-      goalSkills.push('研究能力', '深度思考');
-    }
-    if (goal.includes('创业') || goal.includes('创始人')) {
-      goalSkills.push('商业思维', '资源整合');
-    }
-  }
-
-  // 根据风格添加技能
   const styleSkills = {
     'cross': ['跨界思维', '资源整合', '创新融合'],
     'ideal': ['创新思维', '自我驱动', '突破常规'],
@@ -323,13 +262,7 @@ function getFallbackSkills(job, education, goal, interest, style) {
     'default': ['基础扎实', '专业深耕', '持续进步']
   };
 
-  const allSkills = [
-    ...baseSkills, 
-    ...interestSkills, 
-    ...goalSkills,
-    ...(styleSkills[style] || styleSkills['default'])
-  ];
-  
+  const allSkills = [...baseSkills, ...(styleSkills[style] || styleSkills['default'])];
   const uniqueSkills = [...new Set(allSkills)].filter(s => s && s.length > 0);
   return uniqueSkills.slice(0, 12);
 }
@@ -446,15 +379,15 @@ app.post('/api/consult-ai-stream', async (req, res) => {
 });
 
 // ============================================
-// 5. 生成成长树接口（极速版 - 优化）
+// 5. 生成成长树接口（极速版 - 只传用户信息）
 // ============================================
 app.post('/api/generate-tree', async (req, res) => {
   try {
     const userInput = req.body;
     console.log('🌳 生成成长树:', userInput.job);
 
-    // 极简prompt - 直接要求JSON
-    const prompt = `职业：${userInput.job}，年限：${userInput.years}年，目标：${userInput.goal}，风格：${userInput.styleLabel || '稳妥晋升'}，兴趣：${userInput.interest}，技能：${(userInput.skills || []).join('、')}。生成${userInput.targetYears || 5}年路径JSON：{"branches":[{"year":1,"icon":"📚","title":"阶段","goals":"目标","skills":["技能"],"milestone":"里程碑"}],"radarData":{"skill":60,"experience":50,"learning":70,"adaptability":55,"leadership":40},"event":{"icon":"⚡","text":"机遇"},"badges":["徽章1","徽章2","徽章3"]}只返回JSON`;
+    // 极简prompt - 只传用户填写的信息，不要任何多余描述
+    const prompt = `职业:${userInput.job},年限:${userInput.years}年,目标:${userInput.goal},风格:${userInput.styleLabel},兴趣:${userInput.interest},技能:${(userInput.skills || []).join(',')}。生成${userInput.targetYears || 5}年职业路径JSON，只返回JSON`;
 
     const requestData = {
       appId: '202607APmEQJ20464969',
@@ -463,7 +396,7 @@ app.post('/api/generate-tree', async (req, res) => {
       stream: false,
     };
 
-    // 缩短超时到30秒
+    // 超时20秒
     const response = await axios.post(
       TBOX_CONFIG.apiUrl,
       requestData,
@@ -472,7 +405,7 @@ app.post('/api/generate-tree', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 30000,
+        timeout: 20000,
       }
     );
 
@@ -494,7 +427,7 @@ app.post('/api/generate-tree', async (req, res) => {
     // 确保数据结构完整
     const finalData = {
       tree: { branches: result.branches || [] },
-      recommendedSkills: result.recommendedSkills || ['AI应用', '数据分析', '项目管理'],
+      recommendedSkills: result.recommendedSkills || [],
       radarData: result.radarData || { skill: 60, experience: 50, learning: 70, adaptability: 55, leadership: 40 },
       event: result.event || { icon: '⚡', text: '抓住机遇，持续成长！' },
       badges: result.badges || ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
@@ -507,7 +440,7 @@ app.post('/api/generate-tree', async (req, res) => {
 
   } catch (error) {
     console.error('❌ 生成树失败:', error.message);
-    // 快速返回默认数据
+    // 返回快速模板
     const defaultData = getFastDefaultTree(req.body);
     res.json({
       success: true,
@@ -522,11 +455,8 @@ app.post('/api/generate-tree', async (req, res) => {
 // ============================================
 function getFastDefaultTree(userInput) {
   const job = userInput.job || '产品经理';
-  const interest = userInput.interest || '职业发展';
   const years = userInput.targetYears || 5;
-  const style = userInput.style || 'default';
   
-  // 职业路径模板
   const templates = {
     '计算机老师': [
       { year: 1, icon: '📚', title: '教学筑基', goals: '掌握教学方法，建立课堂管理', skills: ['教学设计', '课堂管理', '编程教学'], milestone: '完成1轮完整课程' },
@@ -551,7 +481,6 @@ function getFastDefaultTree(userInput) {
     ]
   };
 
-  // 选择匹配的模板
   let template = templates['产品经理'];
   for (const [key, value] of Object.entries(templates)) {
     if (job.includes(key) || key.includes(job)) {
@@ -560,7 +489,6 @@ function getFastDefaultTree(userInput) {
     }
   }
 
-  // 生成分支
   const branches = [];
   for (let i = 0; i < Math.min(years, template.length); i++) {
     const t = template[i];
@@ -572,19 +500,6 @@ function getFastDefaultTree(userInput) {
       skills: t.skills,
       milestone: t.milestone
     });
-  }
-
-  // 根据风格调整
-  const styleMap = {
-    'cross': { title: '跨界·', skills: ['跨界思维', '资源整合'] },
-    'ideal': { title: '卓越·', skills: ['创新突破', '追求极致'] },
-    'balanced': { title: '均衡·', skills: ['综合能力', '全面发展'] },
-    'default': { title: '', skills: [] }
-  };
-
-  const styleConfig = styleMap[style] || styleMap['default'];
-  if (styleConfig.title && branches.length > 0) {
-    branches[0].title = styleConfig.title + branches[0].title;
   }
 
   return {
