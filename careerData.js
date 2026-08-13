@@ -1,8 +1,347 @@
 // ============================================
-// 职业路径生成器（智能版 - 知识图谱+协同过滤+马尔可夫链）
+// 职业数据配置（纯数据，无逻辑）
 // ============================================
 
-const {
+// 职业分类映射
+const JOB_CATEGORY_MAP = {
+  // 学生类
+  '学生': 'student',
+  '大学生': 'student',
+  '研究生': 'student',
+  '本科生': 'student',
+  '专科生': 'student',
+  '高中生': 'student',
+  '初中生': 'student',
+  // 教育类
+  '高中教师': 'education',
+  '初中教师': 'education',
+  '小学教师': 'education',
+  '大学教师': 'education',
+  '幼儿园教师': 'education',
+  '教研员': 'education',
+  '教师': 'education',
+  '老师': 'education',
+  '数学老师': 'education',
+  '语文老师': 'education',
+  '英语老师': 'education',
+  '物理老师': 'education',
+  '化学老师': 'education',
+  '生物老师': 'education',
+  '历史老师': 'education',
+  '地理老师': 'education',
+  '政治老师': 'education',
+  '音乐老师': 'education',
+  '美术老师': 'education',
+  '体育老师': 'education',
+  // 技术类
+  '网络安全工程师': 'technology',
+  '安全工程师': 'technology',
+  '网络安全': 'technology',
+  '安全运维': 'technology',
+  '渗透测试': 'technology',
+  '信息安全': 'technology',
+  '软件工程师': 'technology',
+  '软件开发': 'technology',
+  '开发工程师': 'technology',
+  '后端开发': 'technology',
+  '后端工程师': 'technology',
+  '前端开发': 'technology',
+  '前端工程师': 'technology',
+  '全栈开发': 'technology',
+  '全栈工程师': 'technology',
+  '算法工程师': 'technology',
+  '算法': 'technology',
+  '机器学习': 'technology',
+  'AI工程师': 'technology',
+  '人工智能': 'technology',
+  '数据科学家': 'technology',
+  '数据分析师': 'technology',
+  '大数据': 'technology',
+  '运维开发': 'technology',
+  '运维工程师': 'technology',
+  'DevOps': 'technology',
+  '系统运维': 'technology',
+  '测试工程师': 'technology',
+  '测试开发': 'technology',
+  'QA': 'technology',
+  '程序员': 'technology',
+  '架构师': 'technology',
+  '技术经理': 'technology',
+  '技术总监': 'technology',
+  'CTO': 'technology',
+  // 产品/设计类
+  '产品经理': 'product',
+  '产品助理': 'product',
+  '产品运营': 'product',
+  'UI设计师': 'product',
+  'UI设计': 'product',
+  '交互设计师': 'product',
+  '交互设计': 'product',
+  'UX设计师': 'product',
+  '用户体验': 'product',
+  '设计师': 'product',
+  '视觉设计': 'product',
+  // 医疗类
+  '医生': 'medical',
+  '护士': 'medical',
+  '药师': 'medical',
+  '药剂师': 'medical',
+  '中医': 'medical',
+  '牙医': 'medical',
+  '兽医': 'medical',
+  // 金融类
+  '金融分析师': 'finance',
+  '投资分析师': 'finance',
+  '证券分析师': 'finance',
+  '会计': 'finance',
+  '审计师': 'finance',
+  '审计': 'finance',
+  '财务': 'finance',
+  '理财顾问': 'finance',
+  // 管理类
+  '项目经理': 'management',
+  '项目助理': 'management',
+  '人力资源': 'management',
+  'HR': 'management',
+  '人事': 'management',
+  '运营': 'management',
+  '市场专员': 'management',
+  '市场': 'management',
+  '品牌': 'management',
+  '销售': 'management',
+  '客户经理': 'management',
+  // 其他
+  '建筑设计师': 'other',
+  '建筑师': 'other',
+  '心理咨询师': 'other',
+  '心理': 'other',
+  '律师': 'other',
+  '法律': 'other',
+  '公务员': 'other',
+  '警察': 'other',
+  '军人': 'other'
+};
+
+const ICONS = ['📚', '📝', '💡', '👥', '🏆'];
+
+const SKILLS = {
+  student: {
+    1: ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达'],
+    2: ['研究能力', '数据分析', '实验设计', '学术写作', '团队协作'],
+    3: ['实践能力', '问题解决', '团队协作', '沟通表达', '专业应用'],
+    4: ['学术研究', '论文写作', '学术交流', '创新思维', '批判思考'],
+    5: ['教学能力', '职业素养', '持续学习', '适应能力', '专业发展']
+  },
+  education: {
+    1: ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达'],
+    2: ['课程设计', '教育技术', '评估反馈', '教学研究', '学生指导'],
+    3: ['教育研究', '学术写作', '创新教学', '数据驱动', '教学反思'],
+    4: ['团队管理', '教研引领', '课程体系', '教师培养', '教学管理'],
+    5: ['教育战略', '学术影响', '教育领导力', '课程改革', '教育创新']
+  },
+  technology: {
+    1: ['编程语言', '系统设计', '数据库', '算法基础', '调试测试'],
+    2: ['架构设计', '性能优化', '代码审查', '技术文档', '项目管理'],
+    3: ['全栈开发', 'DevOps', '工程化', '系统架构', '技术选型'],
+    4: ['团队管理', '技术决策', '人才培养', '技术战略', '跨部门协作'],
+    5: ['技术战略', '行业洞察', '技术领导力', '创新管理', '技术布道']
+  },
+  product: {
+    1: ['用户研究', '产品设计', '数据分析', '需求分析', '竞品分析'],
+    2: ['项目管理', '商业分析', '沟通协作', '产品运营', '数据驱动'],
+    3: ['战略规划', '市场洞察', '领导力', '商业模式', '产品创新'],
+    4: ['团队管理', '创新思维', '决策能力', '产品战略', '资源整合'],
+    5: ['产品战略', '行业洞察', '管理领导力', '生态构建', '品牌建设']
+  },
+  medical: {
+    1: ['临床技能', '医患沟通', '医疗记录', '基础医学', '诊断思维'],
+    2: ['专科诊疗', '医学研究', '病例分析', '医疗技术', '循证医学'],
+    3: ['学术写作', '科研设计', '数据分析', '临床研究', '医学创新'],
+    4: ['团队管理', '医疗管理', '人才培养', '质量管理', '医疗决策'],
+    5: ['医疗领导', '学术影响', '技术创新', '医疗战略', '行业引领']
+  },
+  finance: {
+    1: ['财务分析', '投资研究', '数据分析', '金融工具', '市场了解'],
+    2: ['风险管理', '数据建模', '行业分析', '投资策略', '财务建模'],
+    3: ['战略规划', '商业分析', '决策能力', '资产管理', '风险控制'],
+    4: ['团队管理', '研究管理', '人才培养', '投资决策', '客户关系'],
+    5: ['行业洞察', '战略决策', '领导力', '资本运作', '金融创新']
+  },
+  management: {
+    1: ['项目管理', '团队协作', '风险控制', '沟通协调', '计划执行'],
+    2: ['流程优化', '质量管理', '沟通协调', '数据分析', '团队建设'],
+    3: ['战略规划', '商业分析', '领导力', '决策能力', '组织发展'],
+    4: ['团队管理', '决策能力', '人才培养', '变革管理', '资源配置'],
+    5: ['管理领导', '行业洞察', '战略决策', '组织变革', '创新管理']
+  },
+  other: {
+    1: ['专业技能', '持续学习', '团队协作', '沟通表达', '问题解决'],
+    2: ['专业深化', '项目管理', '沟通能力', '专业认证', '实践经验'],
+    3: ['创新思维', '战略规划', '领导力', '专业突破', '行业认知'],
+    4: ['团队管理', '决策能力', '人才培养', '专业引领', '资源整合'],
+    5: ['行业洞察', '战略思维', '领导力', '专业影响', '创新引领']
+  }
+};
+
+const TITLES = {
+  student: ['学业筑基', '科研探索', '实践积累', '学术产出', '职业启航'],
+  education: ['教学入门', '方法优化', '教育研究', '团队引领', '成为专家'],
+  technology: ['技术筑基', '架构设计', '全栈拓展', '技术引领', '成为专家'],
+  product: ['产品筑基', '数据驱动', '商业思维', '团队领导', '成为专家'],
+  medical: ['临床入门', '专业精进', '科研起步', '团队协作', '成为专家'],
+  finance: ['分析入门', '投资研究', '策略制定', '团队引领', '成为专家'],
+  management: ['管理入门', '流程优化', '战略思维', '团队引领', '成为专家'],
+  other: ['专业入门', '技能提升', '深化突破', '团队引领', '成为专家']
+};
+
+const MILESTONES = {
+  student: ['GPA达到3.5以上', '完成科研项目', '完成实习经历', '发表学术论文', '获得理想offer'],
+  education: ['完成教学考核', '发表教学论文', '形成教学风格', '指导青年教师', '成为骨干教师'],
+  technology: ['完成项目开发', '完成架构设计', '完成全栈项目', '带领技术团队', '成为技术专家'],
+  product: ['完成PRD', '上线功能', '完成战略汇报', '团队交付项目', '行业分享'],
+  medical: ['通过规培考核', '独立完成诊疗', '发表医学论文', '带领医疗团队', '晋升主治医师'],
+  finance: ['完成分析报告', '完成研究报告', '制定投资策略', '带领分析团队', '晋升高级分析师'],
+  management: ['完成项目管理', '优化管理流程', '完成战略项目', '带领管理团队', '晋升管理层'],
+  other: ['通过考核认证', '完成专业项目', '形成个人风格', '带领团队', '成为领域专家']
+};
+
+const RADAR_BASE = {
+  student: { skill: 45, experience: 25, learning: 85, adaptability: 55, leadership: 30 },
+  education: { skill: 70, experience: 60, learning: 75, adaptability: 55, leadership: 45 },
+  technology: { skill: 75, experience: 55, learning: 70, adaptability: 60, leadership: 45 },
+  product: { skill: 70, experience: 60, learning: 65, adaptability: 70, leadership: 55 },
+  medical: { skill: 75, experience: 60, learning: 70, adaptability: 55, leadership: 45 },
+  finance: { skill: 75, experience: 55, learning: 70, adaptability: 65, leadership: 45 },
+  management: { skill: 65, experience: 55, learning: 65, adaptability: 70, leadership: 60 },
+  other: { skill: 60, experience: 50, learning: 65, adaptability: 60, leadership: 40 }
+};
+
+const CHALLENGES = {
+  student: '从校园到职场的身份转变是最大挑战，需要在理论学习与实践应用之间找到平衡',
+  education: '面临教学创新与科研突破的双重挑战，需要在传统教学与新技术应用之间找到平衡点',
+  technology: '技术迭代极快，需要持续学习新技术，同时关注商业价值与技术实现的平衡',
+  product: '需要在用户体验与商业价值之间找到平衡，同时应对市场竞争的挑战',
+  medical: '医疗工作责任重大，需要持续更新医学知识，同时在繁忙工作中保持学习',
+  finance: '市场波动大，需要在风险与收益之间找到平衡，同时保持理性判断',
+  management: '管理需要在时间、成本、质量之间找到平衡，同时应对各种突发情况',
+  other: '需要在专业深耕与跨界拓展之间找到平衡，持续提升核心竞争力'
+};
+
+const BADGES = {
+  student: ['🎯 学习达人', '🔬 科研新秀', '🚀 未来之星'],
+  education: ['📖 教学能手', '🔬 科研新秀', '🌟 教育先锋'],
+  technology: ['💻 技术能手', '📊 架构师', '🚀 技术先锋'],
+  product: ['📱 产品思维', '📊 数据驱动', '🚀 增长黑客'],
+  medical: ['🏥 白衣天使', '🔬 科研能手', '🏆 科室骨干'],
+  finance: ['📊 金融能手', '📈 投资专家', '🏆 行业精英'],
+  management: ['📋 管理能手', '📊 流程专家', '🏆 管理精英'],
+  other: ['🌟 专业能手', '🎯 目标达人', '🏆 行业新星']
+};
+
+const STYLE_PREFIX = {
+  '跨界融合': '跨界·',
+  '理想主义': '卓越·',
+  '均衡发展': '均衡·',
+  '稳妥晋升': ''
+};
+
+const INTEREST_SKILLS = {
+  'AI': ['AI应用', '机器学习', '深度学习'],
+  '教育': ['教育技术', '课程设计', '教学设计'],
+  '管理': ['团队管理', '组织发展', '领导力'],
+  '创新': ['创新思维', '设计思维', '创意表达'],
+  '数据': ['数据分析', '数据建模', '数据可视化'],
+  '编程': ['编程能力', '算法思维', '代码质量'],
+  '数学': ['数学思维', '逻辑分析', '解题能力'],
+  '语文': ['阅读理解', '写作表达', '文学素养'],
+  '英语': ['英语教学', '跨文化沟通', '英语流利'],
+  '安全': ['网络安全', '渗透测试', '安全防护', '漏洞挖掘'],
+  '网络': ['网络协议', 'TCP/IP', '路由交换', '网络架构'],
+  '运维': ['Linux', '自动化运维', '监控告警', '容器技术']
+};
+
+const INTEREST_BADGES = {
+  'AI': ['🤖 AI探索者'],
+  '教育': ['📚 教育创新者'],
+  '管理': ['👥 团队领袖'],
+  '创新': ['💡 创新先锋'],
+  '数据': ['📊 数据达人'],
+  '数学': ['🔢 数学达人'],
+  '语文': ['📝 文字大师'],
+  '英语': ['🌍 国际视野'],
+  '安全': ['🔒 安全卫士'],
+  '网络': ['🌐 网络专家'],
+  '运维': ['⚙️ 运维大师']
+};
+
+// ============================================
+// 知识图谱（新增）
+// ============================================
+const KNOWLEDGE_GRAPH = {
+  // 职业节点
+  nodes: {
+    '学生': { category: 'student', level: 0 },
+    '初级工程师': { category: 'technology', level: 1 },
+    '中级工程师': { category: 'technology', level: 2 },
+    '高级工程师': { category: 'technology', level: 3 },
+    '架构师': { category: 'technology', level: 4 },
+    '技术总监': { category: 'technology', level: 5 },
+    '产品经理': { category: 'product', level: 3 },
+    '产品总监': { category: 'product', level: 5 },
+    '高中教师': { category: 'education', level: 3 },
+    '特级教师': { category: 'education', level: 5 },
+    '网络安全工程师': { category: 'technology', level: 2 },
+    '安全专家': { category: 'technology', level: 4 },
+    '安全总监': { category: 'technology', level: 5 }
+  },
+  // 职业关系
+  edges: {
+    '学生': ['初级工程师', '产品经理', '高中教师', '网络安全工程师'],
+    '初级工程师': ['中级工程师', '高级工程师'],
+    '中级工程师': ['高级工程师', '架构师', '网络安全工程师'],
+    '高级工程师': ['架构师', '技术总监', '安全专家'],
+    '架构师': ['技术总监'],
+    '网络安全工程师': ['安全专家', '高级工程师'],
+    '安全专家': ['安全总监', '技术总监'],
+    '安全总监': ['技术总监'],
+    '产品经理': ['产品总监', '高级工程师'],
+    '产品总监': ['技术总监'],
+    '高中教师': ['特级教师', '教研员'],
+    '特级教师': ['教育专家']
+  },
+  // 技能映射
+  skills: {
+    '初级工程师': ['编程', '调试', '版本控制'],
+    '中级工程师': ['系统设计', '性能优化', '代码审查'],
+    '高级工程师': ['架构设计', '技术决策', '团队指导'],
+    '架构师': ['系统架构', '技术战略', '跨部门协作'],
+    '技术总监': ['技术战略', '团队管理', '行业洞察'],
+    '网络安全工程师': ['网络安全', '渗透测试', '安全防护'],
+    '安全专家': ['安全架构', '风险评估', '安全策略'],
+    '安全总监': ['安全战略', '团队管理', '合规审计'],
+    '产品经理': ['用户研究', '产品设计', '数据分析'],
+    '产品总监': ['产品战略', '团队管理', '市场洞察'],
+    '高中教师': ['教学设计', '课堂管理', '学科知识'],
+    '特级教师': ['教学领导', '教育研究', '课程开发']
+  },
+  // 里程碑映射
+  milestones: {
+    '初级工程师': '完成第一个项目',
+    '中级工程师': '独立负责模块',
+    '高级工程师': '主导技术方案',
+    '架构师': '完成系统重构',
+    '技术总监': '打造技术团队',
+    '网络安全工程师': '完成安全项目',
+    '安全专家': '搭建安全体系',
+    '安全总监': '建立安全团队',
+    '产品经理': '完成产品上线',
+    '产品总监': '打造产品生态',
+    '高中教师': '完成教学考核',
+    '特级教师': '成为学科带头人'
+  }
+};
+
+module.exports = {
   JOB_CATEGORY_MAP,
   ICONS,
   SKILLS,
@@ -15,353 +354,4 @@ const {
   INTEREST_SKILLS,
   INTEREST_BADGES,
   KNOWLEDGE_GRAPH
-} = require('./careerData.js');
-
-// ============================================
-// 协同过滤缓存
-// ============================================
-const userPathCache = {};
-
-// ============================================
-// 第1层：知识图谱查询（秒开）
-// ============================================
-function queryKnowledgeGraph(job, goal) {
-  if (!KNOWLEDGE_GRAPH.nodes[job]) return null;
-  
-  const edges = KNOWLEDGE_GRAPH.edges[job] || [];
-  
-  // 直接路径
-  if (edges.includes(goal)) {
-    return {
-      source: 'knowledge_graph',
-      path: [job, goal],
-      skills: KNOWLEDGE_GRAPH.skills[goal] || [],
-      milestone: KNOWLEDGE_GRAPH.milestones[goal] || ''
-    };
-  }
-  
-  // 间接路径（A→B→C）
-  for (const mid of edges) {
-    const midEdges = KNOWLEDGE_GRAPH.edges[mid] || [];
-    if (midEdges.includes(goal)) {
-      return {
-        source: 'knowledge_graph',
-        path: [job, mid, goal],
-        skills: KNOWLEDGE_GRAPH.skills[mid] || [],
-        milestone: KNOWLEDGE_GRAPH.milestones[mid] || ''
-      };
-    }
-  }
-  
-  return null;
-}
-
-// ============================================
-// 第2层：协同过滤查询（1-2秒）
-// ============================================
-function queryCollaborativeFilter(job, goal) {
-  const key = `${job}_${goal}`;
-  if (!userPathCache[key] || userPathCache[key].length === 0) return null;
-  
-  const entries = userPathCache[key];
-  const pathCount = {};
-  for (const entry of entries) {
-    const pathKey = entry.path.join('→');
-    pathCount[pathKey] = (pathCount[pathKey] || 0) + 1;
-  }
-  
-  let maxCount = 0;
-  let bestPath = null;
-  for (const [pathKey, count] of Object.entries(pathCount)) {
-    if (count > maxCount) {
-      maxCount = count;
-      bestPath = pathKey.split('→');
-    }
-  }
-  
-  if (bestPath) {
-    return {
-      source: 'collaborative_filter',
-      path: bestPath,
-      confidence: maxCount / entries.length
-    };
-  }
-  return null;
-}
-
-// ============================================
-// 第3层：马尔可夫链预测
-// ============================================
-function buildMarkovChain(branches) {
-  const chain = {};
-  for (let i = 0; i < branches.length - 1; i++) {
-    const current = branches[i].title;
-    const next = branches[i + 1].title;
-    if (!chain[current]) chain[current] = {};
-    chain[current][next] = (chain[current][next] || 0) + 1;
-  }
-  for (const [state, transitions] of Object.entries(chain)) {
-    const total = Object.values(transitions).reduce((a, b) => a + b, 0);
-    for (const [next, count] of Object.entries(transitions)) {
-      transitions[next] = count / total;
-    }
-  }
-  return chain;
-}
-
-function predictNextStep(chain, currentState) {
-  if (!chain[currentState]) return null;
-  const transitions = chain[currentState];
-  let maxProb = 0;
-  let nextState = null;
-  for (const [state, prob] of Object.entries(transitions)) {
-    if (prob > maxProb) {
-      maxProb = prob;
-      nextState = state;
-    }
-  }
-  return { nextState, probability: maxProb };
-}
-
-// ============================================
-// 第4层：蒙特卡洛验证（质量兜底）
-// ============================================
-function monteCarloValidate(path, iterations = 100) {
-  let successCount = 0;
-  for (let i = 0; i < iterations; i++) {
-    successCount += Math.random() > 0.1 ? 1 : 0;
-  }
-  return successCount / iterations;
-}
-
-// ============================================
-// 获取分类
-// ============================================
-function getCategory(job) {
-  if (!job) return 'other';
-  for (const [key, value] of Object.entries(JOB_CATEGORY_MAP)) {
-    if (job.includes(key) || key.includes(job)) return value;
-  }
-  // 关键词兜底
-  if (job.includes('安全') || job.includes('网络')) return 'technology';
-  if (job.includes('学生')) return 'student';
-  if (job.includes('教师') || job.includes('老师')) return 'education';
-  if (job.includes('产品')) return 'product';
-  if (job.includes('医生') || job.includes('护士')) return 'medical';
-  if (job.includes('金融') || job.includes('会计')) return 'finance';
-  if (job.includes('管理') || job.includes('运营')) return 'management';
-  return 'other';
-}
-
-// ============================================
-// 辅助函数
-// ============================================
-function getSkills(category, year, interest) {
-  const yearSkills = SKILLS[category]?.[year] || SKILLS.other?.[year] || SKILLS.other[1];
-  let extraSkills = [];
-  for (const [key, value] of Object.entries(INTEREST_SKILLS)) {
-    if (interest && interest.includes(key)) {
-      extraSkills = value;
-      break;
-    }
-  }
-  return [...yearSkills, ...extraSkills].slice(0, 5);
-}
-
-function getTitle(category, year, style) {
-  const titles = TITLES[category] || TITLES.other;
-  const title = titles[year - 1] || `第${year}年`;
-  return (STYLE_PREFIX[style] || '') + title;
-}
-
-function getMilestone(category, year) {
-  const milestones = MILESTONES[category] || MILESTONES.other;
-  return milestones[year - 1] || `第${year}年里程碑`;
-}
-
-function getRadarData(category, years, skillsCount, style) {
-  const base = RADAR_BASE[category] || RADAR_BASE.other;
-  const experienceBonus = Math.min(10, years * 2);
-  const skillBonus = Math.min(10, skillsCount);
-  const styleBonus = {
-    '跨界融合': { adaptability: 10 },
-    '理想主义': { learning: 10 },
-    '均衡发展': { leadership: 5 },
-    '稳妥晋升': { experience: 5 }
-  };
-  const bonus = styleBonus[style] || {};
-  return {
-    skill: Math.min(100, base.skill + skillBonus),
-    experience: Math.min(100, base.experience + experienceBonus + (bonus.experience || 0)),
-    learning: Math.min(100, base.learning + (bonus.learning || 0)),
-    adaptability: Math.min(100, base.adaptability + (bonus.adaptability || 0)),
-    leadership: Math.min(100, base.leadership + (bonus.leadership || 0) + Math.floor(years / 2))
-  };
-}
-
-function getChallenge(category, job, skillsCount) {
-  let text = CHALLENGES[category] || CHALLENGES.other;
-  if (category === 'student') {
-    text = `从"${job || '学生'}"到"职场人"的转变是最大挑战，需要在理论学习与实践应用之间找到平衡`;
-  } else {
-    text = `作为${job || '职场人'}，` + text;
-  }
-  if (skillsCount > 8) text += '，已有较强技能基础，可向更高层次突破';
-  else if (skillsCount < 4) text += '，需要先夯实基础技能，再寻求突破';
-  return text;
-}
-
-function getBadges(category, style, interest) {
-  const baseBadges = BADGES[category] || BADGES.other;
-  let extraBadges = [];
-  for (const [key, value] of Object.entries(INTEREST_BADGES)) {
-    if (interest && interest.includes(key)) {
-      extraBadges = value;
-      break;
-    }
-  }
-  const styleBadge = {
-    '跨界融合': '🌉 跨界先锋',
-    '理想主义': '✨ 理想主义者',
-    '均衡发展': '⚖️ 均衡大师',
-    '稳妥晋升': '🌱 稳扎稳打'
-  };
-  return [
-    ...baseBadges.slice(0, 2),
-    ...extraBadges,
-    styleBadge[style] || '🏆 成长之星'
-  ].slice(0, 3);
-}
-
-// ============================================
-// 从路径构建树
-// ============================================
-function buildTreeFromPath(pathResult, userInput) {
-  const { job, years, targetYears, interest, style, skills: userSkills } = userInput;
-  const path = pathResult.path;
-  const maxYears = Math.min(targetYears, 5);
-  
-  const branches = [];
-  for (let i = 0; i < Math.min(maxYears, path.length); i++) {
-    const node = path[i];
-    const title = i === 0 ? `${job}→${node}` : node;
-    const prefix = STYLE_PREFIX[style] || '';
-    branches.push({
-      year: i + 1,
-      icon: ICONS[i] || '📌',
-      title: prefix + title,
-      goals: `${title} · ${interest || '职业发展'}`,
-      skills: KNOWLEDGE_GRAPH.skills[node] || ['专业技能', '持续学习'],
-      milestone: KNOWLEDGE_GRAPH.milestones[node] || `第${i+1}年里程碑`
-    });
-  }
-  
-  while (branches.length < maxYears) {
-    const i = branches.length;
-    branches.push({
-      year: i + 1,
-      icon: ICONS[i] || '📌',
-      title: '持续成长',
-      goals: `持续成长 · ${interest || '职业发展'}`,
-      skills: ['持续学习', '专业深化'],
-      milestone: `第${i+1}年里程碑`
-    });
-  }
-  
-  const category = getCategory(job);
-  return {
-    tree: { branches },
-    recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-    radarData: getRadarData(category, years, userSkills.length, style),
-    challenges: { icon: '⚡', text: getChallenge(category, job, userSkills.length) },
-    badges: getBadges(category, style, interest),
-    _source: pathResult.source || 'knowledge_graph'
-  };
-}
-
-// ============================================
-// 构建模板树
-// ============================================
-function buildTemplateTree(userInput) {
-  const { job, years, targetYears, interest, style, skills: userSkills } = userInput;
-  const category = getCategory(job);
-  const maxYears = Math.min(targetYears, 5);
-  
-  const branches = [];
-  for (let i = 1; i <= maxYears; i++) {
-    const title = getTitle(category, i, style);
-    branches.push({
-      year: i,
-      icon: ICONS[i - 1] || '📌',
-      title: title,
-      goals: `${title} · ${interest || '职业发展'}`,
-      skills: getSkills(category, i, interest),
-      milestone: getMilestone(category, i)
-    });
-  }
-  
-  // 添加马尔可夫预测
-  const chain = buildMarkovChain(branches);
-  const lastTitle = branches.length > 0 ? branches[branches.length - 1].title : '';
-  const prediction = predictNextStep(chain, lastTitle);
-  
-  return {
-    tree: { branches },
-    recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-    radarData: getRadarData(category, years, userSkills.length, style),
-    challenges: { icon: '⚡', text: getChallenge(category, job, userSkills.length) },
-    badges: getBadges(category, style, interest),
-    _source: 'template',
-    _prediction: prediction
-  };
-}
-
-// ============================================
-// 主入口：生成完整成长树（智能版）
-// ============================================
-function generateCareerTree(userInput) {
-  const { job = '产品经理', goal = '' } = userInput;
-  
-  console.log('🔍 [生成树] job:', job, 'goal:', goal);
-  
-  // ===== 第1层：知识图谱 =====
-  const graphResult = queryKnowledgeGraph(job, goal);
-  if (graphResult) {
-    console.log('✅ 命中知识图谱:', graphResult.path.join('→'));
-    return buildTreeFromPath(graphResult, userInput);
-  }
-  
-  // ===== 第2层：协同过滤 =====
-  const cfResult = queryCollaborativeFilter(job, goal);
-  if (cfResult && cfResult.confidence > 0.5) {
-    console.log('✅ 命中协同过滤:', cfResult.path.join('→'), '置信度:', cfResult.confidence);
-    return buildTreeFromPath(cfResult, userInput);
-  }
-  
-  // ===== 第3层：模板数据（秒开兜底） =====
-  console.log('📋 使用模板数据');
-  const templateData = buildTemplateTree(userInput);
-  
-  // 记录到协同过滤缓存
-  const key = `${job}_${goal}`;
-  if (!userPathCache[key]) userPathCache[key] = [];
-  userPathCache[key].push({
-    path: templateData.tree.branches.map(b => b.title),
-    timestamp: Date.now()
-  });
-  // 只保留最近100条
-  if (userPathCache[key].length > 100) {
-    userPathCache[key] = userPathCache[key].slice(-100);
-  }
-  
-  return templateData;
-}
-
-module.exports = {
-  generateCareerTree,
-  queryKnowledgeGraph,
-  queryCollaborativeFilter,
-  buildMarkovChain,
-  predictNextStep,
-  monteCarloValidate
 };
