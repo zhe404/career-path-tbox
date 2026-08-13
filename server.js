@@ -83,7 +83,7 @@ app.post('/api/consult-ai', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 600000,
+        timeout: 60000,
       }
     );
 
@@ -141,7 +141,7 @@ app.post('/api/consult-ai-fast', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 250000,
+        timeout: 30000,
       }
     );
 
@@ -190,7 +190,7 @@ app.post('/api/recommend-skills', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 150000,
+        timeout: 20000,
       }
     );
 
@@ -235,16 +235,13 @@ app.post('/api/generate-tree', async (req, res) => {
     const userInput = req.body;
     console.log('🌳 生成成长树:', userInput.job);
 
-    // 1. 智能生成（知识图谱/协同过滤/模板）
     const templateData = generateCareerTree(userInput);
     templateData._isTemplate = true;
     templateData._status = 'AI优化中';
 
-    // 生成sessionId
     const sessionId = 'tree_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
     templateData._sessionId = sessionId;
     
-    // 存储到缓存
     treeCache.set(sessionId, {
       data: templateData,
       userInput: userInput,
@@ -252,7 +249,6 @@ app.post('/api/generate-tree', async (req, res) => {
       timestamp: Date.now()
     });
 
-    // 2. 立即返回（<1秒）
     res.json({
       success: true,
       data: templateData,
@@ -261,18 +257,13 @@ app.post('/api/generate-tree', async (req, res) => {
       source: templateData._source || 'template'
     });
 
-    // 3. 后台异步调用百宝箱API优化
+    // 后台异步调用百宝箱API优化（精简prompt）
     setTimeout(async () => {
       try {
         console.log('🔄 后台AI优化开始... sessionId:', sessionId);
         
-        const prompt = `职业:${userInput.job},${userInput.years}年,目标:${userInput.goal},风格:${userInput.styleLabel},兴趣:${userInput.interest},技能:${(userInput.skills || []).join(',')}。
-生成${userInput.targetYears || 5}年职业路径JSON:
-{"branches":[{"year":1,"icon":"📚","title":"阶段名","goals":"具体目标","skills":["技能"],"milestone":"里程碑"}],
-"radarData":{"skill":0-100,"experience":0-100,"learning":0-100,"adaptability":0-100,"leadership":0-100},
-"challenges":{"icon":"⚡","text":"基于用户背景的挑战与机遇，用'可能面临'、'需要应对'等措辞"},
-"badges":["徽章1","徽章2","徽章3"]}
-只返回JSON`;
+        // 🔥 精简 prompt - 和测试时一样简洁
+        const prompt = `${userInput.job},${userInput.years}年,目标:${userInput.goal},风格:${userInput.styleLabel},兴趣:${userInput.interest}`;
 
         const requestData = {
           appId: '202607APmEQJ20464969',
@@ -289,7 +280,7 @@ app.post('/api/generate-tree', async (req, res) => {
               'Content-Type': 'application/json',
               'Authorization': TBOX_CONFIG.apiKey,
             },
-            timeout: 300000,
+            timeout: 30000,
           }
         );
 
@@ -322,7 +313,7 @@ app.post('/api/generate-tree', async (req, res) => {
           }
         }
       } catch (aiError) {
-        console.log('⏱️ 后台AI优化失败:', aiError.message);
+        console.log('⏱️ 后台AI优化失败:', aiError.response?.data || aiError.message);
       }
     }, 100);
 
