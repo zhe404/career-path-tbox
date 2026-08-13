@@ -83,7 +83,7 @@ app.post('/api/consult-ai', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 600000,
+        timeout: 60000,
       }
     );
 
@@ -141,7 +141,7 @@ app.post('/api/consult-ai-fast', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 250000,
+        timeout: 25000,
       }
     );
 
@@ -190,7 +190,7 @@ app.post('/api/recommend-skills', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 150000,
+        timeout: 15000,
       }
     );
 
@@ -228,14 +228,14 @@ app.post('/api/recommend-skills', async (req, res) => {
 });
 
 // ============================================
-// 4. 生成成长树接口（秒开版 + 百宝箱API）
+// 4. 生成成长树接口（智能版）
 // ============================================
 app.post('/api/generate-tree', async (req, res) => {
   try {
     const userInput = req.body;
     console.log('🌳 生成成长树:', userInput.job);
 
-    // 1. 配置驱动生成模板（<1ms，不调API）
+    // 1. 智能生成（知识图谱/协同过滤/模板）
     const templateData = generateCareerTree(userInput);
     templateData._isTemplate = true;
     templateData._status = 'AI优化中';
@@ -252,15 +252,16 @@ app.post('/api/generate-tree', async (req, res) => {
       timestamp: Date.now()
     });
 
-    // 2. 立即返回模板（<1秒）
+    // 2. 立即返回（<1秒）
     res.json({
       success: true,
       data: templateData,
       template: true,
-      sessionId: sessionId
+      sessionId: sessionId,
+      source: templateData._source || 'template'
     });
 
-    // 3. 后台异步调用百宝箱API
+    // 3. 后台异步调用百宝箱API优化
     setTimeout(async () => {
       try {
         console.log('🔄 后台AI优化开始... sessionId:', sessionId);
@@ -359,11 +360,13 @@ app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
         optimized: true
       });
     } else {
+      const elapsed = Date.now() - cached.timestamp;
+      const remaining = Math.max(0, Math.ceil((15000 - elapsed) / 1000));
       return res.json({
         success: true,
         data: cached.data,
         optimized: false,
-        message: 'AI仍在优化中，请稍后再试'
+        message: remaining > 0 ? `⏳ AI优化中（约${remaining}秒）` : '⏳ AI优化中，请稍后重试'
       });
     }
     
@@ -407,7 +410,7 @@ app.use(express.static(path.join(__dirname, '/')));
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(55));
-  console.log('🚀 服务已启动');
+  console.log('🚀 服务已启动 (智能版)');
   console.log(`📡 端口: ${PORT}`);
   console.log(`🌐 访问: http://localhost:${PORT}`);
   console.log('='.repeat(55));
