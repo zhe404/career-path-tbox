@@ -156,7 +156,7 @@ app.post('/api/consult-ai-fast', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 25000, // 25秒超时
+        timeout: 25000,
       }
     );
 
@@ -174,7 +174,7 @@ app.post('/api/consult-ai-fast', async (req, res) => {
 });
 
 // ============================================
-// 3. 技能推荐接口（新增 - 极速版）
+// 3. 技能推荐接口（极速版）
 // ============================================
 app.post('/api/recommend-skills', async (req, res) => {
   try {
@@ -207,7 +207,7 @@ app.post('/api/recommend-skills', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 15000, // 15秒超时（技能推荐应该更快）
+        timeout: 15000,
       }
     );
 
@@ -446,58 +446,15 @@ app.post('/api/consult-ai-stream', async (req, res) => {
 });
 
 // ============================================
-// 5. 生成成长树接口（优化版）
+// 5. 生成成长树接口（极速版 - 优化）
 // ============================================
 app.post('/api/generate-tree', async (req, res) => {
   try {
     const userInput = req.body;
     console.log('🌳 生成成长树:', userInput.job);
 
-    const styleDesc = {
-      'default': '稳扎稳打，按部就班，注重基础技能的扎实掌握和稳步晋升',
-      'cross': '跨界融合，破圈成长，注重多元化技能和跨领域能力，打破职业边界',
-      'ideal': '追随热爱，追求极致，注重创新能力和理想追求，不拘一格',
-      'balanced': '全面开花，综合成长，注重各方面均衡发展，兼顾广度与深度'
-    };
-
-    const prompt = `你是一位顶级的职业规划专家。请根据以下用户信息，生成一份个性化的职业成长树路径。
-
-用户信息：
-- 姓名：${userInput.name}
-- 当前职业：${userInput.job}
-- 工作年限：${userInput.years}年
-- 教育背景：${userInput.education}
-- 职业目标（5年后）：${userInput.goal}
-- 职业兴趣：${userInput.interest}
-- 已有技能：${(userInput.skills || []).join('、')}
-- 规划周期：${userInput.targetYears || 5}年
-- 路径风格：${userInput.styleLabel || '稳妥晋升'} - ${styleDesc[userInput.style] || '稳扎稳打'}
-
-请生成一份${userInput.targetYears || 5}年的职业发展路径，以树形结构展示。
-
-要求：
-1. 每个阶段包含：年份、阶段标题（有创意）、阶段目标（具体可执行）、核心技能（3-5个）、里程碑事件
-2. 根据用户的职业兴趣，将兴趣融入到每个阶段的描述中
-3. 路径风格必须体现在每个阶段的标题、目标和技能中
-4. 推荐3-5个用户应该学习的新技能
-5. 生成5个维度的能力评估值（专业技能、工作经验、学习能力、适应能力、领导力），范围0-100
-6. 生成一个"意外事件"（一个职业机遇或挑战）
-7. 生成3个成就徽章
-
-输出格式为 JSON，结构如下：
-{
-  "tree": {
-    "branches": [
-      {"year": 1, "icon": "📚", "title": "阶段标题", "goals": "阶段目标", "skills": ["技能1", "技能2"], "milestone": "里程碑"}
-    ]
-  },
-  "recommendedSkills": ["推荐技能1", "推荐技能2"],
-  "radarData": {"skill": 60, "experience": 50, "learning": 70, "adaptability": 55, "leadership": 40},
-  "event": {"icon": "⚡", "text": "机遇描述"},
-  "badges": ["徽章1", "徽章2", "徽章3"]
-}
-
-只返回JSON，不要其他文字。`;
+    // 极简prompt - 直接要求JSON
+    const prompt = `职业：${userInput.job}，年限：${userInput.years}年，目标：${userInput.goal}，风格：${userInput.styleLabel || '稳妥晋升'}，兴趣：${userInput.interest}，技能：${(userInput.skills || []).join('、')}。生成${userInput.targetYears || 5}年路径JSON：{"branches":[{"year":1,"icon":"📚","title":"阶段","goals":"目标","skills":["技能"],"milestone":"里程碑"}],"radarData":{"skill":60,"experience":50,"learning":70,"adaptability":55,"leadership":40},"event":{"icon":"⚡","text":"机遇"},"badges":["徽章1","徽章2","徽章3"]}只返回JSON`;
 
     const requestData = {
       appId: '202607APmEQJ20464969',
@@ -506,6 +463,7 @@ app.post('/api/generate-tree', async (req, res) => {
       stream: false,
     };
 
+    // 缩短超时到30秒
     const response = await axios.post(
       TBOX_CONFIG.apiUrl,
       requestData,
@@ -514,7 +472,7 @@ app.post('/api/generate-tree', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 90000,
+        timeout: 30000,
       }
     );
 
@@ -533,19 +491,110 @@ app.post('/api/generate-tree', async (req, res) => {
       result = JSON.parse(reply);
     }
 
+    // 确保数据结构完整
+    const finalData = {
+      tree: { branches: result.branches || [] },
+      recommendedSkills: result.recommendedSkills || ['AI应用', '数据分析', '项目管理'],
+      radarData: result.radarData || { skill: 60, experience: 50, learning: 70, adaptability: 55, leadership: 40 },
+      event: result.event || { icon: '⚡', text: '抓住机遇，持续成长！' },
+      badges: result.badges || ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
+    };
+
     res.json({
       success: true,
-      data: result
+      data: finalData
     });
 
   } catch (error) {
     console.error('❌ 生成树失败:', error.message);
+    // 快速返回默认数据
+    const defaultData = getFastDefaultTree(req.body);
     res.json({
-      success: false,
-      error: error.message || 'AI生成失败，请重试'
+      success: true,
+      data: defaultData,
+      fallback: true
     });
   }
 });
+
+// ============================================
+// 快速默认树（不依赖AI，秒返回）
+// ============================================
+function getFastDefaultTree(userInput) {
+  const job = userInput.job || '产品经理';
+  const interest = userInput.interest || '职业发展';
+  const years = userInput.targetYears || 5;
+  const style = userInput.style || 'default';
+  
+  // 职业路径模板
+  const templates = {
+    '计算机老师': [
+      { year: 1, icon: '📚', title: '教学筑基', goals: '掌握教学方法，建立课堂管理', skills: ['教学设计', '课堂管理', '编程教学'], milestone: '完成1轮完整课程' },
+      { year: 2, icon: '💻', title: '技术融合', goals: '编程技术与教学深度融合', skills: ['教育技术', '在线教学', '课程开发'], milestone: '开发1门在线课程' },
+      { year: 3, icon: '📊', title: '教学研究', goals: '开展教学研究，形成个人特色', skills: ['教育研究', '学术写作', '数据驱动'], milestone: '完成1篇研究论文' },
+      { year: 4, icon: '👥', title: '团队引领', goals: '带领学科团队，推动课程改革', skills: ['团队管理', '学科建设', '教学管理'], milestone: '完成1个教改项目' },
+      { year: 5, icon: '🏆', title: '学科带头人', goals: '成为学科带头人，推动教育创新', skills: ['学科引领', '教育战略', '行业影响'], milestone: '完成1次学术报告' }
+    ],
+    '产品经理': [
+      { year: 1, icon: '📚', title: '产品筑基', goals: '深入用户研究，建立产品思维', skills: ['用户研究', '产品设计', '数据分析'], milestone: '完成1个完整PRD' },
+      { year: 2, icon: '📊', title: '数据驱动', goals: '数据驱动决策，独立负责产品线', skills: ['数据分析', '项目管理', '沟通协作'], milestone: '上线1个独立功能' },
+      { year: 3, icon: '💡', title: '商业思维', goals: '理解商业模式，制定产品路线图', skills: ['商业分析', '战略规划', '领导力'], milestone: '完成1次战略汇报' },
+      { year: 4, icon: '👥', title: '团队领导', goals: '带领团队，培养跨部门协作', skills: ['团队管理', '创新思维', '市场洞察'], milestone: '团队成功交付项目' },
+      { year: 5, icon: '🏆', title: '产品总监', goals: '构建产品生态，输出方法论', skills: ['产品战略', '行业洞察', '技术管理'], milestone: '完成1次行业分享' }
+    ],
+    '教师': [
+      { year: 1, icon: '📚', title: '教学入门', goals: '掌握教学基本功，建立课堂秩序', skills: ['教学设计', '课堂管理', '教育心理学'], milestone: '完成1轮完整课程' },
+      { year: 2, icon: '📝', title: '教学精进', goals: '优化教学方法，设计创新课程', skills: ['课程设计', '教育技术', '评估反馈'], milestone: '开发1门新课程' },
+      { year: 3, icon: '💡', title: '教育研究', goals: '开展教学研究，形成个人风格', skills: ['教育研究', '创新教学', '教育技术'], milestone: '发表1篇教学论文' },
+      { year: 4, icon: '👥', title: '教研引领', goals: '带领教研团队，培养青年教师', skills: ['教研管理', '团队领导', '课程体系'], milestone: '指导1位青年教师' },
+      { year: 5, icon: '🏆', title: '教育专家', goals: '成为区域教育专家，引领教育改革', skills: ['教育战略', '课程体系', '教育领导力'], milestone: '完成1次区域讲座' }
+    ]
+  };
+
+  // 选择匹配的模板
+  let template = templates['产品经理'];
+  for (const [key, value] of Object.entries(templates)) {
+    if (job.includes(key) || key.includes(job)) {
+      template = value;
+      break;
+    }
+  }
+
+  // 生成分支
+  const branches = [];
+  for (let i = 0; i < Math.min(years, template.length); i++) {
+    const t = template[i];
+    branches.push({
+      year: t.year,
+      icon: t.icon,
+      title: t.title,
+      goals: t.goals,
+      skills: t.skills,
+      milestone: t.milestone
+    });
+  }
+
+  // 根据风格调整
+  const styleMap = {
+    'cross': { title: '跨界·', skills: ['跨界思维', '资源整合'] },
+    'ideal': { title: '卓越·', skills: ['创新突破', '追求极致'] },
+    'balanced': { title: '均衡·', skills: ['综合能力', '全面发展'] },
+    'default': { title: '', skills: [] }
+  };
+
+  const styleConfig = styleMap[style] || styleMap['default'];
+  if (styleConfig.title && branches.length > 0) {
+    branches[0].title = styleConfig.title + branches[0].title;
+  }
+
+  return {
+    tree: { branches },
+    recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
+    radarData: { skill: 65, experience: 55, learning: 75, adaptability: 60, leadership: 45 },
+    event: { icon: '⚡', text: '你被邀请参加一个行业峰会，结识了关键人脉' },
+    badges: ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
+  };
+}
 
 // ============================================
 // 6. 健康检查
@@ -578,7 +627,7 @@ app.use(express.static(path.join(__dirname, '/')));
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(55));
-  console.log('🚀 服务已启动');
+  console.log('🚀 服务已启动 (极速版)');
   console.log(`📡 端口: ${PORT}`);
   console.log(`🌐 访问: http://localhost:${PORT}`);
   console.log('='.repeat(55));
