@@ -240,7 +240,7 @@
           </label>
           <div class="skills-tag-group" id="skillTags">
             <div class="empty-skills-hint">
-              <i class="fas fa-info-circle"></i> 输入职业后，AI 将根据你的教育背景、职业目标、兴趣和路径风格推荐技能
+              <i class="fas fa-info-circle"></i> 请填写完整信息后，AI将为你推荐核心技能
             </div>
           </div>
         </div>
@@ -344,6 +344,7 @@
     let isGeneratingSkills = false;
     let isGeneratingTree = false;
     let selectedStyle = 'default';
+    let hasGeneratedSkills = false;
 
     // ============================================================
     // 路径风格选择
@@ -356,15 +357,9 @@
       card.classList.add('selected');
       selectedStyle = card.dataset.style;
 
-      const job = userJob.value.trim();
-      if (job.length >= 2) {
-        autoRecommendSkills(
-          job,
-          userEdu.value.trim(),
-          userGoal.value.trim(),
-          userInterest.value.trim(),
-          selectedStyle
-        );
+      // 🔥 只有所有字段填完才触发技能推荐
+      if (checkAllFieldsFilled()) {
+        autoRecommendSkills();
       }
     });
 
@@ -373,6 +368,21 @@
     function getStyleLabel(style) {
       const map = { 'default': '稳妥晋升', 'cross': '跨界融合', 'ideal': '理想主义', 'balanced': '均衡发展' };
       return map[style] || '稳妥晋升';
+    }
+
+    // ============================================================
+    // 检查所有必填字段
+    // ============================================================
+    function checkAllFieldsFilled() {
+      const name = userName.value.trim();
+      const job = userJob.value.trim();
+      const years = userYears.value.trim();
+      const edu = userEdu.value;
+      const goal = userGoal.value.trim();
+      const interest = userInterest.value.trim();
+
+      return name.length > 0 && job.length > 0 && years.length > 0 && 
+             edu !== '' && goal.length > 0 && interest.length > 0;
     }
 
     // ============================================================
@@ -415,15 +425,23 @@
     }
 
     // ============================================================
-    // AI 智能推荐技能
+    // 🔥 AI 智能推荐技能（只在所有字段填完后触发）
     // ============================================================
-    async function autoRecommendSkills(job, education, goal, interest, style) {
-      if (!job || job.trim() === '' || isGeneratingSkills) return;
-      if (job.trim().length < 2) return;
+    async function autoRecommendSkills() {
+      if (isGeneratingSkills) return;
+      if (!checkAllFieldsFilled()) return;
+
+      const job = userJob.value.trim();
+      const education = userEdu.value;
+      const goal = userGoal.value.trim();
+      const interest = userInterest.value.trim();
+      const name = userName.value.trim();
+      const years = userYears.value.trim();
 
       isGeneratingSkills = true;
+      hasGeneratedSkills = false;
       aiSkillStatus.classList.remove('hidden');
-      aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析你的职业画像...</span>';
+      aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析你的职业画像，推荐核心技能...</span>';
 
       const styleDesc = {
         'default': '稳扎稳打，按部就班，注重基础技能的扎实掌握',
@@ -432,15 +450,16 @@
         'balanced': '全面开花，综合成长，注重各方面均衡发展'
       };
 
-      const prompt = `
-你是一位资深的职业规划专家。请根据以下用户信息，推荐适合的核心技能。
+      const prompt = `你是一位资深的职业规划专家。请根据以下用户信息，推荐适合的核心技能。
 
 用户信息：
-- 当前职业：${job.trim()}
-- 教育背景：${education || '未填写'}
-- 职业目标：${goal || '未填写'}
-- 职业兴趣：${interest || '未填写'}
-- 路径风格：${styleDesc[style] || '稳扎稳打，按部就班'}
+- 姓名：${name}
+- 当前职业：${job}
+- 工作年限：${years}年
+- 教育背景：${education}
+- 职业目标：${goal}
+- 职业兴趣：${interest}
+- 路径风格：${styleDesc[selectedStyle] || '稳扎稳打，按部就班'}
 
 请列出 8-12 项最适合该用户的核心技能。
 
@@ -451,8 +470,7 @@
 4. 根据路径风格调整技能侧重点
 5. 覆盖硬技能和软技能
 
-只返回技能列表，不要其他文字。
-      `;
+只返回技能列表，不要其他文字。`;
 
       try {
         const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
@@ -460,7 +478,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: prompt,
-            context: { job: job.trim(), education, goal, interest, style }
+            context: { job, education, goal, interest, style: selectedStyle }
           })
         });
 
@@ -486,26 +504,28 @@
 
         if (skills.length > 12) skills = skills.slice(0, 12);
         if (skills.length < 4) {
-          skills = getFallbackSkills(job.trim(), education, goal, interest, style);
+          skills = getFallbackSkills(job, education, goal, interest, selectedStyle);
         }
 
         renderSkillTags(skills, false);
+        hasGeneratedSkills = true;
 
         aiSkillStatus.innerHTML = `
           <i class="fas fa-check-circle"></i>
-          <span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能，请选择你当前具备的</span>
+          <span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能，请选择你当前具备的（至少3项）</span>
         `;
-        setTimeout(() => aiSkillStatus.classList.add('hidden'), 3000);
+        setTimeout(() => aiSkillStatus.classList.add('hidden'), 4000);
 
       } catch (error) {
         console.error('AI技能推荐失败:', error);
-        const fallback = getFallbackSkills(job.trim(), education, goal, interest, style);
+        const fallback = getFallbackSkills(job, education, goal, interest, selectedStyle);
         renderSkillTags(fallback, false);
+        hasGeneratedSkills = true;
         aiSkillStatus.innerHTML = `
           <i class="fas fa-exclamation-circle"></i>
           <span>AI 推荐失败，已使用备选技能，请手动选择</span>
         `;
-        setTimeout(() => aiSkillStatus.classList.add('hidden'), 2000);
+        setTimeout(() => aiSkillStatus.classList.add('hidden'), 3000);
       } finally {
         isGeneratingSkills = false;
       }
@@ -624,9 +644,10 @@
       if (!skills || skills.length === 0) {
         skillTagsContainer.innerHTML = `
           <div class="empty-skills-hint">
-            <i class="fas fa-info-circle"></i> 暂无技能，请重新输入职业
+            <i class="fas fa-info-circle"></i> 请填写完整信息后，AI将为你推荐核心技能
           </div>
         `;
+        skillTagsContainer.classList.remove('has-skills');
         return;
       }
 
@@ -645,31 +666,38 @@
     }
 
     // ============================================================
-    // 监听输入变化
+    // 监听所有输入字段（🔥 所有字段填完才触发）
     // ============================================================
-    function triggerRecommend() {
-      const job = userJob.value.trim();
-      if (job.length >= 2) {
-        autoRecommendSkills(
-          job,
-          userEdu.value.trim(),
-          userGoal.value.trim(),
-          userInterest.value.trim(),
-          getPathStyle()
-        );
-      }
-    }
-
+    const allFields = [userName, userJob, userYears, userEdu, userGoal, userInterest];
     let recommendTimer = null;
-    ['userJob', 'userEdu', 'userGoal', 'userInterest'].forEach(id => {
-      const el = $(id);
+
+    allFields.forEach(el => {
       el.addEventListener('input', function() {
         clearTimeout(recommendTimer);
-        recommendTimer = setTimeout(triggerRecommend, 500);
+        // 🔥 只有所有字段都填完才触发
+        if (checkAllFieldsFilled()) {
+          recommendTimer = setTimeout(() => {
+            autoRecommendSkills();
+          }, 800);
+        } else {
+          // 字段不完整，显示提示
+          if (!hasGeneratedSkills) {
+            skillTagsContainer.innerHTML = `
+              <div class="empty-skills-hint">
+                <i class="fas fa-info-circle"></i> 请填写完整信息后，AI将为你推荐核心技能
+              </div>
+            `;
+            skillTagsContainer.classList.remove('has-skills');
+          }
+        }
       });
       el.addEventListener('change', function() {
         clearTimeout(recommendTimer);
-        recommendTimer = setTimeout(triggerRecommend, 300);
+        if (checkAllFieldsFilled()) {
+          recommendTimer = setTimeout(() => {
+            autoRecommendSkills();
+          }, 500);
+        }
       });
     });
 
@@ -765,7 +793,7 @@
     }
 
     // ============================================================
-    // 生成成长树（秒开版 - 调用 /api/generate-tree）
+    // 生成成长树
     // ============================================================
     async function generateTree(userInput) {
       if (isGeneratingTree) return;
@@ -1180,13 +1208,17 @@ ${currentPathData.tree.branches.map((b, i) =>
       const defaultCard = styleCards.querySelector('[data-style="default"]');
       if (defaultCard) defaultCard.classList.add('selected');
 
+      // 初始化提示
+      skillTagsContainer.innerHTML = `
+        <div class="empty-skills-hint">
+          <i class="fas fa-info-circle"></i> 请填写完整信息后，AI将为你推荐核心技能
+        </div>
+      `;
+
+      // 监听所有字段变化，填完自动推荐
       setTimeout(() => {
-        const job = userJob.value.trim();
-        const edu = userEdu.value.trim();
-        const goal = userGoal.value.trim();
-        const interest = userInterest.value.trim();
-        if (job.length >= 2) {
-          autoRecommendSkills(job, edu, goal, interest, getPathStyle());
+        if (checkAllFieldsFilled()) {
+          autoRecommendSkills();
         }
       }, 500);
     });
