@@ -30,6 +30,8 @@
     .form-group input, .form-group select, .form-group textarea { background: white; border: 1.5px solid #d9e2ef; border-radius: 16px; padding: 12px 16px; font-size: 15px; transition: all 0.2s; outline: none; color: #0a1a33; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1e4a8a; box-shadow: 0 0 0 4px rgba(30, 74, 138, 0.1); }
     .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231d3557' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
+    .form-group select option { color: #0a1a33; }
     .style-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
     .style-card { background: white; border: 2px solid #d9e2ef; border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: all 0.25s ease; text-align: center; position: relative; }
     .style-card:hover { border-color: #8eb0da; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
@@ -60,7 +62,7 @@
     .tree-container { padding: 20px 0 10px; overflow-x: auto; }
     .tree { display: flex; flex-direction: column; align-items: center; min-width: 700px; }
     .tree-root { margin-bottom: 30px; position: relative; }
-    .tree-root .node { background: linear-gradient(135deg, #1e4a8a, #2d6bb8); color: white; padding: 14px 36px; border-radius: 60px; font-size: 18px; font-weight: 700; box-shadow: 0 8px 30px rgba(30, 74, 138, 0.3); display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
+    .tree-root .node { background: linear-gradient(135deg, #1e4a8a, #2d6bb8); color: white; padding: 14px 36px; border-radius: 60px; font-size: 18px; font-weight: 700; box-shadow: 0 8px 30px rgba(30, 74, 138, 0.3); display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; flex-wrap: wrap; justify-content: center; }
     .tree-root .node .sub-info { font-size: 13px; font-weight: 400; opacity: 0.8; }
     .tree-branches { display: flex; justify-content: center; gap: 16px; position: relative; padding-top: 30px; flex-wrap: wrap; }
     .tree-branches::before { content: ''; position: absolute; top: -30px; left: 50%; width: 2px; height: 30px; background: #1e4a8a; }
@@ -79,9 +81,10 @@
     .branch .node.goal { border-color: #ffd700; background: linear-gradient(135deg, #fffbe6, #fff8e1); }
     .branch .node.goal .node-label { color: #b8860b; }
     .branch .year-badge { position: absolute; top: -10px; right: -8px; background: #1e4a8a; color: white; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
-    .event-card { background: linear-gradient(135deg, #fff3cd, #ffeaa7); border-radius: 16px; padding: 14px 20px; margin-top: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #ffd700; }
+    .event-card { background: linear-gradient(135deg, #fff3cd, #ffeaa7); border-radius: 16px; padding: 14px 20px; margin-top: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #ffd700; flex-wrap: wrap; }
     .event-card .event-icon { font-size: 24px; }
-    .event-card .event-text { font-size: 13px; color: #856404; font-weight: 500; }
+    .event-card .event-text { font-size: 13px; color: #856404; font-weight: 500; flex: 1; }
+    .event-card .template-badge { font-size: 11px; color: #856404; background: rgba(255,200,0,0.2); padding: 2px 10px; border-radius: 12px; }
     .radar-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
     .radar-container { background: white; border-radius: 20px; padding: 16px; border: 1px solid #e5edf8; height: 280px; min-height: 280px; }
     .stats-container { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
@@ -161,27 +164,35 @@
       <div class="form-grid">
         <div class="form-group">
           <label><i class="fas fa-user"></i> 姓名 / 昵称</label>
-          <input type="text" id="userName" value="张明" placeholder="你的名字">
+          <input type="text" id="userName" placeholder="你的名字">
         </div>
         <div class="form-group">
           <label><i class="fas fa-briefcase"></i> 当前职业</label>
-          <input type="text" id="userJob" value="计算机老师" placeholder="例如：产品经理 / 教师 / 医生">
+          <input type="text" id="userJob" placeholder="例如：产品经理 / 教师 / 医生 / 网络安全工程师">
         </div>
         <div class="form-group">
           <label><i class="far fa-calendar"></i> 工作年限</label>
-          <input type="number" id="userYears" value="3" min="0" max="40">
+          <input type="number" id="userYears" placeholder="请输入工作年限" min="0" max="40">
         </div>
         <div class="form-group">
           <label><i class="fas fa-graduation-cap"></i> 教育背景</label>
-          <input type="text" id="userEdu" value="计算机科学与技术硕士" placeholder="计算机本科 / 硕士 / 其他">
+          <select id="userEdu">
+            <option value="">请选择教育背景</option>
+            <option value="高中及以下">高中及以下</option>
+            <option value="大专">大专</option>
+            <option value="本科">本科</option>
+            <option value="硕士">硕士</option>
+            <option value="博士">博士</option>
+            <option value="博士后">博士后</option>
+          </select>
         </div>
         <div class="form-group full-width">
           <label><i class="fas fa-bullseye"></i> 职业目标（5年后想成为什么？）</label>
-          <input type="text" id="userGoal" value="计算机学科带头人" placeholder="例如：技术总监 / 产品负责人 / 创业者">
+          <input type="text" id="userGoal" placeholder="例如：技术总监 / 产品负责人 / 创业者 / 安全专家">
         </div>
         <div class="form-group full-width">
           <label><i class="fas fa-compass"></i> 职业兴趣 / 方向</label>
-          <textarea id="userInterest" rows="2" placeholder="例如：我想用AI赋能传统行业，成为懂技术的产品领导者">编程教育 + 在线教学 + 课程设计</textarea>
+          <textarea id="userInterest" rows="2" placeholder="例如：我想用AI赋能传统行业，成为懂技术的产品领导者"></textarea>
         </div>
         <div class="form-group">
           <label><i class="fas fa-clock"></i> 规划周期</label>
@@ -243,11 +254,7 @@
     <!-- TAB 2 -->
     <div id="tab2" class="tab-content">
       <div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;border:1px solid rgba(255,255,255,0.6);">
-        <span><strong>👤 张明</strong> · 计算机老师 · 3年</span>
-        <span><strong>🎓</strong> 计算机科学与技术硕士</span>
-        <span><strong>🎯</strong> 计算机学科带头人</span>
-        <span><strong>📌</strong> 编程教育 + 在线教学 + 课程设计</span>
-        <span><strong>🌳</strong> 点击"生成"按钮创建你的成长树</span>
+        <span style="color:#4a6f9c;"><i class="fas fa-info-circle"></i> 请先在"信息采集"页面填写完整信息并生成成长树</span>
       </div>
 
       <div id="treeContainer">
@@ -288,6 +295,7 @@
 
       <div class="flex mt-20">
         <button class="btn-secondary" id="regenerateBtn"><i class="fas fa-rotate-right"></i> 重新生成</button>
+        <button class="btn-secondary" id="optimizeBtn"><i class="fas fa-magic"></i> 获取优化版</button>
         <button class="btn-secondary" id="consultBtn"><i class="fas fa-paper-plane"></i> 咨询AI助手</button>
       </div>
     </div>
@@ -319,6 +327,7 @@
     const skillTagsContainer = $('skillTags');
     const generateBtn = $('generateBtn');
     const regenerateBtn = $('regenerateBtn');
+    const optimizeBtn = $('optimizeBtn');
     const consultBtn = $('consultBtn');
     const treeDisplay = $('treeDisplay');
     const loadingTree = $('loadingTree');
@@ -330,6 +339,7 @@
     const styleCards = $('styleCards');
 
     let currentPathData = null;
+    let currentSessionId = null;
     let radarChart = null;
     let isGeneratingSkills = false;
     let isGeneratingTree = false;
@@ -378,7 +388,7 @@
         name: userName.value.trim() || '用户',
         job: userJob.value.trim() || '产品经理',
         years: parseInt(userYears.value) || 0,
-        education: userEdu.value.trim() || '未填写',
+        education: userEdu.value || '本科',
         goal: userGoal.value.trim() || '职业发展',
         interest: userInterest.value.trim() || '职业成长',
         targetYears: parseInt(targetYears.value) || 5,
@@ -445,7 +455,7 @@
       `;
 
       try {
-        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai`, {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -509,6 +519,9 @@
         '计算机老师': ['编程教学', '课程设计', '教育技术', '教学管理', '教育心理学', 'Python编程', '在线教学', '教学研究', '信息技术', '学生指导'],
         '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
         '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
+        '学生': ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达', '研究能力', '团队协作', '持续学习'],
+        '网络安全工程师': ['网络协议基础', 'Web安全攻防', '日志分析与审计', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '安全策略', '系统安全'],
+        '安全工程师': ['网络安全', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '安全策略'],
         '医生': ['临床诊断', '医疗技术', '医患沟通', '循证医学', '医疗管理', '团队协作', '持续学习'],
         '护士': ['护理技术', '患者关怀', '医疗记录', '急救技能', '沟通协作', '健康宣教'],
         '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '商业分析', '沟通协作'],
@@ -556,8 +569,11 @@
         if (goal.includes('创业') || goal.includes('创始人')) {
           goalSkills = ['商业思维', '资源整合', '风险决策', '团队建设'];
         }
-        if (goal.includes('学科') || goal.includes('教研')) {
+        if (goal.includes('学科') || goal.includes('教研') || goal.includes('老师') || goal.includes('教师')) {
           goalSkills = ['学科建设', '教研管理', '课程体系', '教学领导力'];
+        }
+        if (goal.includes('安全') || goal.includes('网络')) {
+          goalSkills = ['安全架构', '安全策略', '风险管理', '合规审计'];
         }
       }
 
@@ -577,6 +593,9 @@
         }
         if (interest.includes('编程') || interest.includes('开发') || interest.includes('代码')) {
           interestSkills = ['编程能力', '软件开发', '技术架构', '代码质量'];
+        }
+        if (interest.includes('安全') || interest.includes('网络') || interest.includes('防护')) {
+          interestSkills = ['网络安全', '渗透测试', '安全防护', '漏洞挖掘'];
         }
       }
 
@@ -655,7 +674,7 @@
     });
 
     // ============================================================
-    // 默认树形数据
+    // 默认树形数据（本地fallback）
     // ============================================================
     function getDefaultTree(userInput) {
       const job = userInput.job || '产品经理';
@@ -664,6 +683,24 @@
       const style = userInput.style || 'default';
 
       const branchTemplates = {
+        '学生': {
+          'default': [
+            { year: 1, icon: '📚', title: '学业筑基', goals: '夯实专业基础，建立知识体系', skills: ['学习方法', '时间管理', '专业知识'], milestone: 'GPA达到3.5以上' },
+            { year: 2, icon: '🔬', title: '科研探索', goals: '参与科研项目，培养研究能力', skills: ['研究能力', '数据分析', '实验设计'], milestone: '完成科研项目' },
+            { year: 3, icon: '💡', title: '实践积累', goals: '参加实习实践，提升应用能力', skills: ['实践能力', '问题解决', '团队协作'], milestone: '完成实习经历' },
+            { year: 4, icon: '📝', title: '学术产出', goals: '发表学术论文，形成个人成果', skills: ['学术写作', '学术交流', '创新思维'], milestone: '发表学术论文' },
+            { year: 5, icon: '🏆', title: '职业启航', goals: '从校园到职场的身份转变，开启职业生涯', skills: ['职业素养', '持续学习', '适应能力'], milestone: '获得理想offer' }
+          ]
+        },
+        '网络安全工程师': {
+          'default': [
+            { year: 1, icon: '📚', title: '网络基础筑基', goals: '掌握网络协议基础，建立安全思维', skills: ['网络协议', 'TCP/IP', '操作系统'], milestone: '完成网络基础认证' },
+            { year: 2, icon: '🔒', title: '安全技术入门', goals: '学习Web安全攻防，掌握渗透测试基础', skills: ['Web安全', '渗透测试', '漏洞挖掘'], milestone: '完成CTF比赛' },
+            { year: 3, icon: '🛡️', title: '安全防护实战', goals: '掌握安全防护技术，参与实战项目', skills: ['安全防护', '日志分析', '应急响应'], milestone: '完成安全项目实战' },
+            { year: 4, icon: '👥', title: '安全团队协作', goals: '带领安全团队，推动安全体系建设', skills: ['团队管理', '安全架构', '安全策略'], milestone: '搭建安全体系' },
+            { year: 5, icon: '🏆', title: '安全专家', goals: '成为网络安全专家，构建安全影响力', skills: ['安全战略', '行业洞察', '安全领导力'], milestone: '完成行业安全分享' }
+          ]
+        },
         '计算机老师': {
           'default': [
             { year: 1, icon: '📚', title: '教学筑基 · 课堂实践', goals: '掌握教学方法，建立课堂管理能力', skills: ['教学设计', '课堂管理', '编程教学'], milestone: '完成1轮完整课程教学' },
@@ -671,27 +708,15 @@
             { year: 3, icon: '📊', title: '教学研究 · 成果输出', goals: '开展教学研究，形成个人教学特色', skills: ['教育研究', '学术写作', '数据驱动'], milestone: '完成1篇教学研究论文' },
             { year: 4, icon: '👥', title: '团队引领 · 学科建设', goals: '带领学科团队，推动课程体系改革', skills: ['团队管理', '学科建设', '教学管理'], milestone: '完成1个教学改革项目' },
             { year: 5, icon: '🏆', title: '学科带头人 · 行业影响', goals: '成为计算机学科带头人，推动教育创新', skills: ['学科引领', '教育战略', '行业影响'], milestone: '完成1次区域学术报告' }
-          ],
-          'cross': [
-            { year: 1, icon: '🌉', title: '跨界探索 · 多元融合', goals: '拓展教育边界，融合多学科知识', skills: ['跨学科教学', '教育技术', '课程设计'], milestone: '完成1个跨学科教学案例' },
-            { year: 2, icon: '🔗', title: '产教融合 · 实践创新', goals: '连接产业与教育，创新教学模式', skills: ['产业合作', '项目式教学', '创新设计'], milestone: '完成1个产教融合项目' },
-            { year: 3, icon: '🌐', title: '国际视野 · 全球教育', goals: '拓展国际教育视野，引入先进理念', skills: ['国际教育', '跨文化沟通', '教育创新'], milestone: '完成1次国际交流' },
-            { year: 4, icon: '🚀', title: '教育改革 · 引领突破', goals: '推动教育改革，突破传统模式', skills: ['教育改革', '创新管理', '教育科技'], milestone: '完成1个教育改革提案' },
-            { year: 5, icon: '🏆', title: '教育创新家 · 跨界领袖', goals: '成为教育创新领袖，推动行业变革', skills: ['教育创新', '跨界领导', '行业影响'], milestone: '完成1次行业创新分享' }
-          ],
-          'ideal': [
-            { year: 1, icon: '🌟', title: '教育理想 · 初心启航', goals: '坚守教育初心，追求教学卓越', skills: ['教育理念', '教学艺术', '学生关怀'], milestone: '形成个人教学理念' },
-            { year: 2, icon: '💡', title: '创新教学 · 突破常规', goals: '突破传统教学，探索创新模式', skills: ['创新教学', '教育研究', '课程创新'], milestone: '完成1个创新教学实践' },
-            { year: 3, icon: '✨', title: '学术追求 · 深度探索', goals: '深入教育研究，追求学术卓越', skills: ['学术研究', '教育哲学', '深度思考'], milestone: '完成1篇高质量论文' },
-            { year: 4, icon: '🌈', title: '教育理想 · 影响传播', goals: '传播教育理念，影响更多教育者', skills: ['教育传播', '写作能力', '演讲影响'], milestone: '完成1次教育演讲' },
-            { year: 5, icon: '🏆', title: '教育家 · 理想实现', goals: '成为教育家，实现教育理想', skills: ['教育领导', '思想影响', '教育变革'], milestone: '出版1本教育专著' }
-          ],
-          'balanced': [
-            { year: 1, icon: '📚', title: '教学·研究·服务 均衡起步', goals: '教学、研究、服务全面发展', skills: ['教学设计', '教育研究', '学生服务'], milestone: '完成教学、研究、服务三项任务' },
-            { year: 2, icon: '⚖️', title: '能力均衡 · 多维发展', goals: '教学、科研、管理综合提升', skills: ['教学能力', '研究能力', '管理能力'], milestone: '在教学、科研、管理均有成果' },
-            { year: 3, icon: '🔄', title: '综合成长 · 全面开花', goals: '教学、科研、社会服务全面突破', skills: ['课程开发', '项目研究', '社会服务'], milestone: '获得教学、科研双奖' },
-            { year: 4, icon: '👥', title: '领导·教学·研究 三位一体', goals: '领导力、教学力、研究力齐头并进', skills: ['团队领导', '教学创新', '研究突破'], milestone: '团队、教学、研究均有突破' },
-            { year: 5, icon: '🏆', title: '全面型教育家 · 综合影响', goals: '教学、研究、领导全面发展', skills: ['教育领导', '学术影响', '社会贡献'], milestone: '获得综合荣誉奖项' }
+          ]
+        },
+        '老师': {
+          'default': [
+            { year: 1, icon: '📚', title: '教学入门', goals: '掌握教学基本功，建立课堂秩序', skills: ['教学设计', '课堂管理', '教育心理学'], milestone: '完成1轮完整课程' },
+            { year: 2, icon: '📝', title: '教学精进', goals: '优化教学方法，设计创新课程', skills: ['课程设计', '教育技术', '评估反馈'], milestone: '开发1门新课程' },
+            { year: 3, icon: '💡', title: '教育研究', goals: '开展教学研究，形成个人风格', skills: ['教育研究', '创新教学', '教育技术'], milestone: '发表1篇教学论文' },
+            { year: 4, icon: '👥', title: '教研引领', goals: '带领教研团队，培养青年教师', skills: ['教研管理', '团队领导', '课程体系'], milestone: '指导1位青年教师' },
+            { year: 5, icon: '🏆', title: '教育专家', goals: '成为区域教育专家，引领教育改革', skills: ['教育战略', '课程体系', '教育领导力'], milestone: '完成1次区域讲座' }
           ]
         },
         'default': {
@@ -701,27 +726,6 @@
             { year: 3, icon: '💡', title: '专业突破 · 策略思维', goals: '成为团队骨干，建立专业影响力', skills: ['战略思维', '领导力', '创新思维'], milestone: '完成1次重要汇报' },
             { year: 4, icon: '👥', title: '管理进阶 · 团队领导', goals: '带领团队，培养下属能力', skills: ['团队管理', '决策能力', '跨部门协作'], milestone: '团队项目成功' },
             { year: 5, icon: '🏆', title: '行业专家 · 影响构建', goals: '成为领域专家，输出方法论', skills: ['行业洞察', '影响力', '战略规划'], milestone: '完成1次行业分享' }
-          ],
-          'cross': [
-            { year: 1, icon: '🌉', title: '跨界入门 · 多元视野', goals: '拓展跨领域知识，建立多元视野', skills: ['跨界思维', '多元学习', '沟通协作'], milestone: '完成1个跨领域学习' },
-            { year: 2, icon: '🔗', title: '融合创新 · 跨界实践', goals: '融合不同领域知识，创新实践', skills: ['创新思维', '资源整合', '跨界协作'], milestone: '完成1个跨界项目' },
-            { year: 3, icon: '🌐', title: '国际视野 · 全球连接', goals: '建立国际视野，连接全球资源', skills: ['全球视野', '跨文化沟通', '国际协作'], milestone: '完成1次国际交流' },
-            { year: 4, icon: '🚀', title: '行业突破 · 跨界领导', goals: '突破行业边界，跨界领导创新', skills: ['跨界领导', '行业洞察', '创新管理'], milestone: '完成1个行业突破项目' },
-            { year: 5, icon: '🏆', title: '跨界领袖 · 创新影响', goals: '成为跨界领袖，引领行业创新', skills: ['跨界影响', '创新战略', '行业引领'], milestone: '完成1次行业创新分享' }
-          ],
-          'ideal': [
-            { year: 1, icon: '🌟', title: '理想启航 · 寻找方向', goals: '明确职业理想，寻找发展方向', skills: ['自我认知', '职业规划', '价值追求'], milestone: '形成个人职业愿景' },
-            { year: 2, icon: '💡', title: '创新突破 · 追求卓越', goals: '突破常规思维，追求卓越成就', skills: ['创新能力', '深度思考', '自我驱动'], milestone: '完成1个创新项目' },
-            { year: 3, icon: '✨', title: '深度专注 · 极致追求', goals: '深度专注专业领域，追求极致', skills: ['专注力', '专业深度', '持续精进'], milestone: '完成1个深度研究成果' },
-            { year: 4, icon: '🌈', title: '影响传播 · 价值实现', goals: '传播价值理念，实现自我价值', skills: ['影响力', '价值传播', '思想表达'], milestone: '完成1次重要演讲' },
-            { year: 5, icon: '🏆', title: '理想实现 · 行业标杆', goals: '实现职业理想，成为行业标杆', skills: ['行业影响', '思想引领', '价值创造'], milestone: '成为行业公认的标杆' }
-          ],
-          'balanced': [
-            { year: 1, icon: '📚', title: '工作·学习·生活 均衡起步', goals: '平衡工作、学习、生活，全面发展', skills: ['时间管理', '学习能力', '工作协调'], milestone: '建立良好平衡习惯' },
-            { year: 2, icon: '⚖️', title: '综合能力 · 多维成长', goals: '专业技能、软技能、管理能力均衡发展', skills: ['专业技能', '软技能', '管理能力'], milestone: '能力全面提升' },
-            { year: 3, icon: '🔄', title: '稳健成长 · 全面突破', goals: '在多个维度实现稳健突破', skills: ['战略思维', '执行能力', '团队协作'], milestone: '完成多个维度突破' },
-            { year: 4, icon: '👥', title: '团队·个人·组织 协同发展', goals: '个人成长、团队发展、组织贡献协同', skills: ['团队管理', '个人发展', '组织贡献'], milestone: '团队与个人共同成长' },
-            { year: 5, icon: '🏆', title: '均衡成就 · 全面影响', goals: '在各方面取得均衡成就', skills: ['综合领导', '全面影响', '持续发展'], milestone: '获得综合性成就' }
           ]
         }
       };
@@ -755,13 +759,13 @@
         tree: { branches },
         recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
         radarData: { skill: 65, experience: 55, learning: 75, adaptability: 60, leadership: 45 },
-        event: { icon: '⚡', text: '你被邀请参加一个行业峰会，结识了关键人脉' },
+        challenges: { icon: '⚡', text: '持续学习，抓住职业发展机遇' },
         badges: ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
       };
     }
 
     // ============================================================
-    // 生成成长树
+    // 生成成长树（秒开版 - 调用 /api/generate-tree）
     // ============================================================
     async function generateTree(userInput) {
       if (isGeneratingTree) return;
@@ -770,76 +774,65 @@
       loadingTree.classList.remove('hidden');
       treeDisplay.innerHTML = '';
 
-      const styleDesc = {
-        'default': '稳扎稳打，按部就班，注重基础技能的扎实掌握和稳步晋升',
-        'cross': '跨界融合，破圈成长，注重多元化技能和跨领域能力，打破职业边界',
-        'ideal': '追随热爱，追求极致，注重创新能力和理想追求，不拘一格',
-        'balanced': '全面开花，综合成长，注重各方面均衡发展，兼顾广度与深度'
-      };
-
-      const prompt = `
-你是一位顶级的职业规划专家。请根据以下用户信息，生成一份个性化的职业成长树路径。
-
-用户信息：
-- 姓名：${userInput.name}
-- 当前职业：${userInput.job}
-- 工作年限：${userInput.years}年
-- 教育背景：${userInput.education}
-- 职业目标（5年后）：${userInput.goal}
-- 职业兴趣：${userInput.interest}
-- 已有技能：${userInput.skills.join('、')}
-- 规划周期：${userInput.targetYears}年
-- 路径风格：${userInput.styleLabel} - ${styleDesc[userInput.style] || '稳扎稳打'}
-
-请生成一份${userInput.targetYears}年的职业发展路径，以树形结构展示。
-
-要求：
-1. 每个阶段包含：年份、阶段标题（有创意）、阶段目标（具体可执行）、核心技能（3-5个）、里程碑事件
-2. 根据用户的职业兴趣，将兴趣融入到每个阶段的描述中
-3. 路径风格必须体现在每个阶段的标题、目标和技能中
-4. 推荐3-5个用户应该学习的新技能
-5. 生成5个维度的能力评估值（专业技能、工作经验、学习能力、适应能力、领导力），范围0-100
-6. 生成一个"意外事件"（一个职业机遇或挑战）
-7. 生成3个成就徽章
-
-输出格式为 JSON，只返回JSON，不要其他文字。
-      `;
-
       try {
-        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai`, {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: prompt, context: userInput })
+          body: JSON.stringify(userInput)
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
-        if (!data.success) throw new Error(data.error || 'AI生成失败');
+        if (!data.success) throw new Error(data.error || '生成失败');
 
-        let result;
-        try {
-          let text = data.reply;
-          const jsonMatch = text.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            result = JSON.parse(jsonMatch[0]);
-          } else {
-            result = JSON.parse(text);
-          }
-        } catch (e) {
-          console.error('JSON解析失败:', e);
-          result = getDefaultTree(userInput);
+        if (data.sessionId) {
+          currentSessionId = data.sessionId;
         }
 
-        return result;
+        return data.data;
       } catch (error) {
-        console.error('AI生成失败:', error);
+        console.error('生成失败:', error);
         return getDefaultTree(userInput);
       } finally {
         loadingTree.classList.add('hidden');
         isGeneratingTree = false;
       }
     }
+
+    // ============================================================
+    // 获取优化版
+    // ============================================================
+    optimizeBtn.addEventListener('click', async function() {
+      if (!currentSessionId) {
+        alert('请先生成成长树');
+        return;
+      }
+
+      optimizeBtn.disabled = true;
+      optimizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 获取中...';
+
+      try {
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`);
+        const data = await response.json();
+
+        if (data.success && data.optimized) {
+          currentPathData = data.data;
+          const userInput = getUserInput();
+          renderTree(currentPathData, userInput);
+          alert('✅ 已更新为AI优化版！');
+        } else if (data.success && !data.optimized) {
+          alert('⏳ AI仍在优化中（约20-30秒），请稍后再试');
+        } else {
+          alert('获取失败：' + (data.error || '未知错误'));
+        }
+      } catch (error) {
+        alert('获取失败：' + error.message);
+      } finally {
+        optimizeBtn.disabled = false;
+        optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
+      }
+    });
 
     // ============================================================
     // 渲染树形路径
@@ -852,6 +845,7 @@
 
       const branches = pathData.tree.branches;
       const isGoal = (index) => index === branches.length - 1;
+      const isTemplate = pathData._isTemplate || false;
 
       let html = `
         <div class="tree">
@@ -861,6 +855,7 @@
               <span>${userInput.job || '当前职业'}</span>
               <span class="sub-info">· ${userInput.years || 0}年经验</span>
               <span class="sub-info" style="background:rgba(255,255,255,0.2);padding:2px 12px;border-radius:20px;">${userInput.styleLabel || '稳妥晋升'}</span>
+              ${isTemplate ? `<span class="sub-info" style="background:rgba(255,200,0,0.3);padding:2px 12px;border-radius:20px;font-size:12px;">⏳ AI优化中</span>` : ''}
             </div>
           </div>
           <div class="tree-branches">
@@ -888,11 +883,12 @@
       html += `</div></div>`;
       treeDisplay.innerHTML = html;
 
-      if (pathData.event) {
+      if (pathData.challenges) {
         eventContainer.innerHTML = `
           <div class="event-card">
-            <span class="event-icon">${pathData.event.icon || '⚡'}</span>
-            <span class="event-text">${pathData.event.text || '你遇到了一个职业机遇！'}</span>
+            <span class="event-icon">${pathData.challenges.icon || '⚡'}</span>
+            <span class="event-text">${pathData.challenges.text || '持续学习，抓住机遇！'}</span>
+            ${isTemplate ? `<span class="template-badge">⏳ AI优化中</span>` : ''}
           </div>
         `;
       } else {
@@ -900,12 +896,15 @@
       }
 
       if (pathData.badges && pathData.badges.length > 0) {
-        const badgesHtml = pathData.badges.map((b, i) => `
-          <span class="badge-item unlocked">
-            <span class="badge-icon">${['🌟', '🚀', '👑', '💎', '🏅'][i % 5] || '🏅'}</span>
-            ${b}
-          </span>
-        `).join('');
+        const badgesHtml = pathData.badges.map((b, i) => {
+          const icon = b.match(/^.{1,2}/)?.[0] || ['🌟', '🚀', '👑', '💎', '🏅'][i % 5] || '🏅';
+          return `
+            <span class="badge-item unlocked">
+              <span class="badge-icon">${icon}</span>
+              ${b.replace(/^.{1,2}\s*/, '')}
+            </span>
+          `;
+        }).join('');
         badgesContainer.innerHTML = badgesHtml;
       }
 
@@ -1033,7 +1032,7 @@
       }
 
       generateBtn.disabled = true;
-      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI生成中...';
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
 
       try {
         const pathData = await generateTree(userInput);
@@ -1072,7 +1071,7 @@
     }
 
     // ============================================================
-    // 🔥 咨询AI助手（精简版 - 避免超时）
+    // 咨询AI助手
     // ============================================================
     consultBtn.addEventListener('click', async function() {
       if (!currentPathData) {
@@ -1082,7 +1081,6 @@
 
       const userInput = getUserInput();
 
-      // 精简消息 - 只发关键信息
       const msg = `我是${userInput.name}，${userInput.job}，${userInput.years}年经验。
 教育：${userInput.education}
 目标：${userInput.goal}

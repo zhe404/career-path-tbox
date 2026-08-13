@@ -3,6 +3,9 @@ const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
 
+// 导入职业生成器
+const { generateCareerTree } = require('./careerGenerator.js');
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -16,7 +19,39 @@ const TBOX_CONFIG = {
 };
 
 // ============================================
-// 1. 咨询AI接口
+// 工具函数：解析AI回复
+// ============================================
+function parseAIResponse(data) {
+  if (!data || !data.data) return '';
+  
+  let reply = '';
+  const result = data.data.result;
+  if (Array.isArray(result)) {
+    for (const item of result) {
+      if (item.chunk) {
+        if (item.mediaType === 'text') {
+          reply += item.chunk;
+        } else {
+          try {
+            const chunkData = JSON.parse(item.chunk);
+            reply += chunkData.text || chunkData.content || '';
+          } catch (e) {
+            reply += item.chunk;
+          }
+        }
+      }
+    }
+  }
+  return reply;
+}
+
+// ============================================
+// 缓存
+// ============================================
+const treeCache = new Map();
+
+// ============================================
+// 1. 咨询AI接口（完整版）
 // ============================================
 app.post('/api/consult-ai', async (req, res) => {
   try {
@@ -29,7 +64,8 @@ app.post('/api/consult-ai', async (req, res) => {
       const important = lines.filter(line => 
         line.includes('背景') || line.includes('目标') || 
         line.includes('风格') || line.includes('技能') ||
-        line.includes('请回答') || line.includes('建议')
+        line.includes('请回答') || line.includes('建议') ||
+        line.includes('用户信息') || line.includes('职业')
       );
       query = important.join('\n').substring(0, 1500);
     }
@@ -49,34 +85,11 @@ app.post('/api/consult-ai', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 60000, // 60秒
+        timeout: 600000,
       }
     );
 
-    let reply = '';
-    if (response.data && response.data.data) {
-      const data = response.data.data;
-      if (data.result && Array.isArray(data.result)) {
-        for (const result of data.result) {
-          if (result.chunk) {
-            if (result.mediaType === 'text') {
-              reply += result.chunk;
-            } else {
-              try {
-                const chunkData = JSON.parse(result.chunk);
-                reply += chunkData.text || chunkData.content || '';
-              } catch (e) {
-                reply += result.chunk;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (!reply || reply.trim() === '') {
-      reply = 'AI未返回有效内容';
-    }
+    const reply = parseAIResponse(response.data) || 'AI未返回有效内容';
 
     res.json({
       success: true,
@@ -101,16 +114,19 @@ app.post('/api/consult-ai-fast', async (req, res) => {
     console.log('⚡ 快速咨询');
 
     let query = message;
-    if (message.length > 300) {
-      const jobMatch = message.match(/我是(.*?)[，,]/);
-      const goalMatch = message.match(/目标[：:](.*?)[\n,，]/);
-      const styleMatch = message.match(/风格[：:](.*?)[\n,，]/);
+    if (message.length > 500) {
+      const lines = message.split('\n');
+      const important = lines.filter(line => 
+        line.includes('我是') || line.includes('职业') || 
+        line.includes('目标') || line.includes('兴趣') ||
+        line.includes('技能') || line.includes('建议') ||
+        line.includes('计划') || line.includes('年')
+      );
+      query = important.join('\n').substring(0, 500);
       
-      const job = jobMatch ? jobMatch[1] : '';
-      const goal = goalMatch ? goalMatch[1] : '';
-      const style = styleMatch ? styleMatch[1] : '';
-      
-      query = `职业：${job}，目标：${goal}，风格：${style}。请给5条具体建议，每条20字内。`;
+      if (query.length < 50) {
+        query = message.substring(0, 300);
+      }
     }
 
     const requestData = {
@@ -128,32 +144,11 @@ app.post('/api/consult-ai-fast', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 30000, // 30秒
+        timeout: 250000,
       }
     );
 
-    let reply = 'AI未返回有效内容';
-    if (response.data && response.data.data) {
-      const data = response.data.data;
-      if (data.result && Array.isArray(data.result)) {
-        reply = '';
-        for (const result of data.result) {
-          if (result.chunk) {
-            if (result.mediaType === 'text') {
-              reply += result.chunk;
-            } else {
-              try {
-                const chunkData = JSON.parse(result.chunk);
-                reply += chunkData.text || chunkData.content || '';
-              } catch (e) {
-                reply += result.chunk;
-              }
-            }
-          }
-        }
-        if (!reply) reply = 'AI未返回有效内容';
-      }
-    }
+    const reply = parseAIResponse(response.data) || 'AI未返回有效内容';
 
     res.json({ success: true, reply });
 
@@ -161,149 +156,27 @@ app.post('/api/consult-ai-fast', async (req, res) => {
     console.error('❌ 快速咨询失败:', error.message);
     res.json({
       success: false,
-      error: error.message || '服务暂时不可用'
+      error: 'AI服务响应超时，请稍后重试'
     });
   }
 });
 
 // ============================================
-// 3. 流式咨询接口
+// 3. 技能推荐接口
 // ============================================
-app.post('/api/consult-ai-stream', async (req, res) => {
+app.post('/api/recommend-skills', async (req, res) => {
   try {
-    const { message, context } = req.body;
-    console.log('📨 流式咨询开始');
+    const { job, education, goal, interest, style } = req.body;
+    console.log('🎯 技能推荐:', job);
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
-    let query = message;
-    if (message.length > 800) {
-      const lines = message.split('\n');
-      const important = lines.filter(line => 
-        line.includes('我是') || line.includes('目标') || 
-        line.includes('风格') || line.includes('技能') ||
-        line.includes('请回答') || line.includes('建议')
-      );
-      query = important.join('\n').substring(0, 800);
-    }
-
-    const requestData = {
-      appId: '202607APmEQJ20464969',
-      query: query,
-      userId: 'user_' + Date.now(),
-      stream: true,
+    const styleMap = {
+      'default': '稳妥',
+      'cross': '跨界',
+      'ideal': '创新',
+      'balanced': '均衡'
     };
-
-    const response = await axios({
-      method: 'post',
-      url: TBOX_CONFIG.apiUrl,
-      data: requestData,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': TBOX_CONFIG.apiKey,
-      },
-      responseType: 'stream',
-      timeout: 120000, // 120秒
-    });
-
-    let fullReply = '';
-    let hasContent = false;
-
-    response.data.on('data', (chunk) => {
-      try {
-        const text = chunk.toString();
-        const lines = text.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.substring(6);
-            if (data === '[DONE]') continue;
-            
-            try {
-              const json = JSON.parse(data);
-              let content = '';
-              
-              if (json.data && json.data.result) {
-                for (const result of json.data.result) {
-                  if (result.chunk) {
-                    if (result.mediaType === 'text') {
-                      content += result.chunk;
-                    } else {
-                      try {
-                        const chunkData = JSON.parse(result.chunk);
-                        content += chunkData.text || chunkData.content || '';
-                      } catch (e) {
-                        content += result.chunk;
-                      }
-                    }
-                  }
-                }
-              }
-              
-              if (content) {
-                hasContent = true;
-                fullReply += content;
-                res.write(`data: ${JSON.stringify({ content })}\n\n`);
-              }
-            } catch (e) {}
-          }
-        }
-      } catch (e) {}
-    });
-
-    response.data.on('end', () => {
-      if (!hasContent) {
-        fullReply = 'AI未返回有效内容，请稍后重试';
-        res.write(`data: ${JSON.stringify({ content: fullReply })}\n\n`);
-      }
-      res.write(`data: ${JSON.stringify({ done: true, fullReply })}\n\n`);
-      res.end();
-      console.log('✅ 流式完成，长度:', fullReply.length);
-    });
-
-    response.data.on('error', (error) => {
-      console.error('流式错误:', error);
-      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
-      res.end();
-    });
-
-  } catch (error) {
-    console.error('❌ 流式失败:', error.message);
-    res.write(`data: ${JSON.stringify({ error: '服务暂时不可用，请稍后重试' })}\n\n`);
-    res.end();
-  }
-});
-
-// ============================================
-// 4. 生成成长树接口
-// ============================================
-app.post('/api/generate-tree', async (req, res) => {
-  try {
-    const userInput = req.body;
-    console.log('🌳 生成成长树:', userInput.job);
-
-    const prompt = `
-职业：${userInput.job}
-年限：${userInput.years}年
-目标：${userInput.goal}
-风格：${userInput.styleLabel || '稳妥晋升'}
-兴趣：${userInput.interest || '职业发展'}
-技能：${(userInput.skills || []).join('、')}
-
-生成${userInput.targetYears || 5}年职业路径JSON：
-{
-  "branches": [
-    {"year":1,"icon":"📚","title":"阶段名","goals":"目标","skills":["技能"],"milestone":"里程碑"}
-  ],
-  "radarData":{"skill":60,"experience":50,"learning":70,"adaptability":55,"leadership":40},
-  "event":{"icon":"⚡","text":"机遇"},
-  "badges":["徽章1","徽章2","徽章3"]
-}
-只返回JSON。
-    `;
+    
+    const prompt = `职业:${job},教育:${education},目标:${goal},兴趣:${interest},风格:${styleMap[style]||'稳妥'}。推荐8-12项核心技能，只返回技能名称用逗号分隔`;
 
     const requestData = {
       appId: '202607APmEQJ20464969',
@@ -320,123 +193,195 @@ app.post('/api/generate-tree', async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': TBOX_CONFIG.apiKey,
         },
-        timeout: 90000, // 90秒（内容较多）
+        timeout: 150000,
       }
     );
 
-    let reply = '';
-    if (response.data && response.data.data) {
-      const data = response.data.data;
-      if (data.result && Array.isArray(data.result)) {
-        for (const result of data.result) {
-          if (result.chunk) {
-            if (result.mediaType === 'text') {
-              reply += result.chunk;
-            } else {
-              try {
-                const chunkData = JSON.parse(result.chunk);
-                reply += chunkData.text || chunkData.content || '';
-              } catch (e) {
-                reply += result.chunk;
-              }
-            }
-          }
-        }
+    let reply = parseAIResponse(response.data);
+    
+    let skills = [];
+    if (reply) {
+      const matches = reply.match(/[\u4e00-\u9fa5]{2,6}/g);
+      if (matches && matches.length > 0) {
+        skills = matches.slice(0, 12);
+      } else {
+        skills = reply.split(/[,，、\s]+/).filter(s => {
+          const trimmed = s.trim();
+          return trimmed.length > 0 && trimmed.length < 15 && !/^[0-9]+$/.test(trimmed);
+        }).slice(0, 12);
       }
     }
 
-    let result;
-    try {
-      const jsonMatch = reply.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        result = JSON.parse(jsonMatch[0]);
-      } else {
-        result = JSON.parse(reply);
-      }
-    } catch (e) {
-      console.error('JSON解析失败，使用默认数据');
-      result = getDefaultTree(userInput);
+    if (skills.length < 4) {
+      skills = ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
     }
 
     res.json({
       success: true,
-      data: result
+      skills: skills
     });
 
   } catch (error) {
-    console.error('❌ 生成树失败:', error.message);
+    console.error('❌ 技能推荐失败:', error.message);
     res.json({
       success: true,
-      data: getDefaultTree(req.body),
+      skills: ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'],
       fallback: true
     });
   }
 });
 
 // ============================================
-// 5. 默认树形数据
+// 4. 生成成长树接口（秒开版 + 百宝箱API）
 // ============================================
-function getDefaultTree(userInput) {
-  const job = userInput.job || '产品经理';
-  const interest = userInput.interest || '职业发展';
-  const years = userInput.targetYears || 5;
+app.post('/api/generate-tree', async (req, res) => {
+  try {
+    const userInput = req.body;
+    console.log('🌳 生成成长树:', userInput.job);
 
-  const templates = {
-    '计算机老师': [
-      { year: 1, icon: '📚', title: '教学筑基', goals: '掌握教学方法，建立课堂管理', skills: ['教学设计', '课堂管理', '编程教学'], milestone: '完成1轮完整课程' },
-      { year: 2, icon: '💻', title: '技术融合', goals: '编程技术与教学深度融合', skills: ['教育技术', '在线教学', '课程开发'], milestone: '开发1门在线课程' },
-      { year: 3, icon: '📊', title: '教学研究', goals: '开展教学研究，形成个人特色', skills: ['教育研究', '学术写作', '数据驱动'], milestone: '完成1篇研究论文' },
-      { year: 4, icon: '👥', title: '团队引领', goals: '带领学科团队，推动课程改革', skills: ['团队管理', '学科建设', '教学管理'], milestone: '完成1个教改项目' },
-      { year: 5, icon: '🏆', title: '学科带头人', goals: '成为学科带头人，推动教育创新', skills: ['学科引领', '教育战略', '行业影响'], milestone: '完成1次学术报告' }
-    ],
-    '产品经理': [
-      { year: 1, icon: '📚', title: '产品筑基', goals: '深入用户研究，建立产品思维', skills: ['用户研究', '产品设计', '数据分析'], milestone: '完成1个完整PRD' },
-      { year: 2, icon: '📊', title: '数据驱动', goals: '数据驱动决策，独立负责产品线', skills: ['数据分析', '项目管理', '沟通协作'], milestone: '上线1个独立功能' },
-      { year: 3, icon: '💡', title: '商业思维', goals: '理解商业模式，制定产品路线图', skills: ['商业分析', '战略规划', '领导力'], milestone: '完成1次战略汇报' },
-      { year: 4, icon: '👥', title: '团队领导', goals: '带领团队，培养跨部门协作', skills: ['团队管理', '创新思维', '市场洞察'], milestone: '团队成功交付项目' },
-      { year: 5, icon: '🏆', title: '产品总监', goals: '构建产品生态，输出方法论', skills: ['产品战略', '行业洞察', '技术管理'], milestone: '完成1次行业分享' }
-    ],
-    '教师': [
-      { year: 1, icon: '📚', title: '教学入门', goals: '掌握教学基本功，建立课堂秩序', skills: ['教学设计', '课堂管理', '教育心理学'], milestone: '完成1轮完整课程' },
-      { year: 2, icon: '📝', title: '教学精进', goals: '优化教学方法，设计创新课程', skills: ['课程设计', '教育技术', '评估反馈'], milestone: '开发1门新课程' },
-      { year: 3, icon: '💡', title: '教育研究', goals: '开展教学研究，形成个人风格', skills: ['教育研究', '创新教学', '教育技术'], milestone: '发表1篇教学论文' },
-      { year: 4, icon: '👥', title: '教研引领', goals: '带领教研团队，培养青年教师', skills: ['教研管理', '团队领导', '课程体系'], milestone: '指导1位青年教师' },
-      { year: 5, icon: '🏆', title: '教育专家', goals: '成为区域教育专家，引领教育改革', skills: ['教育战略', '课程体系', '教育领导力'], milestone: '完成1次区域讲座' }
-    ]
-  };
+    // 1. 配置驱动生成模板（<1ms，不调API）
+    const templateData = generateCareerTree(userInput);
+    templateData._isTemplate = true;
+    templateData._status = 'AI优化中';
 
-  let template = templates['产品经理'];
-  for (const [key, value] of Object.entries(templates)) {
-    if (job.includes(key) || key.includes(job)) {
-      template = value;
-      break;
-    }
-  }
+    // 生成sessionId
+    const sessionId = 'tree_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+    templateData._sessionId = sessionId;
+    
+    // 存储到缓存
+    treeCache.set(sessionId, {
+      data: templateData,
+      userInput: userInput,
+      optimized: false,
+      timestamp: Date.now()
+    });
 
-  const branches = [];
-  for (let i = 0; i < Math.min(years, template.length); i++) {
-    const t = template[i];
-    branches.push({
-      year: t.year,
-      icon: t.icon,
-      title: t.title,
-      goals: t.goals + ' · ' + interest.substring(0, 15),
-      skills: t.skills,
-      milestone: t.milestone
+    // 2. 立即返回模板（<1秒）
+    res.json({
+      success: true,
+      data: templateData,
+      template: true,
+      sessionId: sessionId
+    });
+
+    // 3. 后台异步调用百宝箱API
+    setTimeout(async () => {
+      try {
+        console.log('🔄 后台AI优化开始... sessionId:', sessionId);
+        
+        const prompt = `职业:${userInput.job},${userInput.years}年,目标:${userInput.goal},风格:${userInput.styleLabel},兴趣:${userInput.interest},技能:${(userInput.skills || []).join(',')}。
+生成${userInput.targetYears || 5}年职业路径JSON:
+{"branches":[{"year":1,"icon":"📚","title":"阶段名","goals":"具体目标","skills":["技能"],"milestone":"里程碑"}],
+"radarData":{"skill":0-100,"experience":0-100,"learning":0-100,"adaptability":0-100,"leadership":0-100},
+"challenges":{"icon":"⚡","text":"基于用户背景的挑战与机遇，用'可能面临'、'需要应对'等措辞"},
+"badges":["徽章1","徽章2","徽章3"]}
+只返回JSON`;
+
+        const requestData = {
+          appId: '202607APmEQJ20464969',
+          query: prompt,
+          userId: 'user_' + Date.now(),
+          stream: false,
+        };
+
+        const response = await axios.post(
+          TBOX_CONFIG.apiUrl,
+          requestData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': TBOX_CONFIG.apiKey,
+            },
+            timeout: 250000,
+          }
+        );
+
+        let reply = parseAIResponse(response.data);
+        if (reply) {
+          const jsonMatch = reply.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
+            if (result.branches && result.branches.length > 0) {
+              const optimizedData = {
+                tree: { branches: result.branches },
+                recommendedSkills: result.recommendedSkills || ['AI应用', '数据分析', '项目管理'],
+                radarData: result.radarData || templateData.radarData,
+                challenges: result.challenges || templateData.challenges,
+                badges: result.badges || templateData.badges,
+                _isTemplate: false,
+                _sessionId: sessionId,
+                _status: '已优化 ✓'
+              };
+              
+              treeCache.set(sessionId, {
+                data: optimizedData,
+                userInput: userInput,
+                optimized: true,
+                timestamp: Date.now()
+              });
+              
+              console.log('✅ 后台AI优化成功，sessionId:', sessionId);
+            }
+          }
+        }
+      } catch (aiError) {
+        console.log('⏱️ 后台AI优化失败:', aiError.message);
+      }
+    }, 100);
+
+  } catch (error) {
+    console.error('❌ 生成树失败:', error.message);
+    const defaultData = generateCareerTree(req.body);
+    defaultData._fallback = true;
+    res.json({
+      success: true,
+      data: defaultData,
+      fallback: true
     });
   }
-
-  return {
-    tree: { branches },
-    recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-    radarData: { skill: 60, experience: 50, learning: 70, adaptability: 55, leadership: 40 },
-    event: { icon: '⚡', text: '你被邀请参加一个行业峰会，结识了关键人脉' },
-    badges: ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
-  };
-}
+});
 
 // ============================================
-// 6. 健康检查（Railway 需要）
+// 5. 获取优化结果
+// ============================================
+app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
+  try {
+    const sessionId = req.params.sessionId;
+    const cached = treeCache.get(sessionId);
+    
+    if (!cached) {
+      return res.json({
+        success: false,
+        error: 'sessionId不存在或已过期'
+      });
+    }
+    
+    if (cached.optimized) {
+      return res.json({
+        success: true,
+        data: cached.data,
+        optimized: true
+      });
+    } else {
+      return res.json({
+        success: true,
+        data: cached.data,
+        optimized: false,
+        message: 'AI仍在优化中，请稍后再试'
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ 获取优化结果失败:', error.message);
+    res.json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ============================================
+// 6. 健康检查
 // ============================================
 app.get('/health', (req, res) => {
   res.json({ 
