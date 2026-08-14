@@ -235,16 +235,13 @@ app.post('/api/generate-tree', async (req, res) => {
     const userInput = req.body;
     console.log('🌳 生成成长树:', userInput.job);
 
-    // 1. 智能生成（知识图谱/协同过滤/模板）
     const templateData = generateCareerTree(userInput);
     templateData._isTemplate = true;
     templateData._status = 'AI优化中';
 
-    // 生成sessionId
     const sessionId = 'tree_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
     templateData._sessionId = sessionId;
     
-    // 存储到缓存
     treeCache.set(sessionId, {
       data: templateData,
       userInput: userInput,
@@ -252,7 +249,6 @@ app.post('/api/generate-tree', async (req, res) => {
       timestamp: Date.now()
     });
 
-    // 2. 立即返回（<1秒）
     res.json({
       success: true,
       data: templateData,
@@ -261,7 +257,7 @@ app.post('/api/generate-tree', async (req, res) => {
       source: templateData._source || 'template'
     });
 
-    // 3. 后台异步调用百宝箱API优化
+    // 后台异步优化
     setTimeout(async () => {
       try {
         console.log('🔄 后台AI优化开始... sessionId:', sessionId);
@@ -292,7 +288,7 @@ app.post('/api/generate-tree', async (req, res) => {
               'Content-Type': 'application/json',
               'Authorization': TBOX_CONFIG.apiKey,
             },
-            timeout: 3000000,
+            timeout: 300000,
           }
         );
 
@@ -303,15 +299,9 @@ app.post('/api/generate-tree', async (req, res) => {
             const result = JSON.parse(jsonMatch[0]);
             if (result.branches && result.branches.length > 0) {
               
-              // ============================================
-              // 修复：确保优化版数据正确
-              // ============================================
-              
-              // 修复1：确保分支数量符合规划周期
               let optimizedBranches = result.branches;
-              const icons = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '👑'];
+              const icons = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '💎'];
               
-              // 如果分支少于targetYears，补全
               while (optimizedBranches.length < targetYears) {
                 const i = optimizedBranches.length;
                 optimizedBranches.push({
@@ -324,12 +314,10 @@ app.post('/api/generate-tree', async (req, res) => {
                 });
               }
               
-              // 如果分支多于targetYears，截取
               if (optimizedBranches.length > targetYears) {
                 optimizedBranches = optimizedBranches.slice(0, targetYears);
               }
               
-              // 修复2：确保0年工作经验正确
               let radarData = result.radarData || templateData.radarData;
               if (workYears === 0) {
                 radarData = {
@@ -340,13 +328,11 @@ app.post('/api/generate-tree', async (req, res) => {
                 };
               }
               
-              // 修复3：0年经验时使用新人徽章
               let badges = result.badges || templateData.badges;
               if (workYears === 0) {
                 badges = ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
               }
               
-              // 修复4：0年经验时使用新人挑战文本
               let challenges = result.challenges || templateData.challenges;
               if (workYears === 0 && challenges && challenges.text) {
                 challenges.text = `作为职场新人，需要快速学习和积累经验。${challenges.text}`;
@@ -376,6 +362,16 @@ app.post('/api/generate-tree', async (req, res) => {
         }
       } catch (aiError) {
         console.log('⏱️ 后台AI优化失败:', aiError.message);
+        
+        // 修复：优化失败时也更新缓存
+        const cachedData = treeCache.get(sessionId);
+        if (cachedData) {
+          cachedData.optimized = true;
+          cachedData.data._isTemplate = true;
+          cachedData.data._status = 'AI优化失败，使用基础版本';
+          cachedData.data._optimizeError = aiError.message;
+          treeCache.set(sessionId, cachedData);
+        }
       }
     }, 100);
 
