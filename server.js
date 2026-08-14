@@ -292,7 +292,7 @@ app.post('/api/generate-tree', async (req, res) => {
               'Content-Type': 'application/json',
               'Authorization': TBOX_CONFIG.apiKey,
             },
-            timeout: 300000,
+            timeout: 3000000,
           }
         );
 
