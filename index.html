@@ -141,7 +141,7 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v3.0 · AI驱动</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v3.1 · 稳定版</span>
   </div>
 
   <div class="main-card">
@@ -150,7 +150,6 @@
       <button class="tab-btn" data-tab="tab2"><i class="fas fa-tree"></i> <span>成长树</span></button>
     </div>
 
-    <!-- TAB 1 -->
     <div id="tab1" class="tab-content active">
       <div style="font-size:18px;font-weight:700;color:#0b1e3a;margin-bottom:20px;">
         <i class="fas fa-user-astronaut" style="color:#1e4a8a;"></i> 你的职业画像
@@ -240,7 +239,7 @@
           </label>
           <div class="skills-tag-group" id="skillTags">
             <div class="empty-skills-hint">
-              <i class="fas fa-info-circle"></i> 输入职业后，AI 将根据你的教育背景、职业目标、兴趣和路径风格推荐技能
+              <i class="fas fa-info-circle"></i> 输入职业后，AI 将推荐适合的核心技能
             </div>
           </div>
         </div>
@@ -251,7 +250,6 @@
       </button>
     </div>
 
-    <!-- TAB 2 -->
     <div id="tab2" class="tab-content">
       <div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;border:1px solid rgba(255,255,255,0.6);">
         <span style="color:#4a6f9c;"><i class="fas fa-info-circle"></i> 请先在"信息采集"页面填写完整信息并生成成长树</span>
@@ -303,616 +301,506 @@
 </div>
 
 <script>
-  (function() {
-    'use strict';
+(function() {
+  'use strict';
 
-    const API_CONFIG = {
-      baseUrl: '', // 空字符串表示使用相对路径（同源）
+  const API_CONFIG = { baseUrl: '' };
+
+  const $ = id => document.getElementById(id);
+  const userName = $('userName');
+  const userJob = $('userJob');
+  const userYears = $('userYears');
+  const userEdu = $('userEdu');
+  const userGoal = $('userGoal');
+  const userInterest = $('userInterest');
+  const targetYears = $('targetYears');
+  const goalYearLabel = $('goalYearLabel');
+  const skillTagsContainer = $('skillTags');
+  const generateBtn = $('generateBtn');
+  const regenerateBtn = $('regenerateBtn');
+  const optimizeBtn = $('optimizeBtn');
+  const consultBtn = $('consultBtn');
+  const treeDisplay = $('treeDisplay');
+  const loadingTree = $('loadingTree');
+  const profileSummary = $('profileSummary');
+  const eventContainer = $('eventContainer');
+  const badgesContainer = $('badgesContainer');
+  const statsContainer = $('statsContainer');
+  const aiSkillStatus = $('aiSkillStatus');
+  const styleCards = $('styleCards');
+
+  let currentPathData = null;
+  let currentSessionId = null;
+  let radarChart = null;
+  let isGeneratingSkills = false;
+  let isGeneratingTree = false;
+  let selectedStyle = 'default';
+  let skillRecommendTimer = null;
+  let lastSkillRecommendKey = '';
+  let skillRecommendInProgress = false;
+
+  styleCards.addEventListener('click', function(e) {
+    const card = e.target.closest('.style-card');
+    if (!card) return;
+    styleCards.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedStyle = card.dataset.style;
+    if (userJob.value.trim().length >= 2) debouncedRecommendSkills();
+  });
+
+  function getPathStyle() { return selectedStyle; }
+  function getStyleLabel(style) {
+    const map = { 'default': '稳妥晋升', 'cross': '跨界融合', 'ideal': '理想主义', 'balanced': '均衡发展' };
+    return map[style] || '稳妥晋升';
+  }
+
+  function getSelectedSkills() {
+    const tags = skillTagsContainer.querySelectorAll('.skill-tag.active');
+    return Array.from(tags).map(el => el.dataset.skill || el.textContent.trim());
+  }
+
+  function getUserInput() {
+    const yearsValue = parseInt(userYears.value);
+    return {
+      name: userName.value.trim() || '用户',
+      job: userJob.value.trim() || '产品经理',
+      years: isNaN(yearsValue) ? 0 : yearsValue,
+      education: userEdu.value || '本科',
+      goal: userGoal.value.trim() || '职业发展',
+      interest: userInterest.value.trim() || '职业成长',
+      targetYears: parseInt(targetYears.value) || 5,
+      style: getPathStyle(),
+      styleLabel: getStyleLabel(getPathStyle()),
+      skills: getSelectedSkills(),
     };
+  }
 
-    const $ = id => document.getElementById(id);
-    const userName = $('userName');
-    const userJob = $('userJob');
-    const userYears = $('userYears');
-    const userEdu = $('userEdu');
-    const userGoal = $('userGoal');
-    const userInterest = $('userInterest');
-    const targetYears = $('targetYears');
-    const goalYearLabel = $('goalYearLabel');
-    const skillTagsContainer = $('skillTags');
-    const generateBtn = $('generateBtn');
-    const regenerateBtn = $('regenerateBtn');
-    const optimizeBtn = $('optimizeBtn');
-    const consultBtn = $('consultBtn');
-    const treeDisplay = $('treeDisplay');
-    const loadingTree = $('loadingTree');
-    const profileSummary = $('profileSummary');
-    const eventContainer = $('eventContainer');
-    const badgesContainer = $('badgesContainer');
-    const statsContainer = $('statsContainer');
-    const aiSkillStatus = $('aiSkillStatus');
-    const styleCards = $('styleCards');
+  function updateSummary(data) {
+    const skillsText = data.skills && data.skills.length > 0
+      ? data.skills.slice(0, 4).join(' · ') + (data.skills.length > 4 ? ' ...' : '')
+      : '未选择';
+    const styleLabel = getStyleLabel(data.style || 'default');
+    profileSummary.innerHTML = `
+      <span><strong>👤 ${data.name || '用户'}</strong> · ${data.job || '未填写'} · ${data.years || 0}年</span>
+      <span><strong>🎓</strong> ${data.education || '未填写'}</span>
+      <span><strong>🎯</strong> ${data.goal || '未填写'}</span>
+      <span><strong>📌</strong> ${data.interest || '未填写'}</span>
+      <span><strong>🧩</strong> ${skillsText}</span>
+      <span><strong>🌳</strong> 成长树已生成</span>
+      <span><span class="style-tag ${data.style || 'default'}">${styleLabel}</span></span>
+    `;
+  }
 
-    let currentPathData = null;
-    let currentSessionId = null;
-    let radarChart = null;
-    let isGeneratingSkills = false;
-    let isGeneratingTree = false;
-    let selectedStyle = 'default';
-    
-    let skillRecommendTimer = null;
-    let lastSkillRecommendKey = '';
-    let skillRecommendInProgress = false;
-    let skillRecommendQueue = [];
-
-    styleCards.addEventListener('click', function(e) {
-      const card = e.target.closest('.style-card');
-      if (!card) return;
-      styleCards.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedStyle = card.dataset.style;
-      if (userJob.value.trim().length >= 2) {
-        debouncedRecommendSkills();
+  function debouncedRecommendSkills() {
+    if (skillRecommendTimer) clearTimeout(skillRecommendTimer);
+    skillRecommendTimer = setTimeout(() => {
+      const job = userJob.value.trim();
+      if (job.length >= 2) {
+        autoRecommendSkills(job, userEdu.value.trim(), userGoal.value.trim(), userInterest.value.trim(), getPathStyle());
       }
-    });
+    }, 1000);
+  }
 
-    function getPathStyle() { return selectedStyle; }
-    function getStyleLabel(style) {
-      const map = { 'default': '稳妥晋升', 'cross': '跨界融合', 'ideal': '理想主义', 'balanced': '均衡发展' };
-      return map[style] || '稳妥晋升';
-    }
-
-    function getSelectedSkills() {
-      const tags = skillTagsContainer.querySelectorAll('.skill-tag.active');
-      return Array.from(tags).map(el => el.dataset.skill || el.textContent.trim());
-    }
-
-    function getUserInput() {
-      const yearsValue = parseInt(userYears.value);
-      return {
-        name: userName.value.trim() || '用户',
-        job: userJob.value.trim() || '产品经理',
-        years: isNaN(yearsValue) ? 0 : yearsValue,
-        education: userEdu.value || '本科',
-        goal: userGoal.value.trim() || '职业发展',
-        interest: userInterest.value.trim() || '职业成长',
-        targetYears: parseInt(targetYears.value) || 5,
-        style: getPathStyle(),
-        styleLabel: getStyleLabel(getPathStyle()),
-        skills: getSelectedSkills(),
-      };
-    }
-
-    function updateSummary(data) {
-      const skillsText = data.skills && data.skills.length > 0
-        ? data.skills.slice(0, 4).join(' · ') + (data.skills.length > 4 ? ' ...' : '')
-        : '未选择';
-      const styleLabel = getStyleLabel(data.style || 'default');
-      profileSummary.innerHTML = `
-        <span><strong>👤 ${data.name || '用户'}</strong> · ${data.job || '未填写'} · ${data.years || 0}年</span>
-        <span><strong>🎓</strong> ${data.education || '未填写'}</span>
-        <span><strong>🎯</strong> ${data.goal || '未填写'}</span>
-        <span><strong>📌</strong> ${data.interest || '未填写'}</span>
-        <span><strong>🧩</strong> ${skillsText}</span>
-        <span><strong>🌳</strong> 成长树已生成</span>
-        <span><span class="style-tag ${data.style || 'default'}">${styleLabel}</span></span>
-      `;
-    }
-
-    function debouncedRecommendSkills() {
-      if (skillRecommendTimer) clearTimeout(skillRecommendTimer);
-      skillRecommendTimer = setTimeout(() => {
-        const job = userJob.value.trim();
-        if (job.length >= 2) {
-          autoRecommendSkills(job, userEdu.value.trim(), userGoal.value.trim(), userInterest.value.trim(), getPathStyle());
-        }
-      }, 1000);
-    }
-
-    async function autoRecommendSkills(job, education, goal, interest, style) {
-      if (!job || job.trim() === '' || skillRecommendInProgress) {
-        if (job && job.trim().length >= 2) skillRecommendQueue.push({ job, education, goal, interest, style });
-        return;
-      }
-      if (job.trim().length < 2) return;
-      const cacheKey = `${job.trim()}_${education || ''}_${goal || ''}_${interest || ''}_${style}`;
-      if (cacheKey === lastSkillRecommendKey) return;
-      lastSkillRecommendKey = cacheKey;
-      skillRecommendInProgress = true;
-      aiSkillStatus.classList.remove('hidden');
-      aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析你的职业画像...</span>';
-
-      const styleDesc = {
-        'default': '稳扎稳打，按部就班，注重基础技能的扎实掌握',
-        'cross': '跨界融合，破圈成长，注重多元化技能和跨领域能力',
-        'ideal': '追随热爱，追求极致，注重创新能力和理想追求',
-        'balanced': '全面开花，综合成长，注重各方面均衡发展'
-      };
-
-      const prompt = `你是一位资深的职业规划专家。请根据以下用户信息，推荐适合的核心技能。\n用户信息：\n- 当前职业：${job.trim()}\n- 教育背景：${education || '未填写'}\n- 职业目标：${goal || '未填写'}\n- 职业兴趣：${interest || '未填写'}\n- 路径风格：${styleDesc[style] || '稳扎稳打'}\n\n请列出 8-12 项最适合该用户的核心技能。\n要求：\n1. 只返回技能名称列表，用逗号分隔\n2. 技能名称要精炼、准确（2-6个字）\n3. 技能要紧密结合用户的职业、教育、目标和兴趣\n4. 根据路径风格调整技能侧重点\n5. 覆盖硬技能和软技能\n\n只返回技能列表，不要其他文字。`;
-
-      try {
-        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: prompt, context: { job: job.trim(), education, goal, interest, style } })
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        if (!data.success) throw new Error(data.error || 'AI推荐失败');
-        let skills = [];
-        const text = data.reply || '';
-        const match = text.match(/[\u4e00-\u9fa5a-zA-Z\/\s,，、()（）]+/);
-        if (match) {
-          skills = match[0].split(/[,，、\s]+/).filter(s => { const t = s.trim(); return t.length > 0 && t.length < 15 && !/^[0-9]+$/.test(t); });
-        } else {
-          skills = text.split(/[,，、\s]+/).filter(s => { const t = s.trim(); return t.length > 0 && t.length < 15 && !/^[0-9]+$/.test(t); });
-        }
-        if (skills.length > 12) skills = skills.slice(0, 12);
-        if (skills.length < 4) skills = getFallbackSkills(job.trim(), education, goal, interest, style);
-        renderSkillTags(skills, false);
-        aiSkillStatus.innerHTML = `<i class="fas fa-check-circle"></i><span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能，请选择你当前具备的</span>`;
-        setTimeout(() => aiSkillStatus.classList.add('hidden'), 3000);
-      } catch (error) {
-        console.error('AI技能推荐失败:', error);
-        const fallback = getFallbackSkills(job.trim(), education, goal, interest, style);
-        renderSkillTags(fallback, false);
-        aiSkillStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>AI 推荐失败，已使用备选技能，请手动选择</span>`;
-        setTimeout(() => aiSkillStatus.classList.add('hidden'), 2000);
-      } finally {
-        skillRecommendInProgress = false;
-        if (skillRecommendQueue.length > 0) {
-          const nextRequest = skillRecommendQueue.shift();
-          autoRecommendSkills(nextRequest.job, nextRequest.education, nextRequest.goal, nextRequest.interest, nextRequest.style);
-        }
-      }
-    }
-
-    function getFallbackSkills(job, education, goal, interest, style) {
-      const baseMap = {
-        '计算机老师': ['编程教学', '课程设计', '教育技术', '教学管理', '教育心理学', 'Python编程', '在线教学', '教学研究', '信息技术', '学生指导'],
-        '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
-        '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
-        '学生': ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达', '研究能力', '团队协作', '持续学习'],
-        '网络安全工程师': ['网络协议基础', 'Web安全攻防', '日志分析与审计', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '安全策略', '系统安全'],
-        '安全工程师': ['网络安全', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '安全策略'],
-        '医生': ['临床诊断', '医疗技术', '医患沟通', '循证医学', '医疗管理', '团队协作', '持续学习'],
-        '护士': ['护理技术', '患者关怀', '医疗记录', '急救技能', '沟通协作', '健康宣教'],
-        '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '商业分析', '沟通协作'],
-        '软件开发': ['编程语言', '系统设计', '数据库', '算法', '调试测试', '团队协作'],
-        '设计师': ['UI设计', 'UX研究', '设计工具', '设计思维', '用户测试', '创意表达'],
-        '律师': ['法律研究', '法律写作', '诉讼技巧', '谈判能力', '客户沟通', '法律伦理'],
-        '金融分析师': ['财务分析', '投资研究', '风险管理', '数据建模', '行业分析', '商业洞察'],
-        '建筑师': ['建筑设计', '空间规划', '建筑技术', '项目管理', '可持续设计', '沟通协作'],
-        '人力资源': ['招聘管理', '绩效管理', '人才发展', '员工关系', '组织发展', '沟通协调'],
-        '运营': ['用户运营', '数据分析', '增长策略', '内容策划', '项目管理', '沟通协作'],
-        '市场营销': ['品牌营销', '数字营销', '市场分析', '内容创作', '活动策划', '数据分析'],
-        '心理咨询师': ['心理评估', '咨询技巧', '危机干预', '伦理规范', '自我觉察', '沟通共情'],
-      };
-      let baseSkills = ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
-      for (const [key, value] of Object.entries(baseMap)) {
-        if (job.includes(key) || key.includes(job)) { baseSkills = value; break; }
-      }
-      let eduSkills = [];
-      if (education) {
-        const eduLower = education.toLowerCase();
-        if (eduLower.includes('计算机') || eduLower.includes('cs')) eduSkills = ['编程能力', '算法思维', '系统设计', '数据结构'];
-        else if (eduLower.includes('管理') || eduLower.includes('mba')) eduSkills = ['战略思维', '团队管理', '决策能力', '组织行为'];
-        else if (eduLower.includes('教育') || eduLower.includes('师范')) eduSkills = ['教育理论', '课程开发', '教学法', '教育评估'];
-        else if (eduLower.includes('设计') || eduLower.includes('艺术')) eduSkills = ['设计思维', '创意表达', '视觉传达', '用户研究'];
-      }
-      let goalSkills = [];
-      if (goal) {
-        if (goal.includes('管理') || goal.includes('负责') || goal.includes('总监')) goalSkills = ['团队管理', '战略规划', '决策能力', '领导力'];
-        if (goal.includes('专家') || goal.includes('研究') || goal.includes('学术')) goalSkills = ['研究能力', '学术写作', '深度思考', '创新能力'];
-        if (goal.includes('创业') || goal.includes('创始人')) goalSkills = ['商业思维', '资源整合', '风险决策', '团队建设'];
-        if (goal.includes('学科') || goal.includes('教研') || goal.includes('老师') || goal.includes('教师')) goalSkills = ['学科建设', '教研管理', '课程体系', '教学领导力'];
-        if (goal.includes('安全') || goal.includes('网络')) goalSkills = ['安全架构', '安全策略', '风险管理', '合规审计'];
-      }
-      let interestSkills = [];
-      if (interest) {
-        if (interest.includes('AI') || interest.includes('智能') || interest.includes('数据')) interestSkills = ['数据分析', 'AI应用', '机器学习', '数据驱动'];
-        if (interest.includes('教育') || interest.includes('教学') || interest.includes('学习')) interestSkills = ['教学能力', '教育技术', '学习设计', '知识传递'];
-        if (interest.includes('产品') || interest.includes('设计') || interest.includes('创新')) interestSkills = ['产品思维', '创新设计', '用户体验', '商业洞察'];
-        if (interest.includes('管理') || interest.includes('组织') || interest.includes('领导')) interestSkills = ['组织管理', '领导力', '团队协作', '沟通能力'];
-        if (interest.includes('编程') || interest.includes('开发') || interest.includes('代码')) interestSkills = ['编程能力', '软件开发', '技术架构', '代码质量'];
-        if (interest.includes('安全') || interest.includes('网络') || interest.includes('防护')) interestSkills = ['网络安全', '渗透测试', '安全防护', '漏洞挖掘'];
-      }
-      let styleSkills = [];
-      if (style === 'cross') styleSkills = ['跨领域协作', '多元化思维', '资源整合', '创新融合'];
-      else if (style === 'ideal') styleSkills = ['创新思维', '追求卓越', '自我驱动', '突破常规'];
-      else if (style === 'balanced') styleSkills = ['综合能力', '时间管理', '多任务处理', '全面视角'];
-      else styleSkills = ['基础扎实', '专业深耕', '持续进步', '稳扎稳打'];
-      const allSkills = [...baseSkills, ...eduSkills, ...goalSkills, ...interestSkills, ...styleSkills];
-      const uniqueSkills = [...new Set(allSkills)].filter(s => s && s.length > 0);
-      return uniqueSkills.length > 12 ? uniqueSkills.slice(0, 12) : uniqueSkills;
-    }
-
-    function renderSkillTags(skills, defaultActive = false) {
-      skillTagsContainer.innerHTML = '';
-      if (!skills || skills.length === 0) {
-        skillTagsContainer.innerHTML = '<div class="empty-skills-hint"><i class="fas fa-info-circle"></i> 暂无技能，请重新输入职业</div>';
-        return;
-      }
-      skills.forEach(skill => {
-        const tag = document.createElement('span');
-        tag.className = defaultActive ? 'skill-tag active' : 'skill-tag';
-        tag.dataset.skill = skill;
-        tag.textContent = skill;
-        tag.addEventListener('click', function() { this.classList.toggle('active'); });
-        skillTagsContainer.appendChild(tag);
+  async function autoRecommendSkills(job, education, goal, interest, style) {
+    if (!job || job.trim() === '' || skillRecommendInProgress) return;
+    if (job.trim().length < 2) return;
+    const cacheKey = `${job.trim()}_${education || ''}_${goal || ''}_${interest || ''}_${style}`;
+    if (cacheKey === lastSkillRecommendKey) return;
+    lastSkillRecommendKey = cacheKey;
+    skillRecommendInProgress = true;
+    aiSkillStatus.classList.remove('hidden');
+    aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析你的职业画像...</span>';
+    try {
+      const response = await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job: job.trim(), education, goal, interest, style })
       });
-      skillTagsContainer.classList.add('has-skills');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || '推荐失败');
+      let skills = data.skills || [];
+      if (skills.length < 4) skills = getFallbackSkills(job.trim(), education, goal, interest, style);
+      renderSkillTags(skills, false);
+      aiSkillStatus.innerHTML = `<i class="fas fa-check-circle"></i><span>✅ 已为你推荐 <strong>${skills.length}</strong> 项技能，请选择你当前具备的</span>`;
+      setTimeout(() => aiSkillStatus.classList.add('hidden'), 3000);
+    } catch (error) {
+      console.error('AI技能推荐失败:', error);
+      const fallback = getFallbackSkills(job.trim(), education, goal, interest, style);
+      renderSkillTags(fallback, false);
+      aiSkillStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>AI 推荐失败，已使用备选技能，请手动选择</span>`;
+      setTimeout(() => aiSkillStatus.classList.add('hidden'), 2000);
+    } finally {
+      skillRecommendInProgress = false;
     }
+  }
 
-    ['userJob', 'userEdu', 'userGoal', 'userInterest'].forEach(id => {
-      const el = $(id);
-      el.addEventListener('input', function() { debouncedRecommendSkills(); });
-      el.addEventListener('change', function() { debouncedRecommendSkills(); });
-    });
-
-    targetYears.addEventListener('change', function() {
-      if (goalYearLabel) goalYearLabel.textContent = targetYears.value;
-    });
-
-    function getDefaultTree(userInput) {
-      const job = userInput.job || '产品经理';
-      const interest = userInput.interest || '职业发展';
-      const years = userInput.targetYears || 5;
-      const style = userInput.style || 'default';
-      const workYears = userInput.years || 0;
-      const branchTemplates = {
-        '学生': {
-          'default': [
-            { year: 1, icon: '📚', title: '学业筑基', goals: '夯实专业基础，建立知识体系', skills: ['学习方法', '时间管理', '专业知识'], milestone: 'GPA达到3.5以上' },
-            { year: 2, icon: '🔬', title: '科研探索', goals: '参与科研项目，培养研究能力', skills: ['研究能力', '数据分析', '实验设计'], milestone: '完成科研项目' },
-            { year: 3, icon: '💡', title: '实践积累', goals: '参加实习实践，提升应用能力', skills: ['实践能力', '问题解决', '团队协作'], milestone: '完成实习经历' },
-            { year: 4, icon: '📝', title: '学术产出', goals: '发表学术论文，形成个人成果', skills: ['学术写作', '学术交流', '创新思维'], milestone: '发表学术论文' },
-            { year: 5, icon: '🏆', title: '职业启航', goals: '从校园到职场的身份转变', skills: ['职业素养', '持续学习', '适应能力'], milestone: '获得理想offer' },
-            { year: 6, icon: '🌐', title: '职业发展', goals: '适应职场环境', skills: ['职业素养', '专业技能', '沟通协作'], milestone: '转正并独立工作' },
-            { year: 7, icon: '🎯', title: '专业深化', goals: '深入专业领域', skills: ['专业深化', '项目管理', '问题解决'], milestone: '成为团队骨干' },
-            { year: 8, icon: '🌟', title: '行业影响', goals: '建立行业影响力', skills: ['行业洞察', '演讲表达', '人脉拓展'], milestone: '行业交流分享' },
-            { year: 9, icon: '🏛️', title: '管理进阶', goals: '向管理岗位发展', skills: ['团队管理', '战略思维', '决策能力'], milestone: '晋升管理岗位' },
-            { year: 10, icon: '💎', title: '成为领袖', goals: '成为行业领袖', skills: ['战略领导', '行业影响', '创新引领'], milestone: '成为行业领袖' }
-          ]
-        },
-        'default': {
-          'default': [
-            { year: 1, icon: '📚', title: '基础夯实', goals: '掌握核心技能', skills: ['专业技能', '学习方法', '沟通协作'], milestone: '完成1个项目' },
-            { year: 2, icon: '📝', title: '能力提升', goals: '独立承担任务', skills: ['项目管理', '团队协作', '问题解决'], milestone: '独立完成项目' },
-            { year: 3, icon: '💡', title: '专业突破', goals: '成为团队骨干', skills: ['战略思维', '领导力', '创新思维'], milestone: '完成重要汇报' },
-            { year: 4, icon: '👥', title: '管理进阶', goals: '带领团队', skills: ['团队管理', '决策能力', '跨部门协作'], milestone: '团队项目成功' },
-            { year: 5, icon: '🏆', title: '行业专家', goals: '成为领域专家', skills: ['行业洞察', '影响力', '战略规划'], milestone: '行业分享' },
-            { year: 6, icon: '🌐', title: '跨界拓展', goals: '拓展跨领域资源', skills: ['资源整合', '跨界协作'], milestone: '建立人脉网络' },
-            { year: 7, icon: '🎯', title: '战略规划', goals: '参与战略决策', skills: ['战略规划', '商业洞察'], milestone: '主导战略项目' },
-            { year: 8, icon: '🌟', title: '品牌影响', goals: '建立个人品牌', skills: ['品牌建设', '演讲表达'], milestone: '行业大会演讲' },
-            { year: 9, icon: '🏛️', title: '组织变革', goals: '推动组织发展', skills: ['变革管理', '体系建设'], milestone: '完成组织变革' },
-            { year: 10, icon: '💎', title: '行业领袖', goals: '引领行业发展', skills: ['战略领导', '思想引领'], milestone: '发布行业白皮书' }
-          ]
-        }
-      };
-      let template = branchTemplates['default']['default'];
-      for (const [jobKey, styleMap] of Object.entries(branchTemplates)) {
-        if (job.includes(jobKey) || jobKey.includes(job)) {
-          template = styleMap['default'] || branchTemplates['default']['default'];
-          break;
-        }
-      }
-      const branches = [];
-      for (let i = 0; i < Math.min(years, template.length); i++) {
-        const t = template[i];
-        branches.push({ year: t.year, icon: t.icon, title: t.title, goals: t.goals, skills: t.skills, milestone: t.milestone });
-      }
-      const radarData = {
-        skill: workYears === 0 ? 30 : Math.min(85, 40 + workYears * 8),
-        experience: workYears === 0 ? 0 : Math.min(90, workYears * 15),
-        learning: workYears === 0 ? 85 : Math.max(50, 80 - workYears * 3),
-        adaptability: workYears === 0 ? 60 : Math.max(40, 70 - workYears * 2),
-        leadership: workYears === 0 ? 0 : Math.min(75, workYears * 10)
-      };
-      return {
-        tree: { branches },
-        recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-        radarData: radarData,
-        challenges: { icon: '⚡', text: workYears === 0 ? '作为职场新人，快速学习和积累经验是关键' : '持续学习，抓住职业发展机遇' },
-        badges: workYears === 0 ? ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'] : ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
-      };
+  function getFallbackSkills(job, education, goal, interest, style) {
+    const baseMap = {
+      '学生': ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达'],
+      '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达'],
+      '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达'],
+      '网络安全工程师': ['网络协议', '渗透测试', '安全防护', '漏洞挖掘', '应急响应'],
+      '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '沟通协作'],
+      '医生': ['临床诊断', '医患沟通', '医疗技术', '团队协作', '持续学习'],
+      '护士': ['护理技术', '患者关怀', '急救技能', '沟通协作', '健康宣教'],
+      '运营': ['用户运营', '数据分析', '内容策划', '项目管理', '沟通协作'],
+      '设计师': ['UI设计', 'UX研究', '设计工具', '设计思维', '创意表达'],
+      '奶茶店店员': ['团队管理', '门店运营', '排班调度', '营销推广', '客户服务'],
+    };
+    let baseSkills = ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
+    for (const [key, value] of Object.entries(baseMap)) {
+      if (job.includes(key) || key.includes(job)) { baseSkills = value; break; }
     }
+    return baseSkills.slice(0, 8);
+  }
 
-    async function generateTree(userInput) {
-      if (isGeneratingTree) return;
-      isGeneratingTree = true;
-      loadingTree.classList.remove('hidden');
-      treeDisplay.innerHTML = '';
+  function renderSkillTags(skills, defaultActive = false) {
+    skillTagsContainer.innerHTML = '';
+    if (!skills || skills.length === 0) {
+      skillTagsContainer.innerHTML = '<div class="empty-skills-hint"><i class="fas fa-info-circle"></i> 暂无技能，请重新输入职业</div>';
+      return;
+    }
+    skills.forEach(skill => {
+      const tag = document.createElement('span');
+      tag.className = defaultActive ? 'skill-tag active' : 'skill-tag';
+      tag.dataset.skill = skill;
+      tag.textContent = skill;
+      tag.addEventListener('click', function() { this.classList.toggle('active'); });
+      skillTagsContainer.appendChild(tag);
+    });
+    skillTagsContainer.classList.add('has-skills');
+  }
+
+  // 只在职业输入时触发技能推荐
+  userJob.addEventListener('input', function() { debouncedRecommendSkills(); });
+  userJob.addEventListener('change', function() { debouncedRecommendSkills(); });
+
+  targetYears.addEventListener('change', function() {
+    if (goalYearLabel) goalYearLabel.textContent = targetYears.value;
+  });
+
+  function getDefaultTree(userInput) {
+    const job = userInput.job || '产品经理';
+    const years = userInput.targetYears || 5;
+    const workYears = userInput.years || 0;
+    const defaultBranches = [
+      { year: 1, icon: '📚', title: '基础夯实', goals: '掌握核心技能', skills: ['专业技能', '学习方法'], milestone: '完成1个项目' },
+      { year: 2, icon: '📝', title: '能力提升', goals: '独立承担任务', skills: ['项目管理', '团队协作'], milestone: '独立完成项目' },
+      { year: 3, icon: '💡', title: '专业突破', goals: '成为团队骨干', skills: ['战略思维', '创新思维'], milestone: '完成重要汇报' },
+      { year: 4, icon: '👥', title: '管理进阶', goals: '带领团队', skills: ['团队管理', '决策能力'], milestone: '团队项目成功' },
+      { year: 5, icon: '🏆', title: '行业专家', goals: '成为领域专家', skills: ['行业洞察', '战略规划'], milestone: '行业分享' },
+      { year: 6, icon: '🌐', title: '跨界拓展', goals: '拓展资源', skills: ['资源整合', '跨界协作'], milestone: '建立人脉' },
+      { year: 7, icon: '🎯', title: '战略规划', goals: '参与战略决策', skills: ['战略规划', '商业洞察'], milestone: '主导战略项目' },
+      { year: 8, icon: '🌟', title: '品牌影响', goals: '建立个人品牌', skills: ['品牌建设', '演讲表达'], milestone: '行业演讲' },
+      { year: 9, icon: '🏛️', title: '组织变革', goals: '推动组织发展', skills: ['变革管理', '体系建设'], milestone: '完成变革' },
+      { year: 10, icon: '💎', title: '行业领袖', goals: '引领行业发展', skills: ['战略领导', '思想引领'], milestone: '行业白皮书' }
+    ];
+    const branches = defaultBranches.slice(0, years);
+    const radarData = {
+      skill: workYears === 0 ? 30 : Math.min(85, 40 + workYears * 8),
+      experience: workYears === 0 ? 0 : Math.min(90, workYears * 15),
+      learning: workYears === 0 ? 85 : Math.max(50, 80 - workYears * 3),
+      adaptability: workYears === 0 ? 60 : Math.max(40, 70 - workYears * 2),
+      leadership: workYears === 0 ? 0 : Math.min(75, workYears * 10)
+    };
+    return {
+      tree: { branches },
+      recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
+      radarData: radarData,
+      challenges: { icon: '⚡', text: workYears === 0 ? '作为职场新人，快速学习和积累经验是关键' : '持续学习，抓住职业发展机遇' },
+      badges: workYears === 0 ? ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'] : ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
+    };
+  }
+
+  async function generateTree(userInput) {
+    if (isGeneratingTree) return;
+    isGeneratingTree = true;
+    loadingTree.classList.remove('hidden');
+    treeDisplay.innerHTML = '';
+    try {
+      const response = await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userInput)
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || '生成失败');
+      if (data.sessionId) currentSessionId = data.sessionId;
+      return data.data;
+    } catch (error) {
+      console.error('生成失败:', error);
+      return getDefaultTree(userInput);
+    } finally {
+      loadingTree.classList.add('hidden');
+      isGeneratingTree = false;
+    }
+  }
+
+  optimizeBtn.addEventListener('click', async function() {
+    if (!currentSessionId) { alert('请先生成成长树'); return; }
+    optimizeBtn.disabled = true;
+    let attempts = 0;
+    const maxAttempts = 4;
+    const interval = 5000;
+
+    async function checkOptimized() {
+      optimizeBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 优化中(${attempts + 1}/${maxAttempts})...`;
       try {
-        const response = await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(userInput)
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         const data = await response.json();
-        if (!data.success) throw new Error(data.error || '生成失败');
-        if (data.sessionId) currentSessionId = data.sessionId;
-        return data.data;
-      } catch (error) {
-        console.error('生成失败:', error);
-        return getDefaultTree(userInput);
-      } finally {
-        loadingTree.classList.add('hidden');
-        isGeneratingTree = false;
-      }
-    }
-
-    optimizeBtn.addEventListener('click', async function() {
-      if (!currentSessionId) { alert('请先生成成长树'); return; }
-      optimizeBtn.disabled = true;
-      let attempts = 0;
-      const maxAttempts = 4;
-      const interval = 5000;
-
-      async function checkOptimized() {
-        optimizeBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 优化中(${attempts + 1}/${maxAttempts})...`;
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000);
-          const response = await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          const data = await response.json();
-          if (data.success && data.optimized) {
-            const userInput = getUserInput();
-            const targetYearsNum = userInput.targetYears || 5;
-            const workYearsNum = userInput.years || 0;
-            const icons = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '💎'];
-            if (data.data && data.data.tree && data.data.tree.branches) {
-              while (data.data.tree.branches.length < targetYearsNum) {
-                const i = data.data.tree.branches.length;
-                data.data.tree.branches.push({ year: i + 1, icon: icons[i] || '📌', title: `第${i + 1}年成长`, goals: '持续成长与突破', skills: ['专业技能', '持续学习'], milestone: `第${i + 1}年里程碑` });
-              }
-              if (data.data.tree.branches.length > targetYearsNum) {
-                data.data.tree.branches = data.data.tree.branches.slice(0, targetYearsNum);
-              }
-              if (workYearsNum === 0 && data.data.radarData) {
-                data.data.radarData.experience = 0;
-                data.data.radarData.leadership = 0;
-                data.data.radarData.skill = Math.min(40, data.data.radarData.skill || 30);
-              }
-              if (workYearsNum === 0 && data.data.badges) {
-                data.data.badges = ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
-              }
+        if (data.success && data.optimized) {
+          const userInput = getUserInput();
+          const targetYearsNum = userInput.targetYears || 5;
+          const workYearsNum = userInput.years || 0;
+          const icons = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '💎'];
+          if (data.data && data.data.tree && data.data.tree.branches) {
+            while (data.data.tree.branches.length < targetYearsNum) {
+              const i = data.data.tree.branches.length;
+              data.data.tree.branches.push({ year: i + 1, icon: icons[i] || '📌', title: `第${i + 1}年成长`, goals: '持续成长与突破', skills: ['专业技能', '持续学习'], milestone: `第${i + 1}年里程碑` });
             }
-            currentPathData = data.data;
-            renderTree(currentPathData, userInput);
-            if (data.data._status && data.data._status.includes('失败')) {
-              alert('⚠️ AI优化暂时不可用，当前显示基础版本');
-            } else {
-              alert('✅ 已更新为AI优化版！');
+            if (data.data.tree.branches.length > targetYearsNum) {
+              data.data.tree.branches = data.data.tree.branches.slice(0, targetYearsNum);
             }
-            optimizeBtn.disabled = false;
-            optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
-            return;
-          } else if (data.success && !data.optimized) {
-            attempts++;
-            if (attempts < maxAttempts) setTimeout(checkOptimized, interval);
-            else {
-              alert('⏳ AI优化超时，当前显示的是基础版本。请稍后再试。');
-              optimizeBtn.disabled = false;
-              optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
+            if (workYearsNum === 0 && data.data.radarData) {
+              data.data.radarData.experience = 0;
+              data.data.radarData.leadership = 0;
+              data.data.radarData.skill = Math.min(40, data.data.radarData.skill || 30);
             }
-          } else {
-            alert('获取失败：' + (data.error || '未知错误'));
-            optimizeBtn.disabled = false;
-            optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
+            if (workYearsNum === 0 && data.data.badges) {
+              data.data.badges = ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
+            }
           }
-        } catch (error) {
+          currentPathData = data.data;
+          renderTree(currentPathData, userInput);
+          if (data.data._status && data.data._status.includes('失败')) {
+            alert('⚠️ AI优化暂时不可用，当前显示基础版本');
+          } else {
+            alert('✅ 已更新为AI优化版！');
+          }
+          optimizeBtn.disabled = false;
+          optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
+          return;
+        } else if (data.success && !data.optimized) {
           attempts++;
           if (attempts < maxAttempts) setTimeout(checkOptimized, interval);
           else {
-            alert('网络错误，请稍后再试');
+            alert('⏳ AI优化超时，当前显示的是基础版本。请稍后再试。');
             optimizeBtn.disabled = false;
             optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
           }
+        } else {
+          alert('获取失败：' + (data.error || '未知错误'));
+          optimizeBtn.disabled = false;
+          optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
         }
-      }
-      await checkOptimized();
-    });
-
-    function renderTree(pathData, userInput) {
-      if (!pathData || !pathData.tree || !pathData.tree.branches || pathData.tree.branches.length === 0) {
-        treeDisplay.innerHTML = '<div class="text-center text-muted" style="padding:40px;">暂无数据，请先生成</div>';
-        return;
-      }
-      const branches = pathData.tree.branches;
-      const isGoal = (index) => index === branches.length - 1;
-      const isTemplate = pathData._isTemplate || false;
-      let html = `<div class="tree"><div class="tree-root"><div class="node"><span>📍</span><span>${userInput.job || '当前职业'}</span><span class="sub-info">· ${userInput.years || 0}年经验</span><span class="sub-info" style="background:rgba(255,255,255,0.2);padding:2px 12px;border-radius:20px;">${userInput.styleLabel || '稳妥晋升'}</span>${isTemplate ? '<span class="sub-info" style="background:rgba(255,200,0,0.3);padding:2px 12px;border-radius:20px;font-size:12px;">⏳ AI优化中</span>' : ''}</div></div><div class="tree-branches">`;
-      const icons = ['🌱', '🌿', '🌳', '🌲', '🌟', '🌐', '🎯', '🌟', '🏛️', '💎'];
-      branches.forEach((branch, index) => {
-        const yearLabel = icons[index] || '🌱';
-        const skillsHtml = (branch.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
-        html += `<div class="branch"><div class="branch-label">${yearLabel} 第${branch.year}年</div><div class="node ${isGoal(index) ? 'goal' : ''}"><div class="year-badge">第${branch.year}年</div><div class="node-icon">${branch.icon || '📌'}</div><div class="node-label">${branch.title || '阶段目标'}</div><div class="node-goal">${branch.goals || ''}</div><div class="node-skills">${skillsHtml}</div><div class="milestone-badge">🎯 ${branch.milestone || ''}</div></div></div>`;
-      });
-      html += '</div></div>';
-      treeDisplay.innerHTML = html;
-      if (pathData.challenges) {
-        eventContainer.innerHTML = `<div class="event-card"><span class="event-icon">${pathData.challenges.icon || '⚡'}</span><span class="event-text">${pathData.challenges.text || '持续学习，抓住机遇！'}</span>${isTemplate ? '<span class="template-badge">⏳ AI优化中</span>' : ''}</div>`;
-      } else {
-        eventContainer.innerHTML = '';
-      }
-      if (pathData.badges && pathData.badges.length > 0) {
-        const badgesHtml = pathData.badges.map((b, i) => {
-          const icon = b.match(/^.{1,2}/)?.[0] || ['🌟', '🚀', '👑', '💎', '🏅'][i % 5] || '🏅';
-          return `<span class="badge-item unlocked"><span class="badge-icon">${icon}</span>${b.replace(/^.{1,2}\s*/, '')}</span>`;
-        }).join('');
-        badgesContainer.innerHTML = badgesHtml;
-      }
-      if (pathData.radarData) {
-        renderRadarStable(pathData.radarData);
-        updateStats(pathData.radarData);
-      }
-      updateSummary(userInput);
-    }
-
-    function renderRadarStable(data) {
-      const container = document.getElementById('radarContainer');
-      if (!container) return;
-      if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-        setTimeout(() => renderRadarStable(data), 100);
-        return;
-      }
-      try {
-        if (!radarChart) radarChart = echarts.init(container);
-        const values = [data.skill || 0, data.experience || 0, data.learning || 0, data.adaptability || 0, data.leadership || 0];
-        const option = {
-          radar: {
-            indicator: [
-              { name: '专业技能', max: 100 },
-              { name: '工作经验', max: 100 },
-              { name: '学习能力', max: 100 },
-              { name: '适应能力', max: 100 },
-              { name: '领导力', max: 100 }
-            ],
-            center: ['50%', '50%'],
-            radius: '65%',
-            axisName: { color: '#1d3557', fontSize: 12, fontWeight: 600 },
-            splitArea: { areaStyle: { color: ['rgba(30, 74, 138, 0.02)', 'rgba(30, 74, 138, 0.04)'] } }
-          },
-          series: [{
-            type: 'radar',
-            data: [{ value: values, name: '当前能力', areaStyle: { color: 'rgba(30, 74, 138, 0.3)' }, lineStyle: { color: '#1e4a8a', width: 2 }, itemStyle: { color: '#1e4a8a' } }]
-          }]
-        };
-        radarChart.setOption(option, true);
-        radarChart.resize();
-        if (!window._radarResizeHandler) {
-          window._radarResizeHandler = true;
-          window.addEventListener('resize', function() {
-            setTimeout(() => { if (radarChart && !radarChart.isDisposed()) radarChart.resize(); }, 300);
-          });
-        }
-      } catch (error) { console.error('雷达图渲染失败:', error); }
-    }
-
-    function updateStats(data) {
-      const items = [
-        { key: 'skill', label: '专业技能' },
-        { key: 'experience', label: '工作经验' },
-        { key: 'learning', label: '学习能力' },
-        { key: 'adaptability', label: '适应能力' },
-        { key: 'leadership', label: '领导力' }
-      ];
-      const bars = statsContainer.querySelectorAll('.stat-fill');
-      const values = statsContainer.querySelectorAll('.stat-value');
-      items.forEach((item, index) => {
-        const val = Math.min(100, Math.max(0, data[item.key] || 0));
-        if (bars[index]) {
-          bars[index].style.width = '0%';
-          setTimeout(() => { bars[index].style.width = val + '%'; }, 100);
-        }
-        if (values[index]) values[index].textContent = val + '%';
-      });
-    }
-
-    async function generateAndRender() {
-      const userInput = getUserInput();
-      if (!userInput.job || userInput.job.trim() === '') { alert('请输入当前职业'); return; }
-      const selectedSkills = getSelectedSkills();
-      if (selectedSkills.length < 3) { alert('请至少选择3项核心技能（点击技能标签切换选中状态）'); return; }
-      generateBtn.disabled = true;
-      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
-      try {
-        const pathData = await generateTree(userInput);
-        currentPathData = pathData;
-        renderTree(pathData, userInput);
-        switchTab('tab2');
       } catch (error) {
-        console.error('生成失败:', error);
-        alert('生成失败，使用默认数据');
-        const fallback = getDefaultTree(userInput);
-        currentPathData = fallback;
-        renderTree(fallback, userInput);
-        switchTab('tab2');
-      } finally {
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';
+        attempts++;
+        if (attempts < maxAttempts) setTimeout(checkOptimized, interval);
+        else {
+          alert('网络错误，请稍后再试');
+          optimizeBtn.disabled = false;
+          optimizeBtn.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
+        }
       }
     }
+    await checkOptimized();
+  });
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.tab === tabId); });
-      document.querySelectorAll('.tab-content').forEach(content => { content.classList.toggle('active', content.id === tabId); });
-      if (tabId === 'tab2' && currentPathData && currentPathData.radarData) {
-        setTimeout(() => { renderRadarStable(currentPathData.radarData); }, 200);
-      }
+  function renderTree(pathData, userInput) {
+    if (!pathData || !pathData.tree || !pathData.tree.branches || pathData.tree.branches.length === 0) {
+      treeDisplay.innerHTML = '<div class="text-center text-muted" style="padding:40px;">暂无数据，请先生成</div>';
+      return;
     }
+    const branches = pathData.tree.branches;
+    const isGoal = (index) => index === branches.length - 1;
+    const isTemplate = pathData._isTemplate || false;
+    let html = `<div class="tree"><div class="tree-root"><div class="node"><span>📍</span><span>${userInput.job || '当前职业'}</span><span class="sub-info">· ${userInput.years || 0}年经验</span><span class="sub-info" style="background:rgba(255,255,255,0.2);padding:2px 12px;border-radius:20px;">${userInput.styleLabel || '稳妥晋升'}</span>${isTemplate ? '<span class="sub-info" style="background:rgba(255,200,0,0.3);padding:2px 12px;border-radius:20px;font-size:12px;">⏳ AI优化中</span>' : ''}</div></div><div class="tree-branches">`;
+    const icons = ['🌱', '🌿', '🌳', '🌲', '🌟', '🌐', '🎯', '🌟', '🏛️', '💎'];
+    branches.forEach((branch, index) => {
+      const yearLabel = icons[index] || '🌱';
+      const skillsHtml = (branch.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+      html += `<div class="branch"><div class="branch-label">${yearLabel} 第${branch.year}年</div><div class="node ${isGoal(index) ? 'goal' : ''}"><div class="year-badge">第${branch.year}年</div><div class="node-icon">${branch.icon || '📌'}</div><div class="node-label">${branch.title || '阶段目标'}</div><div class="node-goal">${branch.goals || ''}</div><div class="node-skills">${skillsHtml}</div><div class="milestone-badge">🎯 ${branch.milestone || ''}</div></div></div>`;
+    });
+    html += '</div></div>';
+    treeDisplay.innerHTML = html;
+    if (pathData.challenges) {
+      eventContainer.innerHTML = `<div class="event-card"><span class="event-icon">${pathData.challenges.icon || '⚡'}</span><span class="event-text">${pathData.challenges.text || '持续学习，抓住机遇！'}</span>${isTemplate ? '<span class="template-badge">⏳ AI优化中</span>' : ''}</div>`;
+    } else {
+      eventContainer.innerHTML = '';
+    }
+    if (pathData.badges && pathData.badges.length > 0) {
+      const badgesHtml = pathData.badges.map((b, i) => {
+        const icon = b.match(/^.{1,2}/)?.[0] || ['🌟', '🚀', '👑', '💎', '🏅'][i % 5] || '🏅';
+        return `<span class="badge-item unlocked"><span class="badge-icon">${icon}</span>${b.replace(/^.{1,2}\s*/, '')}</span>`;
+      }).join('');
+      badgesContainer.innerHTML = badgesHtml;
+    }
+    if (pathData.radarData) {
+      renderRadarStable(pathData.radarData);
+      updateStats(pathData.radarData);
+    }
+    updateSummary(userInput);
+  }
 
-    consultBtn.addEventListener('click', async function() {
-      if (!currentPathData) { alert('请先生成职业成长树'); return; }
-      const userInput = getUserInput();
-      const msg = `我是${userInput.name}，${userInput.job}，${userInput.years}年经验。\n教育：${userInput.education}\n目标：${userInput.goal}\n兴趣：${userInput.interest}\n风格：${userInput.styleLabel}\n技能：${userInput.skills.join('、')}\n\n我的${userInput.targetYears}年计划：\n${currentPathData.tree.branches.map((b) => `第${b.year}年：${b.title} → ${b.goals}`).join('\n')}\n\n请给我5条具体的职业发展建议，每条不超过50字。`;
-      try {
-        consultBtn.disabled = true;
-        consultBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 咨询中...';
-        const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg, context: userInput })
+  function renderRadarStable(data) {
+    const container = document.getElementById('radarContainer');
+    if (!container) return;
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      setTimeout(() => renderRadarStable(data), 100);
+      return;
+    }
+    try {
+      if (!radarChart) radarChart = echarts.init(container);
+      const values = [data.skill || 0, data.experience || 0, data.learning || 0, data.adaptability || 0, data.leadership || 0];
+      const option = {
+        radar: {
+          indicator: [
+            { name: '专业技能', max: 100 },
+            { name: '工作经验', max: 100 },
+            { name: '学习能力', max: 100 },
+            { name: '适应能力', max: 100 },
+            { name: '领导力', max: 100 }
+          ],
+          center: ['50%', '50%'],
+          radius: '65%',
+          axisName: { color: '#1d3557', fontSize: 12, fontWeight: 600 },
+          splitArea: { areaStyle: { color: ['rgba(30, 74, 138, 0.02)', 'rgba(30, 74, 138, 0.04)'] } }
+        },
+        series: [{
+          type: 'radar',
+          data: [{ value: values, name: '当前能力', areaStyle: { color: 'rgba(30, 74, 138, 0.3)' }, lineStyle: { color: '#1e4a8a', width: 2 }, itemStyle: { color: '#1e4a8a' } }]
+        }]
+      };
+      radarChart.setOption(option, true);
+      radarChart.resize();
+      if (!window._radarResizeHandler) {
+        window._radarResizeHandler = true;
+        window.addEventListener('resize', function() {
+          setTimeout(() => { if (radarChart && !radarChart.isDisposed()) radarChart.resize(); }, 300);
         });
-        const data = await response.json();
-        if (data.success) showAIResponse(data.reply);
-        else alert('咨询失败：' + (data.error || '未知错误'));
-      } catch (error) {
-        alert('咨询失败：' + error.message);
-      } finally {
-        consultBtn.disabled = false;
-        consultBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 咨询AI助手';
       }
-    });
+    } catch (error) { console.error('雷达图渲染失败:', error); }
+  }
 
-    function showAIResponse(reply) {
-      if (!reply || reply.trim() === '') reply = 'AI没有返回有效内容，请重试。';
-      const overlay = document.createElement('div');
-      overlay.className = 'ai-modal-overlay';
-      let formattedReply = reply
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/^### (.*)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.*)$/gm, '<h3>$1</h3>')
-        .replace(/^# (.*)$/gm, '<h3>$1</h3>')
-        .replace(/^\* (.*)$/gm, '• $1')
-        .replace(/^\- (.*)$/gm, '• $1')
-        .replace(/^\d+\. (.*)$/gm, '<br><strong>$1</strong>')
-        .replace(/\n/g, '<br>');
-      overlay.innerHTML = `<div class="ai-modal-content"><div class="ai-modal-header"><span>🤖 AI 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()">✕</button></div><div class="ai-modal-body">${formattedReply}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
-      document.body.appendChild(overlay);
-      overlay.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
+  function updateStats(data) {
+    const items = [
+      { key: 'skill', label: '专业技能' },
+      { key: 'experience', label: '工作经验' },
+      { key: 'learning', label: '学习能力' },
+      { key: 'adaptability', label: '适应能力' },
+      { key: 'leadership', label: '领导力' }
+    ];
+    const bars = statsContainer.querySelectorAll('.stat-fill');
+    const values = statsContainer.querySelectorAll('.stat-value');
+    items.forEach((item, index) => {
+      const val = Math.min(100, Math.max(0, data[item.key] || 0));
+      if (bars[index]) {
+        bars[index].style.width = '0%';
+        setTimeout(() => { bars[index].style.width = val + '%'; }, 100);
+      }
+      if (values[index]) values[index].textContent = val + '%';
+    });
+  }
+
+  async function generateAndRender() {
+    const userInput = getUserInput();
+    if (!userInput.job || userInput.job.trim() === '') { alert('请输入当前职业'); return; }
+    const selectedSkills = getSelectedSkills();
+    if (selectedSkills.length < 3) { alert('请至少选择3项核心技能（点击技能标签切换选中状态）'); return; }
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+    try {
+      const pathData = await generateTree(userInput);
+      currentPathData = pathData;
+      renderTree(pathData, userInput);
+      switchTab('tab2');
+    } catch (error) {
+      console.error('生成失败:', error);
+      alert('生成失败，使用默认数据');
+      const fallback = getDefaultTree(userInput);
+      currentPathData = fallback;
+      renderTree(fallback, userInput);
+      switchTab('tab2');
+    } finally {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';
     }
+  }
 
-    generateBtn.addEventListener('click', generateAndRender);
-    regenerateBtn.addEventListener('click', generateAndRender);
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', function() { switchTab(this.dataset.tab); });
-    });
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.tab === tabId); });
+    document.querySelectorAll('.tab-content').forEach(content => { content.classList.toggle('active', content.id === tabId); });
+    if (tabId === 'tab2' && currentPathData && currentPathData.radarData) {
+      setTimeout(() => { renderRadarStable(currentPathData.radarData); }, 200);
+    }
+  }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const defaultCard = styleCards.querySelector('[data-style="default"]');
-      if (defaultCard) defaultCard.classList.add('selected');
-      if (!userYears.value) userYears.value = '0';
-      if (goalYearLabel) goalYearLabel.textContent = targetYears.value;
-      setTimeout(() => {
-        const job = userJob.value.trim();
-        if (job.length >= 2) {
-          autoRecommendSkills(job, userEdu.value.trim(), userGoal.value.trim(), userInterest.value.trim(), getPathStyle());
-        }
-      }, 500);
-    });
+  consultBtn.addEventListener('click', async function() {
+    if (!currentPathData) { alert('请先生成职业成长树'); return; }
+    const userInput = getUserInput();
+    const msg = `我是${userInput.name}，${userInput.job}，${userInput.years}年经验。\n教育：${userInput.education}\n目标：${userInput.goal}\n兴趣：${userInput.interest}\n风格：${userInput.styleLabel}\n技能：${userInput.skills.join('、')}\n\n我的${userInput.targetYears}年计划：\n${currentPathData.tree.branches.map((b) => `第${b.year}年：${b.title} → ${b.goals}`).join('\n')}\n\n请给我5条具体的职业发展建议，每条不超过50字。`;
+    try {
+      consultBtn.disabled = true;
+      consultBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 咨询中...';
+      const response = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, context: userInput })
+      });
+      const data = await response.json();
+      if (data.success) showAIResponse(data.reply);
+      else alert('咨询失败：' + (data.error || '未知错误'));
+    } catch (error) {
+      alert('咨询失败：' + error.message);
+    } finally {
+      consultBtn.disabled = false;
+      consultBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 咨询AI助手';
+    }
+  });
 
-    let resizeTimer;
-    window.addEventListener('resize', function() {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { if (radarChart && !radarChart.isDisposed()) radarChart.resize(); }, 300);
-    });
+  function showAIResponse(reply) {
+    if (!reply || reply.trim() === '') reply = 'AI没有返回有效内容，请重试。';
+    const overlay = document.createElement('div');
+    overlay.className = 'ai-modal-overlay';
+    let formattedReply = reply
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^### (.*)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.*)$/gm, '<h3>$1</h3>')
+      .replace(/^# (.*)$/gm, '<h3>$1</h3>')
+      .replace(/^\* (.*)$/gm, '• $1')
+      .replace(/^\- (.*)$/gm, '• $1')
+      .replace(/^\d+\. (.*)$/gm, '<br><strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+    overlay.innerHTML = `<div class="ai-modal-content"><div class="ai-modal-header"><span>🤖 AI 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()">✕</button></div><div class="ai-modal-body">${formattedReply}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
+  }
 
-  })();
+  generateBtn.addEventListener('click', generateAndRender);
+  regenerateBtn.addEventListener('click', generateAndRender);
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() { switchTab(this.dataset.tab); });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const defaultCard = styleCards.querySelector('[data-style="default"]');
+    if (defaultCard) defaultCard.classList.add('selected');
+    if (!userYears.value) userYears.value = '0';
+    if (goalYearLabel) goalYearLabel.textContent = targetYears.value;
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { if (radarChart && !radarChart.isDisposed()) radarChart.resize(); }, 300);
+  });
+
+})();
 </script>
 </body>
 </html>
