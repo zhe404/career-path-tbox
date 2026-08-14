@@ -1,6 +1,5 @@
 // ============================================
-// 职业路径生成器（完整修复版）
-// 修复：10年规划、工作年限0年雷达图、兴趣"无"处理、目标职业体现、图标兼容
+// 职业路径生成器（稳定版 v3.1）
 // ============================================
 
 const {
@@ -18,31 +17,36 @@ const {
   KNOWLEDGE_GRAPH
 } = require('./careerData.js');
 
-// ============================================
-// 协同过滤缓存
-// ============================================
 const userPathCache = {};
-
-// ============================================
-// 扩展图标（支持10年，使用兼容性更好的emoji）
-// ============================================
 const EXTENDED_ICONS = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '💎'];
 
 // ============================================
-// 辅助函数：处理兴趣文本
+// 过滤无效技能关键词
+// ============================================
+const INVALID_KEYWORDS = ['根据', '结合', '搜索', '用户', '建议', '以下', '如下', '结果', '信息', '推荐', '核心', '相关', '适合', '需要', '可以', '应该', '包括', '以上', '这些', '那些', '其中', '比如', '例如', '以及', '或者'];
+
+function filterValidSkills(skills) {
+  if (!Array.isArray(skills)) return [];
+  return skills.filter(s => {
+    const trimmed = String(s).trim();
+    if (trimmed.length < 2 || trimmed.length > 12) return false;
+    if (/^[0-9]+$/.test(trimmed)) return false;
+    if (INVALID_KEYWORDS.some(k => trimmed.includes(k))) return false;
+    return true;
+  });
+}
+
+// ============================================
+// 处理兴趣文本
 // ============================================
 function getInterestText(interest) {
-  if (!interest || interest.trim() === '' || 
-      interest === '无' || interest === '没有' || 
-      interest === '暂无' || interest === '无兴趣' ||
-      interest === '无特别兴趣' || interest === '无特别爱好') {
-    return '';
-  }
+  const invalidValues = ['无', '没有', '暂无', '无兴趣', '无特别兴趣', '无特别爱好', '无特别', '无特殊', '无特殊兴趣', '没什么', '没有特别'];
+  if (!interest || invalidValues.includes(interest.trim())) return '';
   return interest.substring(0, 30);
 }
 
 // ============================================
-// 辅助函数：处理目标职业
+// 处理目标职业
 // ============================================
 function getGoalContent(goal) {
   if (!goal || goal === '无' || goal === '暂无' || goal === '暂无目标') return null;
@@ -58,62 +62,49 @@ function getGoalContent(goal) {
     '主管': { finalTitle: '主管之路', finalMilestone: '晋升主管' },
     '老师': { finalTitle: '教师之路', finalMilestone: '成为优秀教师' },
     '教师': { finalTitle: '教师之路', finalMilestone: '成为优秀教师' },
+    '医生': { finalTitle: '名医之路', finalMilestone: '成为资深医生' },
+    '护士': { finalTitle: '护理专家之路', finalMilestone: '成为护理专家' },
+    '律师': { finalTitle: '大律师之路', finalMilestone: '成为资深律师' },
+    '设计师': { finalTitle: '设计大师之路', finalMilestone: '成为设计专家' },
+    '分析师': { finalTitle: '分析专家之路', finalMilestone: '成为资深分析师' },
   };
   
   for (const [key, value] of Object.entries(goalMap)) {
-    if (goal.includes(key)) {
-      return value;
-    }
+    if (goal.includes(key)) return value;
   }
   return null;
 }
 
 // ============================================
-// 第1层：知识图谱查询（秒开）
+// 知识图谱查询
 // ============================================
 function queryKnowledgeGraph(job, goal) {
   if (!KNOWLEDGE_GRAPH.nodes[job]) return null;
-  
   const edges = KNOWLEDGE_GRAPH.edges[job] || [];
-  
   if (edges.includes(goal)) {
-    return {
-      source: 'knowledge_graph',
-      path: [job, goal],
-      skills: KNOWLEDGE_GRAPH.skills[goal] || [],
-      milestone: KNOWLEDGE_GRAPH.milestones[goal] || ''
-    };
+    return { source: 'knowledge_graph', path: [job, goal], skills: KNOWLEDGE_GRAPH.skills[goal] || [], milestone: KNOWLEDGE_GRAPH.milestones[goal] || '' };
   }
-  
   for (const mid of edges) {
     const midEdges = KNOWLEDGE_GRAPH.edges[mid] || [];
     if (midEdges.includes(goal)) {
-      return {
-        source: 'knowledge_graph',
-        path: [job, mid, goal],
-        skills: KNOWLEDGE_GRAPH.skills[mid] || [],
-        milestone: KNOWLEDGE_GRAPH.milestones[mid] || ''
-      };
+      return { source: 'knowledge_graph', path: [job, mid, goal], skills: KNOWLEDGE_GRAPH.skills[mid] || [], milestone: KNOWLEDGE_GRAPH.milestones[mid] || '' };
     }
   }
-  
   return null;
 }
 
 // ============================================
-// 第2层：协同过滤查询
+// 协同过滤查询
 // ============================================
 function queryCollaborativeFilter(job, goal) {
   const key = `${job}_${goal}`;
   if (!userPathCache[key] || userPathCache[key].length === 0) return null;
-  
   const entries = userPathCache[key];
   const pathCount = {};
   for (const entry of entries) {
     const pathKey = entry.path.join('→');
     pathCount[pathKey] = (pathCount[pathKey] || 0) + 1;
   }
-  
   let maxCount = 0;
   let bestPath = null;
   for (const [pathKey, count] of Object.entries(pathCount)) {
@@ -122,19 +113,14 @@ function queryCollaborativeFilter(job, goal) {
       bestPath = pathKey.split('→');
     }
   }
-  
   if (bestPath) {
-    return {
-      source: 'collaborative_filter',
-      path: bestPath,
-      confidence: maxCount / entries.length
-    };
+    return { source: 'collaborative_filter', path: bestPath, confidence: maxCount / entries.length };
   }
   return null;
 }
 
 // ============================================
-// 第3层：马尔可夫链预测
+// 马尔可夫链
 // ============================================
 function buildMarkovChain(branches) {
   const chain = {};
@@ -159,17 +145,11 @@ function predictNextStep(chain, currentState) {
   let maxProb = 0;
   let nextState = null;
   for (const [state, prob] of Object.entries(transitions)) {
-    if (prob > maxProb) {
-      maxProb = prob;
-      nextState = state;
-    }
+    if (prob > maxProb) { maxProb = prob; nextState = state; }
   }
   return { nextState, probability: maxProb };
 }
 
-// ============================================
-// 第4层：蒙特卡洛验证
-// ============================================
 function monteCarloValidate(path, iterations = 100) {
   let successCount = 0;
   for (let i = 0; i < iterations; i++) {
@@ -183,17 +163,10 @@ function monteCarloValidate(path, iterations = 100) {
 // ============================================
 function getCategory(job) {
   if (!job) return 'other';
-  
-  if (JOB_CATEGORY_MAP[job]) {
-    return JOB_CATEGORY_MAP[job];
-  }
-  
+  if (JOB_CATEGORY_MAP[job]) return JOB_CATEGORY_MAP[job];
   for (const [key, value] of Object.entries(JOB_CATEGORY_MAP)) {
-    if (job.includes(key) || key.includes(job)) {
-      return value;
-    }
+    if (job.includes(key) || key.includes(job)) return value;
   }
-  
   if (job.includes('安全') || job.includes('网络')) return 'technology';
   if (job.includes('学生')) return 'student';
   if (job.includes('教师') || job.includes('老师')) return 'education';
@@ -206,23 +179,23 @@ function getCategory(job) {
 }
 
 // ============================================
-// 辅助函数
+// 获取技能
 // ============================================
 function getSkills(category, year, interest) {
   const yearSkills = SKILLS[category]?.[year] || SKILLS.other?.[year] || SKILLS.other[1];
   let extraSkills = [];
   for (const [key, value] of Object.entries(INTEREST_SKILLS)) {
-    if (interest && interest.includes(key)) {
-      extraSkills = value;
-      break;
-    }
+    if (interest && interest.includes(key)) { extraSkills = value; break; }
   }
-  return [...yearSkills, ...extraSkills].slice(0, 5);
+  const combined = [...yearSkills, ...extraSkills].slice(0, 5);
+  return filterValidSkills(combined);
 }
 
+// ============================================
+// 获取标题
+// ============================================
 function getTitle(category, year, style) {
   const titles = TITLES[category] || TITLES.other;
-  
   let title;
   if (year <= 5) {
     title = titles[year - 1] || `第${year}年`;
@@ -240,13 +213,14 @@ function getTitle(category, year, style) {
     const extTitles = extendedTitles[category] || extendedTitles.other;
     title = extTitles[year - 6] || `第${year}年`;
   }
-  
   return (STYLE_PREFIX[style] || '') + title;
 }
 
+// ============================================
+// 获取里程碑
+// ============================================
 function getMilestone(category, year) {
   const milestones = MILESTONES[category] || MILESTONES.other;
-  
   if (year <= 5) {
     return milestones[year - 1] || `第${year}年里程碑`;
   } else {
@@ -266,13 +240,11 @@ function getMilestone(category, year) {
 }
 
 // ============================================
-// 修复：正确计算雷达图数据
+// 雷达图数据
 // ============================================
 function getRadarData(category, years, skillsCount, style) {
   const base = RADAR_BASE[category] || RADAR_BASE.other;
-  
   const workYears = parseInt(years) || 0;
-  
   if (workYears === 0) {
     return {
       skill: Math.min(40, Math.round(base.skill * 0.5)),
@@ -282,11 +254,9 @@ function getRadarData(category, years, skillsCount, style) {
       leadership: 0
     };
   }
-  
   const experienceBonus = Math.min(15, workYears * 2);
   const skillBonus = Math.min(10, skillsCount);
   const leadershipBonus = Math.min(20, workYears * 2);
-  
   const styleBonus = {
     '跨界融合': { adaptability: 10 },
     '理想主义': { learning: 10 },
@@ -294,7 +264,6 @@ function getRadarData(category, years, skillsCount, style) {
     '稳妥晋升': { experience: 5 }
   };
   const bonus = styleBonus[style] || {};
-  
   return {
     skill: Math.min(100, base.skill + skillBonus + (bonus.experience || 0)),
     experience: Math.min(100, base.experience + experienceBonus + (bonus.experience || 0)),
@@ -306,9 +275,7 @@ function getRadarData(category, years, skillsCount, style) {
 
 function getChallenge(category, job, skillsCount, years) {
   let text = CHALLENGES[category] || CHALLENGES.other;
-  
   const workYears = parseInt(years) || 0;
-  
   if (workYears === 0) {
     text = `作为职场新人，需要快速学习和积累经验。${text}`;
   } else if (category === 'student') {
@@ -316,46 +283,30 @@ function getChallenge(category, job, skillsCount, years) {
   } else {
     text = `作为${job || '职场人'}，` + text;
   }
-  
   if (skillsCount > 8) text += '，已有较强技能基础，可向更高层次突破';
   else if (skillsCount < 4) text += '，需要先夯实基础技能，再寻求突破';
-  
   return text;
 }
 
 function getBadges(category, style, interest, years) {
   const baseBadges = BADGES[category] || BADGES.other;
-  
   const workYears = parseInt(years) || 0;
-  
-  if (workYears === 0) {
-    return ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
-  }
-  
+  if (workYears === 0) return ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
   let extraBadges = [];
   for (const [key, value] of Object.entries(INTEREST_BADGES)) {
-    if (interest && interest.includes(key)) {
-      extraBadges = value;
-      break;
-    }
+    if (interest && interest.includes(key)) { extraBadges = value; break; }
   }
-  
   const styleBadge = {
     '跨界融合': '🌉 跨界先锋',
     '理想主义': '✨ 理想主义者',
     '均衡发展': '⚖️ 均衡大师',
     '稳妥晋升': '🌱 稳扎稳打'
   };
-  
-  return [
-    ...baseBadges.slice(0, 2),
-    ...extraBadges,
-    styleBadge[style] || '🏆 成长之星'
-  ].slice(0, 3);
+  return [...baseBadges.slice(0, 2), ...extraBadges, styleBadge[style] || '🏆 成长之星'].slice(0, 3);
 }
 
 // ============================================
-// 从路径构建树（支持10年）
+// 从路径构建树
 // ============================================
 function buildTreeFromPath(pathResult, userInput) {
   const { job, years, targetYears, interest, goal, style, skills: userSkills } = userInput;
@@ -367,17 +318,14 @@ function buildTreeFromPath(pathResult, userInput) {
   const goalContent = getGoalContent(goal);
   
   const branches = [];
-  
   for (let i = 0; i < Math.min(maxYears, path.length); i++) {
     const node = path[i];
     const title = i === 0 ? job : node;
     const prefix = STYLE_PREFIX[style] || '';
-    
     const isLastYear = i === Math.min(maxYears, path.length) - 1;
     const finalTitle = isLastYear && goalContent ? goalContent.finalTitle : title;
     const finalMilestone = isLastYear && goalContent ? goalContent.finalMilestone : (KNOWLEDGE_GRAPH.milestones[node] || getMilestone(category, i + 1));
-    const goalsText = isLastYear && goal && goal !== '无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
-    
+    const goalsText = isLastYear && goal && goal !== '无' && goal !== '暂无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
     branches.push({
       year: i + 1,
       icon: EXTENDED_ICONS[i] || '📌',
@@ -393,11 +341,9 @@ function buildTreeFromPath(pathResult, userInput) {
     const yearNum = i + 1;
     const title = getTitle(category, yearNum, style);
     const isLastYear = i === maxYears - 1;
-    
     const finalTitle = isLastYear && goalContent ? goalContent.finalTitle : title;
     const finalMilestone = isLastYear && goalContent ? goalContent.finalMilestone : getMilestone(category, yearNum);
-    const goalsText = isLastYear && goal && goal !== '无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
-    
+    const goalsText = isLastYear && goal && goal !== '无' && goal !== '暂无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
     branches.push({
       year: yearNum,
       icon: EXTENDED_ICONS[i] || '📌',
@@ -419,7 +365,7 @@ function buildTreeFromPath(pathResult, userInput) {
 }
 
 // ============================================
-// 构建模板树（支持10年）
+// 构建模板树
 // ============================================
 function buildTemplateTree(userInput) {
   const { job, years, targetYears, interest, goal, style, skills: userSkills } = userInput;
@@ -433,11 +379,9 @@ function buildTemplateTree(userInput) {
   for (let i = 1; i <= maxYears; i++) {
     const title = getTitle(category, i, style);
     const isLastYear = i === maxYears;
-    
     const finalTitle = isLastYear && goalContent ? goalContent.finalTitle : title;
     const finalMilestone = isLastYear && goalContent ? goalContent.finalMilestone : getMilestone(category, i);
-    const goalsText = isLastYear && goal && goal !== '无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
-    
+    const goalsText = isLastYear && goal && goal !== '无' && goal !== '暂无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
     branches.push({
       year: i,
       icon: EXTENDED_ICONS[i - 1] || '📌',
@@ -468,7 +412,6 @@ function buildTemplateTree(userInput) {
 // ============================================
 function generateCareerTree(userInput) {
   const { job = '产品经理', goal = '' } = userInput;
-  
   console.log('🔍 [生成树] job:', job, 'goal:', goal);
   
   const graphResult = queryKnowledgeGraph(job, goal);
@@ -488,10 +431,7 @@ function generateCareerTree(userInput) {
   
   const key = `${job}_${goal}`;
   if (!userPathCache[key]) userPathCache[key] = [];
-  userPathCache[key].push({
-    path: templateData.tree.branches.map(b => b.title),
-    timestamp: Date.now()
-  });
+  userPathCache[key].push({ path: templateData.tree.branches.map(b => b.title), timestamp: Date.now() });
   if (userPathCache[key].length > 100) {
     userPathCache[key] = userPathCache[key].slice(-100);
   }
@@ -505,5 +445,6 @@ module.exports = {
   queryCollaborativeFilter,
   buildMarkovChain,
   predictNextStep,
-  monteCarloValidate
+  monteCarloValidate,
+  filterValidSkills
 };
