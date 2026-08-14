@@ -1,5 +1,6 @@
 // ============================================
-// 职业路径生成器（智能版 - 知识图谱+协同过滤+马尔可夫链）
+// 职业路径生成器（完整修复版）
+// 修复：10年规划、工作年限0年雷达图
 // ============================================
 
 const {
@@ -23,6 +24,11 @@ const {
 const userPathCache = {};
 
 // ============================================
+// 扩展图标（支持10年）
+// ============================================
+const EXTENDED_ICONS = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '👑'];
+
+// ============================================
 // 第1层：知识图谱查询（秒开）
 // ============================================
 function queryKnowledgeGraph(job, goal) {
@@ -30,7 +36,6 @@ function queryKnowledgeGraph(job, goal) {
   
   const edges = KNOWLEDGE_GRAPH.edges[job] || [];
   
-  // 直接路径
   if (edges.includes(goal)) {
     return {
       source: 'knowledge_graph',
@@ -40,7 +45,6 @@ function queryKnowledgeGraph(job, goal) {
     };
   }
   
-  // 间接路径（A→B→C）
   for (const mid of edges) {
     const midEdges = KNOWLEDGE_GRAPH.edges[mid] || [];
     if (midEdges.includes(goal)) {
@@ -57,7 +61,7 @@ function queryKnowledgeGraph(job, goal) {
 }
 
 // ============================================
-// 第2层：协同过滤查询（1-2秒）
+// 第2层：协同过滤查询
 // ============================================
 function queryCollaborativeFilter(job, goal) {
   const key = `${job}_${goal}`;
@@ -124,7 +128,7 @@ function predictNextStep(chain, currentState) {
 }
 
 // ============================================
-// 第4层：蒙特卡洛验证（质量兜底）
+// 第4层：蒙特卡洛验证
 // ============================================
 function monteCarloValidate(path, iterations = 100) {
   let successCount = 0;
@@ -139,10 +143,17 @@ function monteCarloValidate(path, iterations = 100) {
 // ============================================
 function getCategory(job) {
   if (!job) return 'other';
-  for (const [key, value] of Object.entries(JOB_CATEGORY_MAP)) {
-    if (job.includes(key) || key.includes(job)) return value;
+  
+  if (JOB_CATEGORY_MAP[job]) {
+    return JOB_CATEGORY_MAP[job];
   }
-  // 关键词兜底
+  
+  for (const [key, value] of Object.entries(JOB_CATEGORY_MAP)) {
+    if (job.includes(key) || key.includes(job)) {
+      return value;
+    }
+  }
+  
   if (job.includes('安全') || job.includes('网络')) return 'technology';
   if (job.includes('学生')) return 'student';
   if (job.includes('教师') || job.includes('老师')) return 'education';
@@ -170,19 +181,72 @@ function getSkills(category, year, interest) {
 
 function getTitle(category, year, style) {
   const titles = TITLES[category] || TITLES.other;
-  const title = titles[year - 1] || `第${year}年`;
+  
+  let title;
+  if (year <= 5) {
+    title = titles[year - 1] || `第${year}年`;
+  } else {
+    const extendedTitles = {
+      'student': ['职业发展', '专业深化', '行业影响', '管理进阶', '成为领袖'],
+      'education': ['教育创新', '学术引领', '教育改革', '教育管理', '教育领袖'],
+      'technology': ['技术战略', '架构演进', '技术创新', '技术管理', '技术领袖'],
+      'product': ['产品创新', '生态构建', '产品战略', '组织管理', '行业领袖'],
+      'medical': ['专科深化', '科研突破', '医疗创新', '学科建设', '医学领袖'],
+      'finance': ['投资策略', '资产管理', '金融创新', '团队管理', '金融领袖'],
+      'management': ['战略管理', '组织变革', '管理创新', '高层管理', '行业领袖'],
+      'other': ['专业深化', '跨界拓展', '创新突破', '管理进阶', '行业领袖']
+    };
+    const extTitles = extendedTitles[category] || extendedTitles.other;
+    title = extTitles[year - 6] || `第${year}年`;
+  }
+  
   return (STYLE_PREFIX[style] || '') + title;
 }
 
 function getMilestone(category, year) {
   const milestones = MILESTONES[category] || MILESTONES.other;
-  return milestones[year - 1] || `第${year}年里程碑`;
+  
+  if (year <= 5) {
+    return milestones[year - 1] || `第${year}年里程碑`;
+  } else {
+    const extendedMilestones = {
+      'student': ['获得晋升', '成为骨干', '建立影响力', '晋升管理层', '成为行业领袖'],
+      'education': ['完成教改项目', '发表核心论文', '主持课题', '晋升管理岗', '成为教育专家'],
+      'technology': ['主导技术项目', '完成架构升级', '技术创新突破', '晋升技术管理', '成为技术领袖'],
+      'product': ['完成产品迭代', '构建产品生态', '制定产品战略', '晋升管理岗', '成为行业领袖'],
+      'medical': ['完成专科进修', '发表SCI论文', '开展新技术', '晋升科室主任', '成为学科带头人'],
+      'finance': ['完成投资组合', '建立分析体系', '创新金融产品', '晋升团队管理', '成为金融专家'],
+      'management': ['完成战略规划', '推动组织变革', '创新管理模式', '晋升高层管理', '成为行业领袖'],
+      'other': ['完成专业认证', '拓展业务领域', '创新突破', '晋升管理岗', '成为行业专家']
+    };
+    const extMilestones = extendedMilestones[category] || extendedMilestones.other;
+    return extMilestones[year - 6] || `第${year}年里程碑`;
+  }
 }
 
+// ============================================
+// 修复：正确计算雷达图数据
+// ============================================
 function getRadarData(category, years, skillsCount, style) {
   const base = RADAR_BASE[category] || RADAR_BASE.other;
-  const experienceBonus = Math.min(10, years * 2);
+  
+  const workYears = parseInt(years) || 0;
+  
+  // 工作年限为0时的特殊处理
+  if (workYears === 0) {
+    return {
+      skill: Math.min(40, Math.round(base.skill * 0.5)),
+      experience: 0,
+      learning: Math.min(90, base.learning + 10),
+      adaptability: Math.min(80, base.adaptability + 5),
+      leadership: 0
+    };
+  }
+  
+  const experienceBonus = Math.min(15, workYears * 2);
   const skillBonus = Math.min(10, skillsCount);
+  const leadershipBonus = Math.min(20, workYears * 2);
+  
   const styleBonus = {
     '跨界融合': { adaptability: 10 },
     '理想主义': { learning: 10 },
@@ -190,29 +254,44 @@ function getRadarData(category, years, skillsCount, style) {
     '稳妥晋升': { experience: 5 }
   };
   const bonus = styleBonus[style] || {};
+  
   return {
-    skill: Math.min(100, base.skill + skillBonus),
+    skill: Math.min(100, base.skill + skillBonus + (bonus.experience || 0)),
     experience: Math.min(100, base.experience + experienceBonus + (bonus.experience || 0)),
-    learning: Math.min(100, base.learning + (bonus.learning || 0)),
+    learning: Math.min(100, base.learning + (bonus.learning || 0) - Math.min(5, workYears)),
     adaptability: Math.min(100, base.adaptability + (bonus.adaptability || 0)),
-    leadership: Math.min(100, base.leadership + (bonus.leadership || 0) + Math.floor(years / 2))
+    leadership: Math.min(100, base.leadership + leadershipBonus + (bonus.leadership || 0))
   };
 }
 
-function getChallenge(category, job, skillsCount) {
+function getChallenge(category, job, skillsCount, years) {
   let text = CHALLENGES[category] || CHALLENGES.other;
-  if (category === 'student') {
+  
+  const workYears = parseInt(years) || 0;
+  
+  if (workYears === 0) {
+    text = `作为职场新人，需要快速学习和积累经验。${text}`;
+  } else if (category === 'student') {
     text = `从"${job || '学生'}"到"职场人"的转变是最大挑战，需要在理论学习与实践应用之间找到平衡`;
   } else {
     text = `作为${job || '职场人'}，` + text;
   }
+  
   if (skillsCount > 8) text += '，已有较强技能基础，可向更高层次突破';
   else if (skillsCount < 4) text += '，需要先夯实基础技能，再寻求突破';
+  
   return text;
 }
 
-function getBadges(category, style, interest) {
+function getBadges(category, style, interest, years) {
   const baseBadges = BADGES[category] || BADGES.other;
+  
+  const workYears = parseInt(years) || 0;
+  
+  if (workYears === 0) {
+    return ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
+  }
+  
   let extraBadges = [];
   for (const [key, value] of Object.entries(INTEREST_BADGES)) {
     if (interest && interest.includes(key)) {
@@ -220,12 +299,14 @@ function getBadges(category, style, interest) {
       break;
     }
   }
+  
   const styleBadge = {
     '跨界融合': '🌉 跨界先锋',
     '理想主义': '✨ 理想主义者',
     '均衡发展': '⚖️ 均衡大师',
     '稳妥晋升': '🌱 稳扎稳打'
   };
+  
   return [
     ...baseBadges.slice(0, 2),
     ...extraBadges,
@@ -234,73 +315,76 @@ function getBadges(category, style, interest) {
 }
 
 // ============================================
-// 从路径构建树
+// 从路径构建树（支持10年）
 // ============================================
 function buildTreeFromPath(pathResult, userInput) {
   const { job, years, targetYears, interest, style, skills: userSkills } = userInput;
   const path = pathResult.path;
-  const maxYears = Math.min(targetYears, 5);
+  const maxYears = Math.min(parseInt(targetYears) || 5, 10);
+  const workYears = parseInt(years) || 0;
+  const category = getCategory(job);
   
   const branches = [];
+  
   for (let i = 0; i < Math.min(maxYears, path.length); i++) {
     const node = path[i];
-    const title = i === 0 ? `${job}→${node}` : node;
+    const title = i === 0 ? job : node;
     const prefix = STYLE_PREFIX[style] || '';
     branches.push({
       year: i + 1,
-      icon: ICONS[i] || '📌',
+      icon: EXTENDED_ICONS[i] || '📌',
       title: prefix + title,
       goals: `${title} · ${interest || '职业发展'}`,
-      skills: KNOWLEDGE_GRAPH.skills[node] || ['专业技能', '持续学习'],
-      milestone: KNOWLEDGE_GRAPH.milestones[node] || `第${i+1}年里程碑`
+      skills: KNOWLEDGE_GRAPH.skills[node] || getSkills(category, Math.min(i + 1, 5), interest),
+      milestone: KNOWLEDGE_GRAPH.milestones[node] || getMilestone(category, i + 1)
     });
   }
   
   while (branches.length < maxYears) {
     const i = branches.length;
+    const yearNum = i + 1;
     branches.push({
-      year: i + 1,
-      icon: ICONS[i] || '📌',
-      title: '持续成长',
-      goals: `持续成长 · ${interest || '职业发展'}`,
-      skills: ['持续学习', '专业深化'],
-      milestone: `第${i+1}年里程碑`
+      year: yearNum,
+      icon: EXTENDED_ICONS[i] || '📌',
+      title: getTitle(category, yearNum, style),
+      goals: `${getTitle(category, yearNum, style)} · ${interest || '职业发展'}`,
+      skills: getSkills(category, Math.min(yearNum, 5), interest),
+      milestone: getMilestone(category, yearNum)
     });
   }
   
-  const category = getCategory(job);
   return {
     tree: { branches },
     recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-    radarData: getRadarData(category, years, userSkills.length, style),
-    challenges: { icon: '⚡', text: getChallenge(category, job, userSkills.length) },
-    badges: getBadges(category, style, interest),
+    radarData: getRadarData(category, workYears, userSkills.length, style),
+    challenges: { icon: '⚡', text: getChallenge(category, job, userSkills.length, workYears) },
+    badges: getBadges(category, style, interest, workYears),
     _source: pathResult.source || 'knowledge_graph'
   };
 }
 
 // ============================================
-// 构建模板树
+// 构建模板树（支持10年）
 // ============================================
 function buildTemplateTree(userInput) {
   const { job, years, targetYears, interest, style, skills: userSkills } = userInput;
   const category = getCategory(job);
-  const maxYears = Math.min(targetYears, 5);
+  const maxYears = Math.min(parseInt(targetYears) || 5, 10);
+  const workYears = parseInt(years) || 0;
   
   const branches = [];
   for (let i = 1; i <= maxYears; i++) {
     const title = getTitle(category, i, style);
     branches.push({
       year: i,
-      icon: ICONS[i - 1] || '📌',
+      icon: EXTENDED_ICONS[i - 1] || '📌',
       title: title,
       goals: `${title} · ${interest || '职业发展'}`,
-      skills: getSkills(category, i, interest),
+      skills: getSkills(category, Math.min(i, 5), interest),
       milestone: getMilestone(category, i)
     });
   }
   
-  // 添加马尔可夫预测
   const chain = buildMarkovChain(branches);
   const lastTitle = branches.length > 0 ? branches[branches.length - 1].title : '';
   const prediction = predictNextStep(chain, lastTitle);
@@ -308,48 +392,43 @@ function buildTemplateTree(userInput) {
   return {
     tree: { branches },
     recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-    radarData: getRadarData(category, years, userSkills.length, style),
-    challenges: { icon: '⚡', text: getChallenge(category, job, userSkills.length) },
-    badges: getBadges(category, style, interest),
+    radarData: getRadarData(category, workYears, userSkills.length, style),
+    challenges: { icon: '⚡', text: getChallenge(category, job, userSkills.length, workYears) },
+    badges: getBadges(category, style, interest, workYears),
     _source: 'template',
     _prediction: prediction
   };
 }
 
 // ============================================
-// 主入口：生成完整成长树（智能版）
+// 主入口
 // ============================================
 function generateCareerTree(userInput) {
   const { job = '产品经理', goal = '' } = userInput;
   
   console.log('🔍 [生成树] job:', job, 'goal:', goal);
   
-  // ===== 第1层：知识图谱 =====
   const graphResult = queryKnowledgeGraph(job, goal);
   if (graphResult) {
     console.log('✅ 命中知识图谱:', graphResult.path.join('→'));
     return buildTreeFromPath(graphResult, userInput);
   }
   
-  // ===== 第2层：协同过滤 =====
   const cfResult = queryCollaborativeFilter(job, goal);
   if (cfResult && cfResult.confidence > 0.5) {
     console.log('✅ 命中协同过滤:', cfResult.path.join('→'), '置信度:', cfResult.confidence);
     return buildTreeFromPath(cfResult, userInput);
   }
   
-  // ===== 第3层：模板数据（秒开兜底） =====
   console.log('📋 使用模板数据');
   const templateData = buildTemplateTree(userInput);
   
-  // 记录到协同过滤缓存
   const key = `${job}_${goal}`;
   if (!userPathCache[key]) userPathCache[key] = [];
   userPathCache[key].push({
     path: templateData.tree.branches.map(b => b.title),
     timestamp: Date.now()
   });
-  // 只保留最近100条
   if (userPathCache[key].length > 100) {
     userPathCache[key] = userPathCache[key].slice(-100);
   }
