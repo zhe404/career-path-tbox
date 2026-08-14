@@ -172,7 +172,7 @@
         </div>
         <div class="form-group">
           <label><i class="far fa-calendar"></i> 工作年限</label>
-          <input type="number" id="userYears" placeholder="请输入工作年限" min="0" max="40">
+          <input type="number" id="userYears" placeholder="请输入工作年限" min="0" max="40" value="0">
         </div>
         <div class="form-group">
           <label><i class="fas fa-graduation-cap"></i> 教育背景</label>
@@ -187,7 +187,7 @@
           </select>
         </div>
         <div class="form-group full-width">
-          <label><i class="fas fa-bullseye"></i> 职业目标（5年后想成为什么？）</label>
+          <label><i class="fas fa-bullseye"></i> 职业目标（<span id="goalYearLabel">5</span>年后想成为什么？）</label>
           <input type="text" id="userGoal" placeholder="例如：技术总监 / 产品负责人 / 创业者 / 安全专家">
         </div>
         <div class="form-group full-width">
@@ -324,6 +324,7 @@
     const userGoal = $('userGoal');
     const userInterest = $('userInterest');
     const targetYears = $('targetYears');
+    const goalYearLabel = $('goalYearLabel');
     const skillTagsContainer = $('skillTags');
     const generateBtn = $('generateBtn');
     const regenerateBtn = $('regenerateBtn');
@@ -344,6 +345,11 @@
     let isGeneratingSkills = false;
     let isGeneratingTree = false;
     let selectedStyle = 'default';
+    
+    let skillRecommendTimer = null;
+    let lastSkillRecommendKey = '';
+    let skillRecommendInProgress = false;
+    let skillRecommendQueue = [];
 
     // ============================================================
     // 路径风格选择
@@ -356,15 +362,8 @@
       card.classList.add('selected');
       selectedStyle = card.dataset.style;
 
-      const job = userJob.value.trim();
-      if (job.length >= 2) {
-        autoRecommendSkills(
-          job,
-          userEdu.value.trim(),
-          userGoal.value.trim(),
-          userInterest.value.trim(),
-          selectedStyle
-        );
+      if (userJob.value.trim().length >= 2) {
+        debouncedRecommendSkills();
       }
     });
 
@@ -384,10 +383,11 @@
     }
 
     function getUserInput() {
+      const yearsValue = parseInt(userYears.value);
       return {
         name: userName.value.trim() || '用户',
         job: userJob.value.trim() || '产品经理',
-        years: parseInt(userYears.value) || 0,
+        years: isNaN(yearsValue) ? 0 : yearsValue,
         education: userEdu.value || '本科',
         goal: userGoal.value.trim() || '职业发展',
         interest: userInterest.value.trim() || '职业成长',
@@ -415,13 +415,49 @@
     }
 
     // ============================================================
+    // 防抖函数
+    // ============================================================
+    function debouncedRecommendSkills() {
+      if (skillRecommendTimer) {
+        clearTimeout(skillRecommendTimer);
+      }
+      
+      skillRecommendTimer = setTimeout(() => {
+        const job = userJob.value.trim();
+        if (job.length >= 2) {
+          autoRecommendSkills(
+            job,
+            userEdu.value.trim(),
+            userGoal.value.trim(),
+            userInterest.value.trim(),
+            getPathStyle()
+          );
+        }
+      }, 1000);
+    }
+
+    // ============================================================
     // AI 智能推荐技能
     // ============================================================
     async function autoRecommendSkills(job, education, goal, interest, style) {
-      if (!job || job.trim() === '' || isGeneratingSkills) return;
+      if (!job || job.trim() === '' || skillRecommendInProgress) {
+        if (job && job.trim().length >= 2) {
+          skillRecommendQueue.push({ job, education, goal, interest, style });
+        }
+        return;
+      }
+      
       if (job.trim().length < 2) return;
 
-      isGeneratingSkills = true;
+      const cacheKey = `${job.trim()}_${education || ''}_${goal || ''}_${interest || ''}_${style}`;
+      
+      if (cacheKey === lastSkillRecommendKey) {
+        return;
+      }
+      
+      lastSkillRecommendKey = cacheKey;
+      skillRecommendInProgress = true;
+      
       aiSkillStatus.classList.remove('hidden');
       aiSkillStatus.innerHTML = '<span class="spinner-small"></span><span>AI 正在分析你的职业画像...</span>';
 
@@ -507,7 +543,18 @@
         `;
         setTimeout(() => aiSkillStatus.classList.add('hidden'), 2000);
       } finally {
-        isGeneratingSkills = false;
+        skillRecommendInProgress = false;
+        
+        if (skillRecommendQueue.length > 0) {
+          const nextRequest = skillRecommendQueue.shift();
+          autoRecommendSkills(
+            nextRequest.job,
+            nextRequest.education,
+            nextRequest.goal,
+            nextRequest.interest,
+            nextRequest.style
+          );
+        }
       }
     }
 
@@ -647,40 +694,32 @@
     // ============================================================
     // 监听输入变化
     // ============================================================
-    function triggerRecommend() {
-      const job = userJob.value.trim();
-      if (job.length >= 2) {
-        autoRecommendSkills(
-          job,
-          userEdu.value.trim(),
-          userGoal.value.trim(),
-          userInterest.value.trim(),
-          getPathStyle()
-        );
-      }
-    }
-
-    let recommendTimer = null;
     ['userJob', 'userEdu', 'userGoal', 'userInterest'].forEach(id => {
       const el = $(id);
       el.addEventListener('input', function() {
-        clearTimeout(recommendTimer);
-        recommendTimer = setTimeout(triggerRecommend, 500);
+        debouncedRecommendSkills();
       });
       el.addEventListener('change', function() {
-        clearTimeout(recommendTimer);
-        recommendTimer = setTimeout(triggerRecommend, 300);
+        debouncedRecommendSkills();
       });
     });
 
+    // 规划周期变化时更新目标标签
+    targetYears.addEventListener('change', function() {
+      if (goalYearLabel) {
+        goalYearLabel.textContent = targetYears.value;
+      }
+    });
+
     // ============================================================
-    // 默认树形数据（本地fallback）
+    // 默认树形数据
     // ============================================================
     function getDefaultTree(userInput) {
       const job = userInput.job || '产品经理';
       const interest = userInput.interest || '职业发展';
       const years = userInput.targetYears || 5;
       const style = userInput.style || 'default';
+      const workYears = userInput.years || 0;
 
       const branchTemplates = {
         '学生': {
@@ -689,7 +728,12 @@
             { year: 2, icon: '🔬', title: '科研探索', goals: '参与科研项目，培养研究能力', skills: ['研究能力', '数据分析', '实验设计'], milestone: '完成科研项目' },
             { year: 3, icon: '💡', title: '实践积累', goals: '参加实习实践，提升应用能力', skills: ['实践能力', '问题解决', '团队协作'], milestone: '完成实习经历' },
             { year: 4, icon: '📝', title: '学术产出', goals: '发表学术论文，形成个人成果', skills: ['学术写作', '学术交流', '创新思维'], milestone: '发表学术论文' },
-            { year: 5, icon: '🏆', title: '职业启航', goals: '从校园到职场的身份转变，开启职业生涯', skills: ['职业素养', '持续学习', '适应能力'], milestone: '获得理想offer' }
+            { year: 5, icon: '🏆', title: '职业启航', goals: '从校园到职场的身份转变，开启职业生涯', skills: ['职业素养', '持续学习', '适应能力'], milestone: '获得理想offer' },
+            { year: 6, icon: '🌐', title: '职业发展', goals: '适应职场环境，建立职业基础', skills: ['职业素养', '专业技能', '沟通协作'], milestone: '转正并独立工作' },
+            { year: 7, icon: '🎯', title: '专业深化', goals: '深入专业领域，成为团队骨干', skills: ['专业深化', '项目管理', '问题解决'], milestone: '成为团队骨干' },
+            { year: 8, icon: '🌟', title: '行业影响', goals: '建立行业影响力，输出专业见解', skills: ['行业洞察', '演讲表达', '人脉拓展'], milestone: '行业交流分享' },
+            { year: 9, icon: '🏛️', title: '管理进阶', goals: '向管理岗位发展，培养领导能力', skills: ['团队管理', '战略思维', '决策能力'], milestone: '晋升管理岗位' },
+            { year: 10, icon: '👑', title: '成为领袖', goals: '成为行业领袖，引领发展方向', skills: ['战略领导', '行业影响', '创新引领'], milestone: '成为行业领袖' }
           ]
         },
         '网络安全工程师': {
@@ -698,25 +742,12 @@
             { year: 2, icon: '🔒', title: '安全技术入门', goals: '学习Web安全攻防，掌握渗透测试基础', skills: ['Web安全', '渗透测试', '漏洞挖掘'], milestone: '完成CTF比赛' },
             { year: 3, icon: '🛡️', title: '安全防护实战', goals: '掌握安全防护技术，参与实战项目', skills: ['安全防护', '日志分析', '应急响应'], milestone: '完成安全项目实战' },
             { year: 4, icon: '👥', title: '安全团队协作', goals: '带领安全团队，推动安全体系建设', skills: ['团队管理', '安全架构', '安全策略'], milestone: '搭建安全体系' },
-            { year: 5, icon: '🏆', title: '安全专家', goals: '成为网络安全专家，构建安全影响力', skills: ['安全战略', '行业洞察', '安全领导力'], milestone: '完成行业安全分享' }
-          ]
-        },
-        '计算机老师': {
-          'default': [
-            { year: 1, icon: '📚', title: '教学筑基 · 课堂实践', goals: '掌握教学方法，建立课堂管理能力', skills: ['教学设计', '课堂管理', '编程教学'], milestone: '完成1轮完整课程教学' },
-            { year: 2, icon: '💻', title: '技术融合 · 教育创新', goals: '将编程技术与教学深度融合', skills: ['教育技术', '在线教学', '课程开发'], milestone: '开发1门在线编程课程' },
-            { year: 3, icon: '📊', title: '教学研究 · 成果输出', goals: '开展教学研究，形成个人教学特色', skills: ['教育研究', '学术写作', '数据驱动'], milestone: '完成1篇教学研究论文' },
-            { year: 4, icon: '👥', title: '团队引领 · 学科建设', goals: '带领学科团队，推动课程体系改革', skills: ['团队管理', '学科建设', '教学管理'], milestone: '完成1个教学改革项目' },
-            { year: 5, icon: '🏆', title: '学科带头人 · 行业影响', goals: '成为计算机学科带头人，推动教育创新', skills: ['学科引领', '教育战略', '行业影响'], milestone: '完成1次区域学术报告' }
-          ]
-        },
-        '老师': {
-          'default': [
-            { year: 1, icon: '📚', title: '教学入门', goals: '掌握教学基本功，建立课堂秩序', skills: ['教学设计', '课堂管理', '教育心理学'], milestone: '完成1轮完整课程' },
-            { year: 2, icon: '📝', title: '教学精进', goals: '优化教学方法，设计创新课程', skills: ['课程设计', '教育技术', '评估反馈'], milestone: '开发1门新课程' },
-            { year: 3, icon: '💡', title: '教育研究', goals: '开展教学研究，形成个人风格', skills: ['教育研究', '创新教学', '教育技术'], milestone: '发表1篇教学论文' },
-            { year: 4, icon: '👥', title: '教研引领', goals: '带领教研团队，培养青年教师', skills: ['教研管理', '团队领导', '课程体系'], milestone: '指导1位青年教师' },
-            { year: 5, icon: '🏆', title: '教育专家', goals: '成为区域教育专家，引领教育改革', skills: ['教育战略', '课程体系', '教育领导力'], milestone: '完成1次区域讲座' }
+            { year: 5, icon: '🏆', title: '安全专家', goals: '成为网络安全专家，构建安全影响力', skills: ['安全战略', '行业洞察', '安全领导力'], milestone: '完成行业安全分享' },
+            { year: 6, icon: '🌐', title: '安全架构师', goals: '设计企业级安全架构体系', skills: ['安全架构', '风险评估', '合规审计'], milestone: '完成安全架构设计' },
+            { year: 7, icon: '🎯', title: '安全战略规划', goals: '制定企业安全战略，推动安全建设', skills: ['安全战略', '安全管理', '预算规划'], milestone: '制定安全战略规划' },
+            { year: 8, icon: '🌟', title: '安全创新突破', goals: '推动安全技术创新，建立安全品牌', skills: ['安全创新', '技术研发', '品牌建设'], milestone: '完成安全创新项目' },
+            { year: 9, icon: '🏛️', title: '安全团队管理', goals: '管理安全团队，培养安全人才', skills: ['团队管理', '人才梯队', '绩效管理'], milestone: '建立安全团队' },
+            { year: 10, icon: '👑', title: '安全行业领袖', goals: '成为安全行业领袖，引领行业发展', skills: ['行业领导', '战略远见', '生态构建'], milestone: '成为行业领袖' }
           ]
         },
         'default': {
@@ -725,7 +756,12 @@
             { year: 2, icon: '📊', title: '能力提升 · 项目主导', goals: '独立承担任务，拓展综合能力', skills: ['项目管理', '团队协作', '问题解决'], milestone: '独立完成1个项目' },
             { year: 3, icon: '💡', title: '专业突破 · 策略思维', goals: '成为团队骨干，建立专业影响力', skills: ['战略思维', '领导力', '创新思维'], milestone: '完成1次重要汇报' },
             { year: 4, icon: '👥', title: '管理进阶 · 团队领导', goals: '带领团队，培养下属能力', skills: ['团队管理', '决策能力', '跨部门协作'], milestone: '团队项目成功' },
-            { year: 5, icon: '🏆', title: '行业专家 · 影响构建', goals: '成为领域专家，输出方法论', skills: ['行业洞察', '影响力', '战略规划'], milestone: '完成1次行业分享' }
+            { year: 5, icon: '🏆', title: '行业专家 · 影响构建', goals: '成为领域专家，输出方法论', skills: ['行业洞察', '影响力', '战略规划'], milestone: '完成1次行业分享' },
+            { year: 6, icon: '🌐', title: '跨界拓展', goals: '拓展跨领域资源', skills: ['资源整合', '跨界协作'], milestone: '建立人脉网络' },
+            { year: 7, icon: '🎯', title: '战略规划', goals: '参与战略决策', skills: ['战略规划', '商业洞察'], milestone: '主导战略项目' },
+            { year: 8, icon: '🌟', title: '品牌影响', goals: '建立个人品牌', skills: ['品牌建设', '演讲表达'], milestone: '行业大会演讲' },
+            { year: 9, icon: '🏛️', title: '组织变革', goals: '推动组织发展', skills: ['变革管理', '体系建设'], milestone: '完成组织变革' },
+            { year: 10, icon: '👑', title: '行业领袖', goals: '引领行业发展', skills: ['战略领导', '思想引领'], milestone: '发布行业白皮书' }
           ]
         }
       };
@@ -733,11 +769,7 @@
       let template = branchTemplates['default']['default'];
       for (const [jobKey, styleMap] of Object.entries(branchTemplates)) {
         if (job.includes(jobKey) || jobKey.includes(job)) {
-          if (styleMap[style]) {
-            template = styleMap[style];
-          } else {
-            template = styleMap['default'] || branchTemplates['default']['default'];
-          }
+          template = styleMap['default'] || branchTemplates['default']['default'];
           break;
         }
       }
@@ -755,17 +787,25 @@
         });
       }
 
+      const radarData = {
+        skill: workYears === 0 ? 30 : Math.min(85, 40 + workYears * 8),
+        experience: workYears === 0 ? 0 : Math.min(90, workYears * 15),
+        learning: workYears === 0 ? 85 : Math.max(50, 80 - workYears * 3),
+        adaptability: workYears === 0 ? 60 : Math.max(40, 70 - workYears * 2),
+        leadership: workYears === 0 ? 0 : Math.min(75, workYears * 10)
+      };
+
       return {
         tree: { branches },
         recommendedSkills: ['AI应用', '数据分析', '项目管理', '沟通协作', '领导力'],
-        radarData: { skill: 65, experience: 55, learning: 75, adaptability: 60, leadership: 45 },
-        challenges: { icon: '⚡', text: '持续学习，抓住职业发展机遇' },
-        badges: ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
+        radarData: radarData,
+        challenges: { icon: '⚡', text: workYears === 0 ? '作为职场新人，快速学习和积累经验是关键' : '持续学习，抓住职业发展机遇' },
+        badges: workYears === 0 ? ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'] : ['🌟 初露锋芒', '🚀 快速成长', '👑 行业认可']
       };
     }
 
     // ============================================================
-    // 生成成长树（秒开版 - 调用 /api/generate-tree）
+    // 生成成长树
     // ============================================================
     async function generateTree(userInput) {
       if (isGeneratingTree) return;
@@ -817,8 +857,40 @@
         const data = await response.json();
 
         if (data.success && data.optimized) {
-          currentPathData = data.data;
           const userInput = getUserInput();
+          const targetYearsNum = userInput.targetYears || 5;
+          const workYearsNum = userInput.years || 0;
+          const icons = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '👑'];
+          
+          if (data.data && data.data.tree && data.data.tree.branches) {
+            while (data.data.tree.branches.length < targetYearsNum) {
+              const i = data.data.tree.branches.length;
+              data.data.tree.branches.push({
+                year: i + 1,
+                icon: icons[i] || '📌',
+                title: `第${i + 1}年成长`,
+                goals: '持续成长与突破',
+                skills: ['专业技能', '持续学习'],
+                milestone: `第${i + 1}年里程碑`
+              });
+            }
+            
+            if (data.data.tree.branches.length > targetYearsNum) {
+              data.data.tree.branches = data.data.tree.branches.slice(0, targetYearsNum);
+            }
+            
+            if (workYearsNum === 0 && data.data.radarData) {
+              data.data.radarData.experience = 0;
+              data.data.radarData.leadership = 0;
+              data.data.radarData.skill = Math.min(40, data.data.radarData.skill || 30);
+            }
+            
+            if (workYearsNum === 0 && data.data.badges) {
+              data.data.badges = ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
+            }
+          }
+          
+          currentPathData = data.data;
           renderTree(currentPathData, userInput);
           alert('✅ 已更新为AI优化版！');
         } else if (data.success && !data.optimized) {
@@ -861,8 +933,10 @@
           <div class="tree-branches">
       `;
 
+      const icons = ['🌱', '🌿', '🌳', '🌲', '🌟', '🌐', '🎯', '🌟', '🏛️', '👑'];
+
       branches.forEach((branch, index) => {
-        const yearLabel = ['🌱', '🌿', '🌳', '🌲', '🌟'][index] || '🌱';
+        const yearLabel = icons[index] || '🌱';
         const skillsHtml = (branch.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
 
         html += `
@@ -1088,7 +1162,7 @@
 风格：${userInput.styleLabel}
 技能：${userInput.skills.join('、')}
 
-我的5年计划：
+我的${userInput.targetYears}年计划：
 ${currentPathData.tree.branches.map((b, i) => 
   `第${b.year}年：${b.title} → ${b.goals}`
 ).join('\n')}
@@ -1179,6 +1253,14 @@ ${currentPathData.tree.branches.map((b, i) =>
     document.addEventListener('DOMContentLoaded', function() {
       const defaultCard = styleCards.querySelector('[data-style="default"]');
       if (defaultCard) defaultCard.classList.add('selected');
+
+      if (!userYears.value) {
+        userYears.value = '0';
+      }
+
+      if (goalYearLabel) {
+        goalYearLabel.textContent = targetYears.value;
+      }
 
       setTimeout(() => {
         const job = userJob.value.trim();
