@@ -1,6 +1,6 @@
 // ============================================
 // 职业路径生成器（完整修复版）
-// 修复：10年规划、工作年限0年雷达图、兴趣"无"处理、目标职业体现
+// 修复：10年规划、工作年限0年雷达图、兴趣"无"处理、目标职业体现、图标兼容
 // ============================================
 
 const {
@@ -24,7 +24,7 @@ const {
 const userPathCache = {};
 
 // ============================================
-// 扩展图标（支持10年）
+// 扩展图标（支持10年，使用兼容性更好的emoji）
 // ============================================
 const EXTENDED_ICONS = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '💎'];
 
@@ -35,7 +35,7 @@ function getInterestText(interest) {
   if (!interest || interest.trim() === '' || 
       interest === '无' || interest === '没有' || 
       interest === '暂无' || interest === '无兴趣' ||
-      interest === '无特别兴趣') {
+      interest === '无特别兴趣' || interest === '无特别爱好') {
     return '';
   }
   return interest.substring(0, 30);
@@ -56,6 +56,8 @@ function getGoalContent(goal) {
     '创业者': { finalTitle: '创业之路', finalMilestone: '成功创业' },
     '负责人': { finalTitle: '负责人之路', finalMilestone: '成为负责人' },
     '主管': { finalTitle: '主管之路', finalMilestone: '晋升主管' },
+    '老师': { finalTitle: '教师之路', finalMilestone: '成为优秀教师' },
+    '教师': { finalTitle: '教师之路', finalMilestone: '成为优秀教师' },
   };
   
   for (const [key, value] of Object.entries(goalMap)) {
@@ -199,7 +201,7 @@ function getCategory(job) {
   if (job.includes('医生') || job.includes('护士')) return 'medical';
   if (job.includes('金融') || job.includes('会计')) return 'finance';
   if (job.includes('管理') || job.includes('运营')) return 'management';
-  if (job.includes('店') || job.includes('餐饮') || job.includes('奶茶')) return 'management';
+  if (job.includes('店') || job.includes('餐饮') || job.includes('奶茶') || job.includes('咖啡')) return 'management';
   return 'other';
 }
 
@@ -371,11 +373,10 @@ function buildTreeFromPath(pathResult, userInput) {
     const title = i === 0 ? job : node;
     const prefix = STYLE_PREFIX[style] || '';
     
-    // 如果是最后一年且有目标内容，使用目标相关内容
     const isLastYear = i === Math.min(maxYears, path.length) - 1;
     const finalTitle = isLastYear && goalContent ? goalContent.finalTitle : title;
     const finalMilestone = isLastYear && goalContent ? goalContent.finalMilestone : (KNOWLEDGE_GRAPH.milestones[node] || getMilestone(category, i + 1));
-    const goalsText = isLastYear && goal ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
+    const goalsText = isLastYear && goal && goal !== '无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
     
     branches.push({
       year: i + 1,
@@ -395,7 +396,7 @@ function buildTreeFromPath(pathResult, userInput) {
     
     const finalTitle = isLastYear && goalContent ? goalContent.finalTitle : title;
     const finalMilestone = isLastYear && goalContent ? goalContent.finalMilestone : getMilestone(category, yearNum);
-    const goalsText = isLastYear && goal ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
+    const goalsText = isLastYear && goal && goal !== '无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
     
     branches.push({
       year: yearNum,
@@ -435,7 +436,7 @@ function buildTemplateTree(userInput) {
     
     const finalTitle = isLastYear && goalContent ? goalContent.finalTitle : title;
     const finalMilestone = isLastYear && goalContent ? goalContent.finalMilestone : getMilestone(category, i);
-    const goalsText = isLastYear && goal ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
+    const goalsText = isLastYear && goal && goal !== '无' ? `达成目标：${goal}` : (interestText ? `${title} · ${interestText}` : title);
     
     branches.push({
       year: i,
