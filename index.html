@@ -96,7 +96,7 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v6.0 · 稳定版</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v7.0 · 终极版</span>
   </div>
   <div class="main-card">
     <div class="tab-nav">
@@ -198,7 +198,16 @@ async function recommendSkills(job){
   catch(e){renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);}
   finally{skillInProgress=false;setTimeout(()=>$('aiSkillStatus').classList.add('hidden'),3000);}
 }
-function renderSkillTags(skills){const c=$('skillTags');c.innerHTML='';skills.forEach(s=>{const t=document.createElement('span');t.className='skill-tag';t.textContent=s;t.dataset.skill=s;t.onclick=function(){this.classList.toggle('active');};c.appendChild(t);});c.classList.add('has-skills');}
+function renderSkillTags(skills){
+  const c=$('skillTags');c.innerHTML='';
+  const invalidWords=['根据','结合','搜索','用户','推荐','以下','如下','建议','结果','信息','核心','相关','适合','需要','可以','应该','包括','以上','这些','那些','其中','比如','例如','以及','或者','技能','能力','方面','领域','知识','经验','直接','返回','名称','列表','输出','格式'];
+  skills.forEach(s=>{
+    if(invalidWords.some(w=>s.includes(w)))return;
+    const t=document.createElement('span');t.className='skill-tag';t.textContent=s;t.dataset.skill=s;t.onclick=function(){this.classList.toggle('active');};c.appendChild(t);
+  });
+  if(c.children.length===0){['专业技能','沟通协作','问题解决','持续学习','团队合作'].forEach(s=>{const t=document.createElement('span');t.className='skill-tag';t.textContent=s;t.dataset.skill=s;t.onclick=function(){this.classList.toggle('active');};c.appendChild(t);});}
+  c.classList.add('has-skills');
+}
 function getSelectedSkills(){return[...document.querySelectorAll('.skill-tag.active')].map(el=>el.dataset.skill);}
 function getUserInput(){return{name:$('userName').value.trim()||'用户',gender:$('userGender').value||'不便透露',age:parseInt($('userAge').value)||0,job:$('userJob').value.trim()||'产品经理',years:parseInt($('userYears').value)||0,education:$('userEdu').value||'本科',goal:$('userGoal').value.trim()||'职业发展',interest:$('userInterest').value.trim()||'职业成长',targetYears:parseInt($('targetYears').value)||5,style:selectedStyle,styleLabel:{default:'稳妥晋升',cross:'跨界融合',ideal:'理想主义',balanced:'均衡发展'}[selectedStyle],skills:getSelectedSkills()};}
 $('generateBtn').addEventListener('click',async function(){
@@ -218,18 +227,17 @@ $('optimizeBtn').addEventListener('click',async function(){
   };await check();
 });
 function renderTree(data,input){
+  const defaultIcons=['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
+  if(data&&data.tree&&data.tree.branches){data.tree.branches.forEach((b,i)=>{if(!b.year)b.year=i+1;if(!b.title)b.title=`第${i+1}年成长`;if(!b.goals)b.goals='持续成长';if(!b.milestone)b.milestone=`第${i+1}年里程碑`;if(!b.icon)b.icon=defaultIcons[i]||'📌';});}
+  if(!data.radarData)data.radarData={skill:30,experience:0,learning:85,adaptability:60,leadership:0};
+  if(!data.challenges||!data.challenges.text)data.challenges={icon:'⚡',text:'持续学习，抓住职业发展机遇'};
+  if(!data.badges||data.badges.length===0)data.badges=['初入职场','快速成长','潜力无限'];
   if(!data?.tree?.branches?.length){$('treeDisplay').innerHTML='<div class="text-center text-muted" style="padding:40px;">暂无数据</div>';return;}
-  const branches=data.tree.branches;const icons=['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
-  const radarData=data.radarData||{skill:30,experience:0,learning:85,adaptability:60,leadership:0};
-  const challengeText=data.challenges?.text||'持续学习，抓住职业发展机遇';
-  let badges=(data.badges||[]).filter(b=>typeof b==='string'&&b.length>0);
+  const branches=data.tree.branches;const radarData=data.radarData;const challengeText=data.challenges.text;
+  let badges=data.badges.filter(b=>typeof b==='string'&&b.length>0);
   if(badges.length===0)badges=['初入职场','快速成长','潜力无限'];
   let html=`<div class="tree-container"><div class="tree"><div class="tree-root-node">📍 ${input.job} · ${input.years}年${data._isTemplate?' · ⏳AI优化中':''}</div><div class="tree-trunk"></div><div class="tree-branches-row">`;
-  branches.forEach((b,i)=>{
-    const yearValue=b.year||(i+1);
-    const yearText=String(yearValue).replace(/第|年/g,'');
-    html+=`<div class="tree-branch"><div class="tree-branch-node ${i===branches.length-1?'goal':''}"><span class="branch-year">第${yearText}年</span><div class="branch-icon">${b.icon||icons[i]||'📌'}</div><div class="branch-title">${b.title||`第${yearText}年成长`}</div><div class="branch-goals">${b.goals||'持续成长'}</div><div class="branch-milestone">🎯 ${b.milestone||`第${yearText}年里程碑`}</div></div></div>`;
-  });
+  branches.forEach((b,i)=>{const yearText=String(b.year).replace(/第|年/g,'');html+=`<div class="tree-branch"><div class="tree-branch-node ${i===branches.length-1?'goal':''}"><span class="branch-year">第${yearText}年</span><div class="branch-icon">${b.icon||defaultIcons[i]}</div><div class="branch-title">${b.title}</div><div class="branch-goals">${b.goals}</div><div class="branch-milestone">🎯 ${b.milestone}</div></div></div>`;});
   html+='</div></div></div>';$('treeDisplay').innerHTML=html;
   $('profileSummary').innerHTML=`<span>👤 ${input.name} · ${input.gender} · ${input.age}岁</span><span>💼 ${input.job} · ${input.years}年</span><span>🎓 ${input.education}</span><span>🎯 ${input.goal}</span>`;
   renderRadar(radarData);
