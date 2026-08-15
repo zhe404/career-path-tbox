@@ -28,9 +28,6 @@
     .form-group label i { margin-right: 6px; color: #1e4a8a; }
     .form-group input, .form-group select, .form-group textarea { background: white; border: 1.5px solid #d9e2ef; border-radius: 16px; padding: 12px 16px; font-size: 15px; outline: none; color: #0a1a33; }
     .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231d3557' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
-    .info-icon { color: #aaa; font-size: 12px; margin-left: 6px; cursor: help; position: relative; display: inline-flex; }
-    .info-icon .tooltip { visibility: hidden; width: 200px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 1000; bottom: 150%; left: 50%; margin-left: -100px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: 400; }
-    .info-icon:hover .tooltip { visibility: visible; opacity: 1; }
     .style-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
     .style-card { background: white; border: 2px solid #d9e2ef; border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: all 0.25s; text-align: center; }
     .style-card.selected { border-color: #1e4a8a; background: #f0f7ff; }
@@ -62,10 +59,11 @@
     .tree { display: flex; flex-direction: column; align-items: center; min-width: 900px; }
     .tree-root-node { background: linear-gradient(135deg, #1e4a8a, #2d6bb8); color: white; padding: 16px 40px; border-radius: 60px; font-weight: 700; }
     .tree-trunk { width: 3px; height: 40px; background: #1e4a8a; }
-    .tree-branches-row { display: flex; gap: 20px; position: relative; padding-top: 20px; }
-    .tree-branch { display: flex; flex-direction: column; align-items: center; min-width: 130px; }
-    .tree-branch::before { content: ''; width: 3px; height: 20px; background: #1e4a8a; }
-    .tree-branch-node { background: white; border: 2px solid #1e4a8a; border-radius: 16px; padding: 12px 10px; text-align: center; }
+    .tree-branches-row { display: flex; gap: 20px; position: relative; padding-top: 30px; }
+    .tree-branches-row::before { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 3px; background: #1e4a8a; }
+    .tree-branch { display: flex; flex-direction: column; align-items: center; min-width: 130px; position: relative; }
+    .tree-branch::before { content: ''; width: 3px; height: 30px; background: #1e4a8a; }
+    .tree-branch-node { background: white; border: 2px solid #1e4a8a; border-radius: 16px; padding: 12px 10px; text-align: center; width: 100%; }
     .tree-branch-node.goal { border-color: #ffd700; background: #fffbe6; }
     .branch-year { font-size: 11px; font-weight: 700; color: #1e4a8a; background: rgba(30,74,138,0.1); padding: 2px 10px; border-radius: 12px; display: inline-block; margin-bottom: 4px; }
     .branch-icon { font-size: 24px; margin: 4px 0; }
@@ -98,16 +96,19 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v5.1 · 修复版</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v5.2 · 最终版</span>
   </div>
+
   <div class="main-card">
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="tab1"><i class="fas fa-pen-to-square"></i> <span>信息采集</span></button>
       <button class="tab-btn" data-tab="tab2"><i class="fas fa-tree"></i> <span>成长树</span></button>
     </div>
+
     <div id="tab1" class="tab-content active">
       <div style="font-size:18px;font-weight:700;color:#0b1e3a;margin-bottom:20px;"><i class="fas fa-user-astronaut" style="color:#1e4a8a;"></i> 你的职业画像</div>
       <div id="aiSkillStatus" class="ai-status hidden"><span class="spinner-small"></span><span>AI 正在分析...</span></div>
+
       <div class="form-grid">
         <div class="form-group"><label><i class="fas fa-user"></i> 姓名/昵称</label><input type="text" id="userName" placeholder="你的名字"></div>
         <div class="form-group"><label><i class="fas fa-venus-mars"></i> 性别</label><select id="userGender"><option value="">请选择</option><option>男</option><option>女</option><option>其他</option><option>不便透露</option></select></div>
@@ -121,8 +122,10 @@
         <div class="form-group full-width"><label><i class="fas fa-compass"></i> 职业兴趣/方向</label><textarea id="userInterest" rows="2" placeholder="例如：想用AI赋能传统行业"></textarea></div>
         <div class="form-group full-width"><label><i class="fas fa-tags"></i> 核心技能（点击选择，至少3项）</label><div class="skills-tag-group" id="skillTags"><div class="empty-skills-hint">选择职业后AI自动推荐</div></div></div>
       </div>
+
       <button class="btn-primary mt-20" id="generateBtn"><i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树</button>
     </div>
+
     <div id="tab2" class="tab-content">
       <div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;font-size:14px;"></div>
       <div id="treeDisplay"><div class="text-center text-muted" style="padding:40px;">请先生成成长树</div></div>
@@ -148,106 +151,389 @@
 <script>
 const JOB_CASCADE = {
   '🎓 学生': { children: { '中学生': ['初中生','高中生'], '大学生': ['本科生','硕士生','博士生'], '应届生': ['本科应届','硕士应届'] } },
-  '💻 技术/IT': { children: { '软件开发': ['前端工程师','后端工程师','全栈工程师'], '网络安全': ['网络安全工程师','渗透测试工程师','安全运维工程师'], '数据/AI': ['数据分析师','算法工程师','AI工程师'], '运维/测试': ['运维工程师','测试工程师'], '架构/管理': ['架构师','技术经理','CTO'] } },
-  '📚 教育': { children: { '基础教育': ['小学教师','初中教师','高中教师'], '高等教育': ['大学教师','讲师','教授'] } },
-  '🏥 医疗': { children: { '临床': ['医生','外科医生','内科医生'], '护理': ['护士','护师','护士长'] } },
-  '💰 金融': { children: { '银行': ['柜员','客户经理'], '证券': ['证券分析师','投资顾问'] } },
-  '🎨 产品/设计': { children: { '产品': ['产品助理','产品经理','产品总监'], 'UI/UX': ['UI设计师','UX设计师'] } },
-  '🏪 服务/零售': { children: { '餐饮': ['奶茶店店员','咖啡师','厨师'], '零售': ['店员','导购','店长'] } },
-  '📌 其他': { children: { '法律': ['律师','法务'], '建筑': ['建筑师','室内设计师'], '自由职业': ['自媒体运营','独立开发者'] } }
+  '💻 技术/IT': { children: {
+    '软件开发': ['前端工程师','后端工程师','全栈工程师','移动开发工程师'],
+    '网络安全': ['网络安全工程师','渗透测试工程师','安全运维工程师','安全分析师'],
+    '数据/AI': ['数据分析师','算法工程师','AI工程师','机器学习工程师'],
+    '运维/测试': ['运维工程师','测试工程师','DevOps工程师'],
+    '架构/管理': ['架构师','技术经理','技术总监','CTO']
+  }},
+  '📚 教育': { children: {
+    '基础教育': ['小学教师','初中教师','高中教师'],
+    '高等教育': ['大学教师','讲师','教授'],
+    '职业教育': ['职业培训师','技能教练'],
+    '教育管理': ['教研员','教务主任','校长']
+  }},
+  '🏥 医疗': { children: {
+    '临床': ['医生','外科医生','内科医生','儿科医生'],
+    '护理': ['护士','护师','护士长'],
+    '医技': ['药剂师','检验师','影像技师'],
+    '中医': ['中医师','针灸师']
+  }},
+  '💰 金融': { children: {
+    '银行': ['柜员','客户经理','风控专员'],
+    '证券/投资': ['证券分析师','投资顾问','基金经理'],
+    '保险': ['保险顾问','精算师'],
+    '财务/会计': ['会计','审计师','财务分析师']
+  }},
+  '🎨 产品/设计': { children: {
+    '产品': ['产品助理','产品经理','产品总监'],
+    'UI/UX': ['UI设计师','UX设计师','交互设计师'],
+    '视觉': ['平面设计师','视觉设计师']
+  }},
+  '🏪 服务/零售': { children: {
+    '餐饮': ['奶茶店店员','咖啡师','餐厅服务员','厨师'],
+    '零售': ['店员','导购','店长'],
+    '酒店': ['前台','客房服务','酒店管理']
+  }},
+  '📌 法律/建筑': { children: {
+    '法律': ['律师','法务','法律顾问'],
+    '建筑': ['建筑师','室内设计师','工程管理']
+  }},
+  '🏛️ 公务员/事业': { children: {
+    '公务员': ['行政人员','执法人员','事业单位人员'],
+    '其他': ['自由职业者','自媒体运营','独立开发者']
+  }}
 };
-let cascadeLevel = 0, cascadePath = [];
-function openCascade(){document.getElementById('cascadeOverlay').classList.remove('hidden');cascadeLevel=0;cascadePath=[];renderCascade();}
-function closeCascade(){document.getElementById('cascadeOverlay').classList.add('hidden');}
-function setUserJob(job){document.getElementById('userJob').value=job;document.getElementById('userJobText').textContent=job;document.getElementById('userJobText').style.color='#0a1a33';}
-function renderCascade(){
-  const body=document.getElementById('cascadeBody');body.innerHTML='';const columns=cascadeLevel+1;
-  for(let col=0;col<columns;col++){
-    const colDiv=document.createElement('div');colDiv.className='cascade-column';colDiv.innerHTML=`<div class="cascade-column-title">${['大类','子类','具体职业'][col]||''}</div>`;
-    let options=[];
-    if(col===0){options=Object.keys(JOB_CASCADE);}
-    else if(col===1){const p=cascadePath[0];if(p==='📌 其他')options=['✏️ 自定义职业'];else options=[...Object.keys(JOB_CASCADE[p].children),'✏️ 其他'];}
-    else{const p=cascadePath[0],s=cascadePath[1];if(s==='✏️ 自定义职业'||s==='✏️ 其他')options=['✏️ 手动输入...'];else options=[...(JOB_CASCADE[p]?.children[s]||[]),'✏️ 其他...'];}
-    options.forEach(opt=>{const d=document.createElement('div');d.className='cascade-option'+(cascadePath[col]===opt?' active':'');d.textContent=opt;d.onclick=()=>selectCascadeOption(col,opt);colDiv.appendChild(d);});
+
+let cascadeLevel = 0;
+let cascadePath = [];
+
+function openCascade() {
+  document.getElementById('cascadeOverlay').classList.remove('hidden');
+  cascadeLevel = 0;
+  cascadePath = [];
+  renderCascade();
+}
+
+function closeCascade() {
+  document.getElementById('cascadeOverlay').classList.add('hidden');
+}
+
+function setUserJob(job) {
+  document.getElementById('userJob').value = job;
+  document.getElementById('userJobText').textContent = job;
+  document.getElementById('userJobText').style.color = '#0a1a33';
+}
+
+function renderCascade() {
+  const body = document.getElementById('cascadeBody');
+  body.innerHTML = '';
+  const columns = cascadeLevel + 1;
+  for (let col = 0; col < columns; col++) {
+    const colDiv = document.createElement('div');
+    colDiv.className = 'cascade-column';
+    colDiv.innerHTML = `<div class="cascade-column-title">${['大类','子类','具体职业'][col]||''}</div>`;
+    let options = [];
+    if (col === 0) {
+      options = Object.keys(JOB_CASCADE);
+    } else if (col === 1) {
+      const parent = cascadePath[0];
+      if (parent === '📌 法律/建筑' || parent === '🏛️ 公务员/事业') {
+        options = [...Object.keys(JOB_CASCADE[parent].children), '✏️ 其他'];
+      } else if (JOB_CASCADE[parent]) {
+        options = [...Object.keys(JOB_CASCADE[parent].children), '✏️ 其他'];
+      }
+    } else if (col === 2) {
+      const parent = cascadePath[0], sub = cascadePath[1];
+      if (sub === '✏️ 其他') options = ['✏️ 手动输入职业...'];
+      else if (JOB_CASCADE[parent]?.children[sub]) options = [...JOB_CASCADE[parent].children[sub], '✏️ 其他...'];
+    }
+    options.forEach(opt => {
+      const div = document.createElement('div');
+      div.className = 'cascade-option' + (cascadePath[col] === opt ? ' active' : '');
+      div.textContent = opt;
+      div.onclick = () => selectCascadeOption(col, opt);
+      colDiv.appendChild(div);
+    });
     body.appendChild(colDiv);
   }
 }
-function selectCascadeOption(col,opt){
-  cascadePath=cascadePath.slice(0,col);cascadePath[col]=opt;
-  if(opt.includes('✏️')||opt.includes('自定义')){closeCascade();showManualInput();return;}
-  if(col===2){setUserJob(opt);closeCascade();debouncedRecommend();}
-  else{cascadeLevel=col+1;renderCascade();}
-}
-function showManualInput(){
-  const o=document.createElement('div');o.className='cascade-overlay';o.id='manualOverlay';
-  o.innerHTML=`<div class="cascade-modal" style="max-width:400px;"><div class="cascade-header"><span>请输入职业</span><button onclick="document.getElementById('manualOverlay').remove()">✕</button></div><div style="padding:20px;"><input id="manualInput" placeholder="请输入职业名称" style="width:100%;padding:12px;border:1.5px solid #d9e2ef;border-radius:12px;font-size:15px;"><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="confirmManual()" style="flex:1;padding:12px;background:#1e4a8a;color:white;border:none;border-radius:12px;cursor:pointer;">确认</button><button onclick="document.getElementById('manualOverlay').remove()" style="flex:1;padding:12px;background:#f0f0f0;border:none;border-radius:12px;cursor:pointer;">取消</button></div></div></div>`;
-  document.body.appendChild(o);setTimeout(()=>document.getElementById('manualInput').focus(),100);
-  document.getElementById('manualInput').addEventListener('keydown',e=>{if(e.key==='Enter')confirmManual();});
-}
-function confirmManual(){const v=document.getElementById('manualInput').value.trim();if(v.length<2){alert('请输入至少2个字');return;}setUserJob(v);document.getElementById('manualOverlay').remove();debouncedRecommend();}
 
-const API_CONFIG={baseUrl:''};const $=id=>document.getElementById(id);
-let currentPathData=null,currentSessionId=null,radarChart=null,selectedStyle='default';
-let skillTimer=null,lastSkillKey='',skillInProgress=false;
-document.querySelectorAll('.style-card').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.style-card').forEach(x=>x.classList.remove('selected'));this.classList.add('selected');selectedStyle=this.dataset.style;if($('userJob').value.trim().length>=2)debouncedRecommend();}));
-$('targetYears').addEventListener('change',function(){$('goalYearLabel').textContent=this.value;});
-function debouncedRecommend(){clearTimeout(skillTimer);skillTimer=setTimeout(()=>{const j=$('userJob').value.trim();if(j.length>=2)recommendSkills(j);},1000);}
-async function recommendSkills(job){
-  if(skillInProgress)return;const key=`${job}_${$('userEdu').value}_${$('userGoal').value}_${$('userInterest').value}_${selectedStyle}`;
-  if(key===lastSkillKey)return;lastSkillKey=key;skillInProgress=true;
+function selectCascadeOption(col, opt) {
+  cascadePath = cascadePath.slice(0, col);
+  cascadePath[col] = opt;
+  if (opt.includes('✏️') || opt.includes('自定义')) { closeCascade(); showManualInput(); return; }
+  if (col === 2) {
+    setUserJob(opt);
+    closeCascade();
+    debouncedRecommend();
+  } else {
+    cascadeLevel = col + 1;
+    renderCascade();
+  }
+}
+
+function showManualInput() {
+  const o = document.createElement('div');
+  o.className = 'cascade-overlay';
+  o.id = 'manualOverlay';
+  o.innerHTML = `<div class="cascade-modal" style="max-width:400px;"><div class="cascade-header"><span>请输入职业</span><button onclick="document.getElementById('manualOverlay').remove()">✕</button></div><div style="padding:20px;"><input id="manualInput" placeholder="请输入职业名称" style="width:100%;padding:12px;border:1.5px solid #d9e2ef;border-radius:12px;font-size:15px;"><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="confirmManual()" style="flex:1;padding:12px;background:#1e4a8a;color:white;border:none;border-radius:12px;cursor:pointer;">确认</button><button onclick="document.getElementById('manualOverlay').remove()" style="flex:1;padding:12px;background:#f0f0f0;border:none;border-radius:12px;cursor:pointer;">取消</button></div></div></div>`;
+  document.body.appendChild(o);
+  setTimeout(() => document.getElementById('manualInput').focus(), 100);
+  document.getElementById('manualInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmManual(); });
+}
+
+function confirmManual() {
+  const v = document.getElementById('manualInput').value.trim();
+  if (v.length < 2) { alert('请输入至少2个字'); return; }
+  setUserJob(v);
+  document.getElementById('manualOverlay').remove();
+  debouncedRecommend();
+}
+
+const API_CONFIG = { baseUrl: '' };
+const $ = id => document.getElementById(id);
+let currentPathData = null, currentSessionId = null, radarChart = null, selectedStyle = 'default';
+let skillTimer = null, lastSkillKey = '', skillInProgress = false;
+
+document.querySelectorAll('.style-card').forEach(c => c.addEventListener('click', function() {
+  document.querySelectorAll('.style-card').forEach(x => x.classList.remove('selected'));
+  this.classList.add('selected');
+  selectedStyle = this.dataset.style;
+  if ($('userJob').value.trim().length >= 2) debouncedRecommend();
+}));
+
+$('targetYears').addEventListener('change', function() { $('goalYearLabel').textContent = this.value; });
+
+function debouncedRecommend() {
+  clearTimeout(skillTimer);
+  skillTimer = setTimeout(() => {
+    const j = $('userJob').value.trim();
+    if (j.length >= 2) recommendSkills(j);
+  }, 1000);
+}
+
+async function recommendSkills(job) {
+  if (skillInProgress) return;
+  const key = `${job}_${$('userEdu').value}_${$('userGoal').value}_${$('userInterest').value}_${selectedStyle}`;
+  if (key === lastSkillKey) return;
+  lastSkillKey = key;
+  skillInProgress = true;
   $('aiSkillStatus').classList.remove('hidden');
-  try{const res=await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job,education:$('userEdu').value,goal:$('userGoal').value,interest:$('userInterest').value,style:selectedStyle,gender:$('userGender').value,age:$('userAge').value})});const data=await res.json();if(data.success&&data.skills&&data.skills.length>=3)renderSkillTags(data.skills);else renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);}
-  catch(e){renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);}
-  finally{skillInProgress=false;setTimeout(()=>$('aiSkillStatus').classList.add('hidden'),3000);}
+  try {
+    const res = await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ job, education: $('userEdu').value, goal: $('userGoal').value, interest: $('userInterest').value, style: selectedStyle, gender: $('userGender').value, age: $('userAge').value })
+    });
+    const data = await res.json();
+    if (data.success && data.skills && data.skills.length >= 3) renderSkillTags(data.skills);
+    else renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);
+  } catch(e) {
+    renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);
+  } finally {
+    skillInProgress = false;
+    setTimeout(() => $('aiSkillStatus').classList.add('hidden'), 3000);
+  }
 }
-function renderSkillTags(skills){const c=$('skillTags');c.innerHTML='';skills.forEach(s=>{const t=document.createElement('span');t.className='skill-tag';t.textContent=s;t.dataset.skill=s;t.onclick=function(){this.classList.toggle('active');};c.appendChild(t);});c.classList.add('has-skills');}
-function getSelectedSkills(){return[...document.querySelectorAll('.skill-tag.active')].map(el=>el.dataset.skill);}
-function getUserInput(){return{name:$('userName').value.trim()||'用户',gender:$('userGender').value||'不便透露',age:parseInt($('userAge').value)||0,job:$('userJob').value.trim()||'产品经理',years:parseInt($('userYears').value)||0,education:$('userEdu').value||'本科',goal:$('userGoal').value.trim()||'职业发展',interest:$('userInterest').value.trim()||'职业成长',targetYears:parseInt($('targetYears').value)||5,style:selectedStyle,styleLabel:{default:'稳妥晋升',cross:'跨界融合',ideal:'理想主义',balanced:'均衡发展'}[selectedStyle],skills:getSelectedSkills()};}
-$('generateBtn').addEventListener('click',async function(){
-  const input=getUserInput();if(!input.job){alert('请选择职业');return;}if(input.skills.length<3){alert('请至少选择3项技能');return;}
-  this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i> 生成中...';
-  try{const res=await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});const data=await res.json();if(data.success){currentPathData=data.data;currentSessionId=data.sessionId;renderTree(data.data,input);switchTab('tab2');}}
-  catch(e){const fb={tree:{branches:[]},radarData:{skill:30,experience:0,learning:85,adaptability:60,leadership:0}};currentPathData=fb;renderTree(fb,input);switchTab('tab2');}
-  finally{this.disabled=false;this.innerHTML='<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';}
-});
-$('optimizeBtn').addEventListener('click',async function(){
-  if(!currentSessionId){alert('请先生成成长树');return;}this.disabled=true;let attempts=0;const maxAttempts=4;
-  const check=async()=>{this.innerHTML=`<i class="fas fa-spinner fa-spin"></i> 优化中(${attempts+1}/${maxAttempts})...`;
-    try{const controller=new AbortController();const tid=setTimeout(()=>controller.abort(),10000);const res=await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`,{signal:controller.signal});clearTimeout(tid);const data=await res.json();
-      if(data.success&&data.optimized){currentPathData=data.data;renderTree(data.data,getUserInput());alert('✅ 已优化');this.disabled=false;this.innerHTML='<i class="fas fa-magic"></i> 获取优化版';}
-      else if(!data.optimized){attempts++;if(attempts<maxAttempts)setTimeout(check,5000);else{alert('⏳ 超时');this.disabled=false;this.innerHTML='<i class="fas fa-magic"></i> 获取优化版';}}
-    }catch(e){attempts++;if(attempts<maxAttempts)setTimeout(check,5000);else{alert('网络错误');this.disabled=false;this.innerHTML='<i class="fas fa-magic"></i> 获取优化版';}}
-  };await check();
-});
-function renderTree(data,input){
-  if(!data?.tree?.branches?.length){$('treeDisplay').innerHTML='<div class="text-center text-muted">暂无数据</div>';return;}
-  const branches=data.tree.branches;const icons=['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
-  let html=`<div class="tree-container"><div class="tree"><div class="tree-root-node">📍 ${input.job} · ${input.years}年</div><div class="tree-trunk"></div><div class="tree-branches-row">`;
-  branches.forEach((b,i)=>{html+=`<div class="tree-branch"><div class="tree-branch-node ${i===branches.length-1?'goal':''}"><span class="branch-year">第${b.year}年</span><div class="branch-icon">${b.icon||icons[i]}</div><div class="branch-title">${b.title}</div><div class="branch-goals">${b.goals||''}</div><div class="branch-milestone">🎯 ${b.milestone||''}</div></div></div>`;});
-  html+='</div></div></div>';$('treeDisplay').innerHTML=html;
-  $('profileSummary').innerHTML=`<span>👤 ${input.name} · ${input.gender} · ${input.age}岁</span><span>💼 ${input.job} · ${input.years}年</span><span>🎓 ${input.education}</span><span>🎯 ${input.goal}</span>`;
-  if(data.radarData){renderRadar(data.radarData);const labels=['💪专业技能','📋工作经验','📚学习能力','🔄适应能力','👥领导力'];const keys=['skill','experience','learning','adaptability','leadership'];$('statsContainer').innerHTML=keys.map((k,i)=>`<div class="stat-item"><span style="width:90px;font-size:13px;">${labels[i]}</span><div class="stat-bar"><div class="stat-fill" style="width:${data.radarData[k]||0}%"></div></div><span style="font-size:13px;font-weight:700;">${data.radarData[k]||0}%</span></div>`).join('');}
-  if(data.badges)$('badgesContainer').innerHTML=data.badges.map((b,i)=>`<span class="badge-item">${['🌟','🚀','👑','💎'][i]||'🏅'} ${typeof b==='string'?b:''}</span>`).join('');
-  if(data.challenges)$('eventContainer').innerHTML=`<div style="background:#fff3cd;border-radius:16px;padding:14px;margin-top:10px;">⚡ ${data.challenges.text||''}</div>`;
+
+function renderSkillTags(skills) {
+  const c = $('skillTags');
+  c.innerHTML = '';
+  skills.forEach(s => {
+    const t = document.createElement('span');
+    t.className = 'skill-tag';
+    t.textContent = s;
+    t.dataset.skill = s;
+    t.onclick = function() { this.classList.toggle('active'); };
+    c.appendChild(t);
+  });
+  c.classList.add('has-skills');
 }
-function renderRadar(data){const c=$('radarContainer');if(!c||c.offsetWidth===0){setTimeout(()=>renderRadar(data),100);return;}if(!radarChart)radarChart=echarts.init(c);radarChart.setOption({radar:{indicator:[{name:'专业技能',max:100},{name:'工作经验',max:100},{name:'学习能力',max:100},{name:'适应能力',max:100},{name:'领导力',max:100}],center:['50%','50%'],radius:'65%'},series:[{type:'radar',data:[{value:[data.skill||0,data.experience||0,data.learning||0,data.adaptability||0,data.leadership||0],areaStyle:{color:'rgba(30,74,138,0.3)'},lineStyle:{color:'#1e4a8a'}}]}]},true);radarChart.resize();}
-function switchTab(tabId){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tabId));document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id===tabId));if(tabId==='tab2'&&currentPathData?.radarData)setTimeout(()=>renderRadar(currentPathData.radarData),200);}
-document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',function(){switchTab(this.dataset.tab);}));
-$('regenerateBtn').addEventListener('click',()=>$('generateBtn').click());
-$('consultBtn').addEventListener('click',async function(){
-  if(!currentPathData){alert('请先生成成长树');return;}const input=getUserInput();
-  this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i> 咨询中...';
-  try{const res=await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:`我是${input.name}，${input.job}，${input.years}年。请给我5条职业建议。`})});const data=await res.json();if(data.success)showAIResponse(data.reply);else alert('咨询失败');}
-  catch(e){alert('咨询失败');}finally{this.disabled=false;this.innerHTML='<i class="fas fa-paper-plane"></i> 咨询AI助手';}
+
+function getSelectedSkills() { return [...document.querySelectorAll('.skill-tag.active')].map(el => el.dataset.skill); }
+
+function getUserInput() {
+  return {
+    name: $('userName').value.trim() || '用户',
+    gender: $('userGender').value || '不便透露',
+    age: parseInt($('userAge').value) || 0,
+    job: $('userJob').value.trim() || '产品经理',
+    years: parseInt($('userYears').value) || 0,
+    education: $('userEdu').value || '本科',
+    goal: $('userGoal').value.trim() || '职业发展',
+    interest: $('userInterest').value.trim() || '职业成长',
+    targetYears: parseInt($('targetYears').value) || 5,
+    style: selectedStyle,
+    styleLabel: {default:'稳妥晋升',cross:'跨界融合',ideal:'理想主义',balanced:'均衡发展'}[selectedStyle],
+    skills: getSelectedSkills()
+  };
+}
+
+$('generateBtn').addEventListener('click', async function() {
+  const input = getUserInput();
+  if (!input.job) { alert('请选择职业'); return; }
+  if (input.skills.length < 3) { alert('请至少选择3项技能'); return; }
+  this.disabled = true;
+  this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+  try {
+    const res = await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(input)
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentPathData = data.data;
+      currentSessionId = data.sessionId;
+      renderTree(data.data, input);
+      switchTab('tab2');
+    }
+  } catch(e) {
+    const fb = { tree:{branches:[]}, radarData:{skill:30,experience:0,learning:85,adaptability:60,leadership:0} };
+    currentPathData = fb;
+    renderTree(fb, input);
+    switchTab('tab2');
+  } finally {
+    this.disabled = false;
+    this.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';
+  }
 });
-function showAIResponse(reply){
-  const overlay=document.createElement('div');overlay.className='ai-modal-overlay';
-  overlay.innerHTML=`<div class="ai-modal-content"><div class="ai-modal-header"><span>🤖 AI 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button></div><div class="ai-modal-body">${(reply||'').replace(/\n/g,'<br>')}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
+
+$('optimizeBtn').addEventListener('click', async function() {
+  if (!currentSessionId) { alert('请先生成成长树'); return; }
+  this.disabled = true;
+  let attempts = 0;
+  const maxAttempts = 4;
+  const check = async () => {
+    this.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 优化中(${attempts+1}/${maxAttempts})...`;
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`, { signal: controller.signal });
+      clearTimeout(tid);
+      const data = await res.json();
+      if (data.success && data.optimized) {
+        currentPathData = data.data;
+        renderTree(data.data, getUserInput());
+        alert('✅ 已优化');
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
+      } else if (!data.optimized) {
+        attempts++;
+        if (attempts < maxAttempts) setTimeout(check, 5000);
+        else { alert('⏳ 超时'); this.disabled = false; this.innerHTML = '<i class="fas fa-magic"></i> 获取优化版'; }
+      }
+    } catch(e) {
+      attempts++;
+      if (attempts < maxAttempts) setTimeout(check, 5000);
+      else { alert('网络错误'); this.disabled = false; this.innerHTML = '<i class="fas fa-magic"></i> 获取优化版'; }
+    }
+  };
+  await check();
+});
+
+function renderTree(data, input) {
+  if (!data?.tree?.branches?.length) {
+    $('treeDisplay').innerHTML = '<div class="text-center text-muted" style="padding:40px;">暂无数据</div>';
+    return;
+  }
+  const branches = data.tree.branches;
+  const icons = ['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
+  const radarData = data.radarData || {skill:30, experience:0, learning:85, adaptability:60, leadership:0};
+  const challengeText = data.challenges?.text || '持续学习，抓住职业发展机遇';
+  let badges = (data.badges || []).filter(b => typeof b === 'string' && b.length > 0);
+  if (badges.length === 0) badges = ['初入职场','快速成长','潜力无限'];
+
+  let html = `<div class="tree-container"><div class="tree">`;
+  html += `<div class="tree-root-node">📍 ${input.job} · ${input.years}年${data._isTemplate ? ' · ⏳AI优化中' : ''}</div>`;
+  html += `<div class="tree-trunk"></div>`;
+  html += `<div class="tree-branches-row">`;
+  branches.forEach((b, i) => {
+    const yearText = String(b.year).replace(/第|年/g, '');
+    html += `<div class="tree-branch"><div class="tree-branch-node ${i === branches.length - 1 ? 'goal' : ''}">`;
+    html += `<span class="branch-year">第${yearText}年</span>`;
+    html += `<div class="branch-icon">${b.icon || icons[i] || '📌'}</div>`;
+    html += `<div class="branch-title">${b.title || `第${yearText}年`}</div>`;
+    html += `<div class="branch-goals">${b.goals || '持续成长'}</div>`;
+    html += `<div class="branch-milestone">🎯 ${b.milestone || `第${yearText}年里程碑`}</div>`;
+    html += `</div></div>`;
+  });
+  html += `</div></div></div>`;
+  $('treeDisplay').innerHTML = html;
+
+  $('profileSummary').innerHTML = `<span>👤 ${input.name} · ${input.gender} · ${input.age}岁</span><span>💼 ${input.job} · ${input.years}年</span><span>🎓 ${input.education}</span><span>🎯 ${input.goal}</span>`;
+
+  renderRadar(radarData);
+  const labels = ['💪专业技能','📋工作经验','📚学习能力','🔄适应能力','👥领导力'];
+  const keys = ['skill','experience','learning','adaptability','leadership'];
+  $('statsContainer').innerHTML = keys.map((k, i) => {
+    const val = Math.min(100, Math.max(0, radarData[k] || 0));
+    return `<div class="stat-item"><span style="width:90px;font-size:13px;">${labels[i]}</span><div class="stat-bar"><div class="stat-fill" style="width:${val}%"></div></div><span style="font-size:13px;font-weight:700;">${val}%</span></div>`;
+  }).join('');
+
+  const badgeIcons = ['🌟','🚀','👑','💎','🏅','🏅','🏅','🏅','🏅','🏅'];
+  $('badgesContainer').innerHTML = badges.map((b, i) => `<span class="badge-item">${badgeIcons[i] || '🏅'} ${b}</span>`).join('');
+
+  $('eventContainer').innerHTML = `<div style="background:#fff3cd;border-radius:16px;padding:14px;margin-top:10px;">⚡ ${challengeText}</div>`;
+}
+
+function renderRadar(data) {
+  const c = $('radarContainer');
+  if (!c || c.offsetWidth === 0) { setTimeout(() => renderRadar(data), 100); return; }
+  if (!radarChart) radarChart = echarts.init(c);
+  radarChart.setOption({
+    radar: {
+      indicator: [
+        {name:'专业技能',max:100},{name:'工作经验',max:100},{name:'学习能力',max:100},{name:'适应能力',max:100},{name:'领导力',max:100}
+      ],
+      center: ['50%','50%'],
+      radius: '65%'
+    },
+    series: [{
+      type: 'radar',
+      data: [{
+        value: [data.skill||0, data.experience||0, data.learning||0, data.adaptability||0, data.leadership||0],
+        areaStyle: {color: 'rgba(30,74,138,0.3)'},
+        lineStyle: {color: '#1e4a8a'}
+      }]
+    }]
+  }, true);
+  radarChart.resize();
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === tabId));
+  if (tabId === 'tab2' && currentPathData?.radarData) setTimeout(() => renderRadar(currentPathData.radarData), 200);
+}
+
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', function() { switchTab(this.dataset.tab); }));
+$('regenerateBtn').addEventListener('click', () => $('generateBtn').click());
+
+$('consultBtn').addEventListener('click', async function() {
+  if (!currentPathData) { alert('请先生成成长树'); return; }
+  const input = getUserInput();
+  this.disabled = true;
+  this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 咨询中...';
+  try {
+    const res = await fetch(`${API_CONFIG.baseUrl}/api/consult-ai-fast`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ message: `我是${input.name}，${input.job}，${input.years}年。请给我5条职业建议。` })
+    });
+    const data = await res.json();
+    if (data.success) showAIResponse(data.reply);
+    else alert('咨询失败');
+  } catch(e) {
+    alert('咨询失败');
+  } finally {
+    this.disabled = false;
+    this.innerHTML = '<i class="fas fa-paper-plane"></i> 咨询AI助手';
+  }
+});
+
+function showAIResponse(reply) {
+  const overlay = document.createElement('div');
+  overlay.className = 'ai-modal-overlay';
+  overlay.innerHTML = `<div class="ai-modal-content"><div class="ai-modal-header"><span>🤖 AI 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button></div><div class="ai-modal-body">${(reply||'AI没有返回内容').replace(/\n/g,'<br>')}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener('click',function(e){if(e.target===this)this.remove();});
+  overlay.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
 }
-document.addEventListener('DOMContentLoaded',function(){if(!$('userYears').value)$('userYears').value='0';$('goalYearLabel').textContent=$('targetYears').value;});
-window.addEventListener('resize',function(){if(radarChart)radarChart.resize();});
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (!$('userYears').value) $('userYears').value = '0';
+  $('goalYearLabel').textContent = $('targetYears').value;
+});
+
+window.addEventListener('resize', function() { if (radarChart) radarChart.resize(); });
 </script>
 </body>
 </html>
