@@ -352,7 +352,7 @@ $('optimizeBtn').addEventListener('click', async function() {
   if (!currentSessionId) { alert('请先生成成长树'); return; }
   this.disabled = true;
   let attempts = 0;
-  const maxAttempts = 8;
+  const maxAttempts = 20;
   const interval = 3000;
   const check = async () => {
     this.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 优化中(${attempts+1}/${maxAttempts})...`;
