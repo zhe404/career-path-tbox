@@ -54,7 +54,7 @@
     .cascade-column { flex: 1; overflow-y: auto; padding: 8px; border-right: 1px solid #f0f0f0; }
     .cascade-column:last-child { border-right: none; }
     .cascade-column-title { font-size: 12px; color: #999; padding: 8px 12px; font-weight: 600; }
-    .cascade-option { padding: 10px 12px; cursor: pointer; border-radius: 8px; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+    .cascade-option { padding: 10px 12px; cursor: pointer; border-radius: 8px; font-size: 14px; transition: all 0.15s; }
     .cascade-option:hover { background: #f0f7ff; }
     .cascade-option.active { background: #1e4a8a; color: white; font-weight: 600; }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -74,7 +74,8 @@
     .branch-milestone { font-size: 10px; color: #1e4a8a; margin-top: 6px; }
     .ai-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 99999; }
     .ai-modal-content { background: white; border-radius: 24px; width: 90%; max-width: 800px; max-height: 85vh; overflow: auto; animation: slideUp 0.3s ease; }
-    .ai-modal-header { padding: 20px 24px; border-bottom: 1px solid #e5edf8; font-weight: 700; font-size: 18px; position: sticky; top: 0; background: white; }
+    .ai-modal-header { padding: 20px 24px; border-bottom: 1px solid #e5edf8; font-weight: 700; font-size: 18px; position: sticky; top: 0; background: white; display: flex; justify-content: space-between; align-items: center; }
+    .ai-modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
     .ai-modal-body { padding: 24px; line-height: 1.8; font-size: 15px; white-space: pre-wrap; max-height: 65vh; overflow-y: auto; }
     .ai-modal-footer { padding: 16px 24px; border-top: 1px solid #e5edf8; text-align: right; }
     .ai-modal-footer button { padding: 10px 30px; background: #1e4a8a; color: white; border: none; border-radius: 30px; cursor: pointer; }
@@ -97,7 +98,7 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v5.0 · 树形版</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v5.1 · 修复版</span>
   </div>
   <div class="main-card">
     <div class="tab-nav">
@@ -153,7 +154,7 @@ const JOB_CASCADE = {
   '💰 金融': { children: { '银行': ['柜员','客户经理'], '证券': ['证券分析师','投资顾问'] } },
   '🎨 产品/设计': { children: { '产品': ['产品助理','产品经理','产品总监'], 'UI/UX': ['UI设计师','UX设计师'] } },
   '🏪 服务/零售': { children: { '餐饮': ['奶茶店店员','咖啡师','厨师'], '零售': ['店员','导购','店长'] } },
-  '📌 其他': { children: { '法律': ['律师','法务'], '建筑': ['建筑师','室内设计师'] } }
+  '📌 其他': { children: { '法律': ['律师','法务'], '建筑': ['建筑师','室内设计师'], '自由职业': ['自媒体运营','独立开发者'] } }
 };
 let cascadeLevel = 0, cascadePath = [];
 function openCascade(){document.getElementById('cascadeOverlay').classList.remove('hidden');cascadeLevel=0;cascadePath=[];renderCascade();}
@@ -164,10 +165,10 @@ function renderCascade(){
   for(let col=0;col<columns;col++){
     const colDiv=document.createElement('div');colDiv.className='cascade-column';colDiv.innerHTML=`<div class="cascade-column-title">${['大类','子类','具体职业'][col]||''}</div>`;
     let options=[];
-    if(col===0){options=[...Object.keys(JOB_CASCADE),'📌 其他'];}
+    if(col===0){options=Object.keys(JOB_CASCADE);}
     else if(col===1){const p=cascadePath[0];if(p==='📌 其他')options=['✏️ 自定义职业'];else options=[...Object.keys(JOB_CASCADE[p].children),'✏️ 其他'];}
     else{const p=cascadePath[0],s=cascadePath[1];if(s==='✏️ 自定义职业'||s==='✏️ 其他')options=['✏️ 手动输入...'];else options=[...(JOB_CASCADE[p]?.children[s]||[]),'✏️ 其他...'];}
-    options.forEach(opt=>{const d=document.createElement('div');d.className='cascade-option'+(cascadePath[col]===opt?' active':'');d.innerHTML=`<span>${opt.includes('✏️')?'✏️':opt.includes('📌')?'📌':col===0?opt.split(' ')[0]:col===2?'👤':'📁'}</span> ${opt.includes('✏️')?'其他（手动输入）':opt}`;d.onclick=()=>selectCascadeOption(col,opt);colDiv.appendChild(d);});
+    options.forEach(opt=>{const d=document.createElement('div');d.className='cascade-option'+(cascadePath[col]===opt?' active':'');d.textContent=opt;d.onclick=()=>selectCascadeOption(col,opt);colDiv.appendChild(d);});
     body.appendChild(colDiv);
   }
 }
@@ -195,10 +196,8 @@ async function recommendSkills(job){
   if(skillInProgress)return;const key=`${job}_${$('userEdu').value}_${$('userGoal').value}_${$('userInterest').value}_${selectedStyle}`;
   if(key===lastSkillKey)return;lastSkillKey=key;skillInProgress=true;
   $('aiSkillStatus').classList.remove('hidden');
-  try{
-    const res=await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job,education:$('userEdu').value,goal:$('userGoal').value,interest:$('userInterest').value,style:selectedStyle,gender:$('userGender').value,age:$('userAge').value})});
-    const data=await res.json();if(data.success&&data.skills&&data.skills.length>=3)renderSkillTags(data.skills);else renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);
-  }catch(e){renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);}
+  try{const res=await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job,education:$('userEdu').value,goal:$('userGoal').value,interest:$('userInterest').value,style:selectedStyle,gender:$('userGender').value,age:$('userAge').value})});const data=await res.json();if(data.success&&data.skills&&data.skills.length>=3)renderSkillTags(data.skills);else renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);}
+  catch(e){renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);}
   finally{skillInProgress=false;setTimeout(()=>$('aiSkillStatus').classList.add('hidden'),3000);}
 }
 function renderSkillTags(skills){const c=$('skillTags');c.innerHTML='';skills.forEach(s=>{const t=document.createElement('span');t.className='skill-tag';t.textContent=s;t.dataset.skill=s;t.onclick=function(){this.classList.toggle('active');};c.appendChild(t);});c.classList.add('has-skills');}
@@ -207,26 +206,18 @@ function getUserInput(){return{name:$('userName').value.trim()||'用户',gender:
 $('generateBtn').addEventListener('click',async function(){
   const input=getUserInput();if(!input.job){alert('请选择职业');return;}if(input.skills.length<3){alert('请至少选择3项技能');return;}
   this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i> 生成中...';
-  try{
-    const res=await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
-    const data=await res.json();
-    if(data.success){currentPathData=data.data;currentSessionId=data.sessionId;renderTree(data.data,input);switchTab('tab2');}
-  }catch(e){const fb={tree:{branches:[]},radarData:{skill:30,experience:0,learning:85,adaptability:60,leadership:0}};currentPathData=fb;renderTree(fb,input);switchTab('tab2');}
+  try{const res=await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});const data=await res.json();if(data.success){currentPathData=data.data;currentSessionId=data.sessionId;renderTree(data.data,input);switchTab('tab2');}}
+  catch(e){const fb={tree:{branches:[]},radarData:{skill:30,experience:0,learning:85,adaptability:60,leadership:0}};currentPathData=fb;renderTree(fb,input);switchTab('tab2');}
   finally{this.disabled=false;this.innerHTML='<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';}
 });
 $('optimizeBtn').addEventListener('click',async function(){
   if(!currentSessionId){alert('请先生成成长树');return;}this.disabled=true;let attempts=0;const maxAttempts=4;
-  const check=async()=>{
-    this.innerHTML=`<i class="fas fa-spinner fa-spin"></i> 优化中(${attempts+1}/${maxAttempts})...`;
-    try{
-      const controller=new AbortController();const tid=setTimeout(()=>controller.abort(),10000);
-      const res=await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`,{signal:controller.signal});clearTimeout(tid);
-      const data=await res.json();
+  const check=async()=>{this.innerHTML=`<i class="fas fa-spinner fa-spin"></i> 优化中(${attempts+1}/${maxAttempts})...`;
+    try{const controller=new AbortController();const tid=setTimeout(()=>controller.abort(),10000);const res=await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`,{signal:controller.signal});clearTimeout(tid);const data=await res.json();
       if(data.success&&data.optimized){currentPathData=data.data;renderTree(data.data,getUserInput());alert('✅ 已优化');this.disabled=false;this.innerHTML='<i class="fas fa-magic"></i> 获取优化版';}
       else if(!data.optimized){attempts++;if(attempts<maxAttempts)setTimeout(check,5000);else{alert('⏳ 超时');this.disabled=false;this.innerHTML='<i class="fas fa-magic"></i> 获取优化版';}}
     }catch(e){attempts++;if(attempts<maxAttempts)setTimeout(check,5000);else{alert('网络错误');this.disabled=false;this.innerHTML='<i class="fas fa-magic"></i> 获取优化版';}}
-  };
-  await check();
+  };await check();
 });
 function renderTree(data,input){
   if(!data?.tree?.branches?.length){$('treeDisplay').innerHTML='<div class="text-center text-muted">暂无数据</div>';return;}
@@ -251,7 +242,7 @@ $('consultBtn').addEventListener('click',async function(){
 });
 function showAIResponse(reply){
   const overlay=document.createElement('div');overlay.className='ai-modal-overlay';
-  overlay.innerHTML=`<div class="ai-modal-content"><div class="ai-modal-header"><span>🤖 AI 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button></div><div class="ai-modal-body">${reply.replace(/\n/g,'<br>')}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
+  overlay.innerHTML=`<div class="ai-modal-content"><div class="ai-modal-header"><span>🤖 AI 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button></div><div class="ai-modal-body">${(reply||'').replace(/\n/g,'<br>')}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
   document.body.appendChild(overlay);
   overlay.addEventListener('click',function(e){if(e.target===this)this.remove();});
 }
