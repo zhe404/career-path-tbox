@@ -62,7 +62,7 @@ app.post('/api/consult-ai-fast', async (req, res) => {
 });
 
 // ============================================
-// 技能推荐
+// 技能推荐（强过滤版）
 // ============================================
 app.post('/api/recommend-skills', async (req, res) => {
   try {
@@ -70,13 +70,13 @@ app.post('/api/recommend-skills', async (req, res) => {
     console.log('🎯 技能推荐:', job);
     
     const styleDesc = {
-      'default': '稳扎稳打，按部就班，注重基础技能的扎实掌握',
-      'cross': '跨界融合，破圈成长，注重多元化技能和跨领域能力',
-      'ideal': '追随热爱，追求极致，注重创新能力和理想追求',
-      'balanced': '全面开花，综合成长，注重各方面均衡发展'
+      'default': '稳扎稳打',
+      'cross': '跨界融合',
+      'ideal': '理想主义',
+      'balanced': '均衡发展'
     };
     
-    const prompt = `你是一位资深的职业规划专家。请根据以下用户信息，推荐适合的核心技能。\n\n用户信息：\n- 当前职业：${job.trim()}\n- 性别：${gender || '未填写'}\n- 年龄：${age || '未填写'}岁\n- 教育背景：${education || '未填写'}\n- 职业目标：${goal || '未填写'}\n- 职业兴趣：${interest || '未填写'}\n- 路径风格：${styleDesc[style] || '稳妥'}\n\n请列出 8-12 项最适合该用户的核心技能。\n\n要求：\n1. 只返回技能名称列表，用逗号分隔\n2. 技能名称要精炼、准确（2-6个字）\n3. 技能要紧密结合用户的职业、教育、目标和兴趣\n4. 根据路径风格调整技能侧重点\n5. 覆盖硬技能和软技能\n\n只返回技能列表，不要其他文字。`;
+    const prompt = `请直接输出8-12个技能名称，用逗号分隔。不要任何解释、不要复述、不要前缀。\n\n职业:${job}\n教育:${education||''}\n目标:${goal||''}\n兴趣:${interest||''}\n风格:${styleDesc[style]||''}\n\n直接输出：`;
     
     const requestData = { appId: '202607APmEQJ20464969', query: prompt, userId: 'user_' + Date.now(), stream: false };
     const response = await axios.post(TBOX_CONFIG.apiUrl, requestData, {
@@ -85,16 +85,31 @@ app.post('/api/recommend-skills', async (req, res) => {
     });
     
     const reply = parseAIResponse(response.data) || '';
+    console.log('📝 AI原始:', reply.substring(0, 150));
+    
     let skills = [];
     
     if (reply) {
-      const invalidPrefixes = ['根据', '结合', '搜索', '推荐', '以下', '如下', '建议', '结果', '用户信息', '输出', '格式', '示例'];
+      const invalidWords = [
+        '我直接','为你','分析','不需要','创建','计划','目标','风格',
+        '稳扎稳打','项核心','技能：','**','根据','结合','搜索','用户',
+        '推荐','以下','如下','建议','结果','信息','核心','相关',
+        '适合','需要','可以','应该','包括','以上','这些','那些',
+        '其中','比如','例如','以及','或者','技能','能力','方面',
+        '领域','知识','经验','直接','返回','名称','列表','输出',
+        '格式','请','只','不','要','的','了','是','和','与',
+        '或','等','为','在','有','你','我','直接输出','直接'
+      ];
+      
       const parts = reply.split(/[,，、\s\n\r\t]+/);
       for (const part of parts) {
-        const trimmed = part.trim().replace(/^["'""''【】\[\]()（）]+|["'""''【】\[\]()（）]+$/g, '');
+        let trimmed = part.trim()
+          .replace(/^["'""''【】\[\]()（）]+|["'""''【】\[\]()（）]+$/g, '')
+          .replace(/^\*+|\*+$/g, '')
+          .replace(/^\d+[.、\)]\s*/, '');
         if (trimmed.length < 2 || trimmed.length > 12) continue;
         if (/^[0-9]+$/.test(trimmed)) continue;
-        if (invalidPrefixes.some(p => trimmed.startsWith(p))) continue;
+        if (invalidWords.some(w => trimmed.includes(w))) continue;
         skills.push(trimmed);
       }
       skills = [...new Set(skills)].slice(0, 12);
@@ -201,7 +216,6 @@ app.post('/api/generate-tree', async (req, res) => {
         console.log('⏱️ 优化失败:', aiError.message);
         const cached = treeCache.get(sessionId);
         if (cached) {
-          // 使用本地生成器生成更好的数据
           const localData = generateCareerTree(userInput);
           localData._isTemplate = false;
           localData._status = '本地优化版';
@@ -229,4 +243,4 @@ app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use(express.static(path.join(__dirname, '/')));
 const PORT = process.env.PORT || 8081;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 服务已启动 v5.0 端口:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 服务已启动 v6.0 端口:${PORT}`));
