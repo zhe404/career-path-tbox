@@ -91,7 +91,7 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v4.0 · 表带式</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v4.1 · 修复版</span>
   </div>
 
   <div class="main-card">
@@ -302,7 +302,8 @@ function selectCascadeOption(col, opt) {
 function showManualJobInput() {
   const overlay = document.createElement('div');
   overlay.className = 'cascade-overlay';
-  overlay.innerHTML = `<div class="cascade-modal" style="max-width:400px;"><div class="cascade-header"><span>请输入你的职业</span><button onclick="this.closest('.cascade-overlay').remove()">✕</button></div><div style="padding:20px;"><input type="text" id="manualJobInput" placeholder="请输入职业名称" style="width:100%;padding:12px;border:1.5px solid #d9e2ef;border-radius:12px;font-size:15px;"><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="confirmManualJob()" style="flex:1;padding:12px;background:#1e4a8a;color:white;border:none;border-radius:12px;cursor:pointer;">确认</button><button onclick="this.closest('.cascade-overlay').remove()" style="flex:1;padding:12px;background:#f0f0f0;border:none;border-radius:12px;cursor:pointer;">取消</button></div></div></div>`;
+  overlay.id = 'manualJobOverlay';
+  overlay.innerHTML = `<div class="cascade-modal" style="max-width:400px;"><div class="cascade-header"><span>请输入你的职业</span><button onclick="document.getElementById('manualJobOverlay').remove()">✕</button></div><div style="padding:20px;"><input type="text" id="manualJobInput" placeholder="请输入职业名称" style="width:100%;padding:12px;border:1.5px solid #d9e2ef;border-radius:12px;font-size:15px;"><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="confirmManualJob()" style="flex:1;padding:12px;background:#1e4a8a;color:white;border:none;border-radius:12px;cursor:pointer;">确认</button><button onclick="document.getElementById('manualJobOverlay').remove()" style="flex:1;padding:12px;background:#f0f0f0;border:none;border-radius:12px;cursor:pointer;">取消</button></div></div></div>`;
   document.body.appendChild(overlay);
   setTimeout(() => document.getElementById('manualJobInput').focus(), 100);
   document.getElementById('manualJobInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') confirmManualJob(); });
@@ -312,7 +313,8 @@ function confirmManualJob() {
   const val = document.getElementById('manualJobInput').value.trim();
   if (val.length < 2) { alert('请输入至少2个字的职业名称'); return; }
   setUserJob(val);
-  document.querySelectorAll('.cascade-overlay').forEach(el => el.remove());
+  // 只删除手动输入弹窗，不删除cascadeOverlay
+  document.getElementById('manualJobOverlay').remove();
   debouncedRecommendSkills();
 }
 
