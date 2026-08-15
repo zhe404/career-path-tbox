@@ -78,7 +78,7 @@ async function callAIWithRetry(query, maxRetries = 3, timeout = 90000) {
   throw new Error(`AI调用失败 ${maxRetries} 次: ${lastError?.message || '未知错误'}`);
 }
 
-// 本地生成树（兜底方案）
+// 本地生成树（增强版 - 兜底方案）
 function generateLocalTreeEnhanced(userInput) {
   const targetYears = parseInt(userInput.targetYears) || 5;
   const workYears = parseInt(userInput.years) || 0;
@@ -121,20 +121,31 @@ function generateLocalTreeEnhanced(userInput) {
     });
   }
   
+  // 根据工作年限调整雷达图
+  let skill = Math.min(90, 40 + workYears * 8 + targetYears * 2);
+  let experience = Math.min(95, workYears * 12 + targetYears * 3);
+  let leadership = Math.min(80, workYears * 5 + targetYears * 3);
+  
+  if (workYears === 0) {
+    skill = Math.min(40, skill);
+    experience = Math.min(15, experience);
+    leadership = Math.min(10, leadership);
+  }
+  
   return {
     tree: { branches },
     radarData: { 
-      skill: Math.min(90, 40 + workYears * 8 + targetYears * 2), 
-      experience: Math.min(95, workYears * 12 + targetYears * 3), 
-      learning: 85, 
-      adaptability: 70, 
-      leadership: Math.min(80, workYears * 5 + targetYears * 3) 
+      skill: skill,
+      experience: experience,
+      learning: 85,
+      adaptability: 70,
+      leadership: leadership
     },
     challenges: { 
       icon: '⚡', 
       text: '持续学习，把握机遇，在变化中成长' 
     },
-    badges: ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期'],
+    badges: workYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期'],
     _isTemplate: false,
     _status: '📋 本地生成',
     _source: 'local'
@@ -277,6 +288,7 @@ app.post('/api/generate-tree', async (req, res) => {
   try {
     const userInput = req.body;
     console.log('🌳 生成成长树:', userInput.job);
+    console.log(`📊 用户工作年限: ${userInput.years || 0}年`);
     
     const sessionId = 'tree_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
     
@@ -288,7 +300,7 @@ app.post('/api/generate-tree', async (req, res) => {
     
     treeCache.set(sessionId, {
       data: templateData,
-      userInput,
+      userInput: userInput,
       optimized: false,
       timestamp: Date.now(),
       retryCount: 0,
@@ -303,7 +315,7 @@ app.post('/api/generate-tree', async (req, res) => {
       message: '初始版本已生成，AI正在后台优化...'
     });
     
-    // 异步优化（后台执行）
+    // 异步优化
     setTimeout(() => optimizeInBackground(sessionId), 500);
     
   } catch (error) {
@@ -314,7 +326,7 @@ app.post('/api/generate-tree', async (req, res) => {
 });
 
 // ============================================
-// 后台优化函数（带重试）
+// 后台优化函数（修复版 - 保留工作年限）
 // ============================================
 async function optimizeInBackground(sessionId, retryCount = 0) {
   const cached = treeCache.get(sessionId);
@@ -344,6 +356,7 @@ async function optimizeInBackground(sessionId, retryCount = 0) {
     const workYears = parseInt(userInput.years) || 0;
     
     console.log(`🔄 AI优化 (尝试 ${retryCount + 1}/${maxRetries})...`);
+    console.log(`📊 用户工作年限: ${workYears}年`);
     
     const prompt = `职业:${userInput.job},工作${workYears}年,性别:${userInput.gender||''},年龄:${userInput.age||''}岁,目标:${userInput.goal},兴趣:${userInput.interest},技能:${(userInput.skills||[]).join(',')}。生成${targetYears}年职业路径JSON:{"branches":[{"year":年份,"icon":"图标","title":"标题","goals":"目标","skills":["技能"],"milestone":"里程碑"}],"radarData":{"skill":数值,"experience":数值,"learning":数值,"adaptability":数值,"leadership":数值},"challenges":{"icon":"图标","text":"挑战描述"},"badges":["徽章1","徽章2"]}只返回JSON，不要任何解释。`;
     
@@ -370,14 +383,40 @@ async function optimizeInBackground(sessionId, retryCount = 0) {
           }
           if (branches.length > targetYears) branches = branches.slice(0, targetYears);
           
+          // ========== 关键修复：基于用户工作年限调整雷达图 ==========
+          let radarData = result.radarData || cached.data.radarData;
+          
+          // 如果用户是应届生（工作年限为0），强制调整经验值和领导力
+          if (workYears === 0) {
+            radarData.experience = Math.min(15, radarData.experience || 5);
+            radarData.leadership = Math.min(10, radarData.leadership || 5);
+            radarData.skill = Math.min(40, radarData.skill || 30);
+            console.log('🎓 应届生模式：调整雷达图数据');
+          } else if (workYears <= 2) {
+            radarData.experience = Math.min(30, radarData.experience || 20);
+            radarData.leadership = Math.min(20, radarData.leadership || 10);
+          } else if (workYears <= 5) {
+            radarData.experience = Math.min(60, radarData.experience || 50);
+            radarData.leadership = Math.min(40, radarData.leadership || 30);
+          }
+          
+          // 确保数值在合理范围
+          radarData.skill = Math.min(100, Math.max(10, radarData.skill || 30));
+          radarData.experience = Math.min(100, Math.max(0, radarData.experience || 0));
+          radarData.learning = Math.min(100, Math.max(50, radarData.learning || 80));
+          radarData.adaptability = Math.min(100, Math.max(40, radarData.adaptability || 60));
+          radarData.leadership = Math.min(100, Math.max(0, radarData.leadership || 0));
+          
           const optimizedData = {
             tree: { branches },
-            radarData: result.radarData || cached.data.radarData,
+            radarData: radarData,
             challenges: result.challenges || cached.data.challenges,
             badges: result.badges || cached.data.badges,
             _isTemplate: false,
             _status: '✅ AI优化完成 ✨',
-            _source: 'ai'
+            _source: 'ai',
+            _userYears: workYears,
+            _targetYears: targetYears
           };
           
           treeCache.set(sessionId, {
@@ -388,6 +427,7 @@ async function optimizeInBackground(sessionId, retryCount = 0) {
           });
           
           console.log(`✅ AI优化成功: ${sessionId}`);
+          console.log(`📊 最终雷达数据:`, radarData);
           return;
         }
       }
@@ -396,14 +436,13 @@ async function optimizeInBackground(sessionId, retryCount = 0) {
     
   } catch (error) {
     console.log(`⚠️ 优化失败 (尝试 ${retryCount + 1}): ${error.message}`);
-    // 指数退避重试
     const delay = 3000 * Math.pow(2, retryCount);
     setTimeout(() => optimizeInBackground(sessionId, retryCount + 1), delay);
   }
 }
 
 // ============================================
-// 接口4: 获取优化结果（轮询）
+// 接口4: 获取优化结果
 // ============================================
 app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
   const { sessionId } = req.params;
@@ -417,7 +456,7 @@ app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
     });
   }
   
-  // 更新缓存时间，延长生命周期
+  // 更新缓存时间
   cached.timestamp = Date.now();
   treeCache.set(sessionId, cached);
   
@@ -430,7 +469,6 @@ app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
     });
   }
   
-  // 计算预估剩余时间
   const elapsed = (Date.now() - cached.timestamp) / 1000;
   const estimatedTotal = 15 + (cached.retryCount || 0) * 5;
   const remaining = Math.max(0, Math.ceil(estimatedTotal - elapsed));
@@ -456,6 +494,6 @@ app.use(express.static(path.join(__dirname, '/')));
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 服务已启动 v8.0 端口:${PORT}`);
+  console.log(`🚀 服务已启动 v9.0 端口:${PORT}`);
   console.log(`📊 缓存容量: ${treeCache.size}`);
 });
