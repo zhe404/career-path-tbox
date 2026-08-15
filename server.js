@@ -62,7 +62,7 @@ app.post('/api/consult-ai-fast', async (req, res) => {
 });
 
 // ============================================
-// 技能推荐（折中版）
+// 技能推荐
 // ============================================
 app.post('/api/recommend-skills', async (req, res) => {
   try {
@@ -189,7 +189,8 @@ app.post('/api/generate-tree', async (req, res) => {
                 radarData,
                 challenges: result.challenges || templateData.challenges,
                 badges: result.badges || templateData.badges,
-                _isTemplate: false, _status: '已优化 ✓'
+                _isTemplate: false,
+                _status: '已优化 ✓'
               };
               treeCache.set(sessionId, { data: optimizedData, userInput, optimized: true, timestamp: Date.now() });
               console.log('✅ 后台AI优化成功');
@@ -199,7 +200,16 @@ app.post('/api/generate-tree', async (req, res) => {
       } catch (aiError) {
         console.log('⏱️ 优化失败:', aiError.message);
         const cached = treeCache.get(sessionId);
-        if (cached) { cached.optimized = true; cached.data._status = 'AI优化失败'; treeCache.set(sessionId, cached); }
+        if (cached) {
+          // 使用本地生成器生成更好的数据
+          const localData = generateCareerTree(userInput);
+          localData._isTemplate = false;
+          localData._status = '本地优化版';
+          cached.data = localData;
+          cached.optimized = true;
+          treeCache.set(sessionId, cached);
+          console.log('✅ 使用本地优化版');
+        }
       }
     }, 100);
   } catch (error) {
@@ -219,4 +229,4 @@ app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use(express.static(path.join(__dirname, '/')));
 const PORT = process.env.PORT || 8081;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 服务已启动 v4.0 端口:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 服务已启动 v5.0 端口:${PORT}`));
