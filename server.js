@@ -47,15 +47,8 @@ app.post('/api/consult-ai-fast', async (req, res) => {
     const { message, context } = req.body;
     console.log('⚡ 快速咨询');
     let query = message;
-    if (message.length > 500) {
-      query = message.substring(0, 500);
-    }
-    const requestData = {
-      appId: '202607APmEQJ20464969',
-      query: query,
-      userId: 'user_' + Date.now(),
-      stream: false,
-    };
+    if (message.length > 500) query = message.substring(0, 500);
+    const requestData = { appId: '202607APmEQJ20464969', query, userId: 'user_' + Date.now(), stream: false };
     const response = await axios.post(TBOX_CONFIG.apiUrl, requestData, {
       headers: { 'Content-Type': 'application/json', 'Authorization': TBOX_CONFIG.apiKey },
       timeout: 250000,
@@ -69,77 +62,86 @@ app.post('/api/consult-ai-fast', async (req, res) => {
 });
 
 // ============================================
-// 技能推荐（修复版 - 不返回提示词内容）
+// 技能推荐（折中版）
 // ============================================
 app.post('/api/recommend-skills', async (req, res) => {
   try {
-    const { job, education, goal, interest, style } = req.body;
+    const { job, education, goal, interest, style, gender, age } = req.body;
     console.log('🎯 技能推荐:', job);
     
-    const styleMap = { 'default': '稳妥', 'cross': '跨界', 'ideal': '创新', 'balanced': '均衡' };
-    
-    // 严格提示词：要求只返回技能名称
-    const prompt = `你是技能推荐引擎。请直接输出技能名称列表，用逗号分隔。\n禁止输出任何解释、前缀、后缀、复述。\n禁止输出"根据""结合""推荐""以下"等词汇。\n\n用户信息：职业=${job}，教育=${education || '无'}，目标=${goal || '无'}，兴趣=${interest || '无'}，风格=${styleMap[style] || '稳妥'}\n\n输出格式（仅技能名称）：`;
-    
-    const requestData = {
-      appId: '202607APmEQJ20464969',
-      query: prompt,
-      userId: 'user_' + Date.now(),
-      stream: false,
+    const styleDesc = {
+      'default': '稳扎稳打，按部就班，注重基础技能的扎实掌握',
+      'cross': '跨界融合，破圈成长，注重多元化技能和跨领域能力',
+      'ideal': '追随热爱，追求极致，注重创新能力和理想追求',
+      'balanced': '全面开花，综合成长，注重各方面均衡发展'
     };
     
+    const prompt = `你是一位资深的职业规划专家。请根据以下用户信息，推荐适合的核心技能。\n\n用户信息：\n- 当前职业：${job.trim()}\n- 性别：${gender || '未填写'}\n- 年龄：${age || '未填写'}岁\n- 教育背景：${education || '未填写'}\n- 职业目标：${goal || '未填写'}\n- 职业兴趣：${interest || '未填写'}\n- 路径风格：${styleDesc[style] || '稳妥'}\n\n请列出 8-12 项最适合该用户的核心技能。\n\n要求：\n1. 只返回技能名称列表，用逗号分隔\n2. 技能名称要精炼、准确（2-6个字）\n3. 技能要紧密结合用户的职业、教育、目标和兴趣\n4. 根据路径风格调整技能侧重点\n5. 覆盖硬技能和软技能\n\n只返回技能列表，不要其他文字。`;
+    
+    const requestData = { appId: '202607APmEQJ20464969', query: prompt, userId: 'user_' + Date.now(), stream: false };
     const response = await axios.post(TBOX_CONFIG.apiUrl, requestData, {
       headers: { 'Content-Type': 'application/json', 'Authorization': TBOX_CONFIG.apiKey },
-      timeout: 150000,
+      timeout: 250000,
     });
     
-    let reply = parseAIResponse(response.data);
+    const reply = parseAIResponse(response.data) || '';
     let skills = [];
     
     if (reply) {
-      // 无效短语黑名单
-      const invalidPhrases = [
-        '根据', '结合', '搜索', '用户', '推荐', '以下', '如下',
-        '建议', '结果', '信息', '核心', '相关', '适合', '需要',
-        '可以', '应该', '包括', '以上', '这些', '那些', '其中',
-        '比如', '例如', '以及', '或者', '技能', '能力', '方面',
-        '领域', '知识', '经验', '素质', '特质', '直接', '返回',
-        '名称', '列表', '输出', '格式', '仅', '禁止', '解释',
-        '前缀', '后缀', '复述', '词汇', '引擎', '用户信息',
-        '职业', '教育', '目标', '兴趣', '风格', '无', '稳妥',
-        '跨界', '创新', '均衡', '请', '只', '不', '要', '的',
-        '了', '是', '和', '与', '或', '等', '为', '在', '有'
-      ];
-      
-      // 按分隔符分割
+      const invalidPrefixes = ['根据', '结合', '搜索', '推荐', '以下', '如下', '建议', '结果', '用户信息', '输出', '格式', '示例'];
       const parts = reply.split(/[,，、\s\n\r\t]+/);
-      
       for (const part of parts) {
-        // 去除引号、括号等包装字符
         const trimmed = part.trim().replace(/^["'""''【】\[\]()（）]+|["'""''【】\[\]()（）]+$/g, '');
         if (trimmed.length < 2 || trimmed.length > 12) continue;
         if (/^[0-9]+$/.test(trimmed)) continue;
-        if (invalidPhrases.some(p => trimmed.includes(p))) continue;
+        if (invalidPrefixes.some(p => trimmed.startsWith(p))) continue;
         skills.push(trimmed);
       }
-      
-      // 去重并限制数量
       skills = [...new Set(skills)].slice(0, 12);
     }
     
-    // fallback
-    if (skills.length < 4) {
-      skills = ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
-    }
+    if (skills.length < 4) skills = getFallbackSkills(job, education, goal, interest, style);
     
     console.log('✅ 推荐技能:', skills);
     res.json({ success: true, skills });
-    
   } catch (error) {
     console.error('❌ 技能推荐失败:', error.message);
-    res.json({ success: true, skills: ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'], fallback: true });
+    res.json({ success: true, skills: getFallbackSkills(req.body.job, req.body.education, req.body.goal, req.body.interest, req.body.style), fallback: true });
   }
 });
+
+function getFallbackSkills(job, education, goal, interest, style) {
+  const baseMap = {
+    '学生': ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达', '研究能力', '团队协作', '持续学习'],
+    '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
+    '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
+    '网络安全': ['网络协议', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '日志分析', '安全策略', '系统安全'],
+    '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '商业分析', '沟通协作', '需求分析', '竞品分析'],
+    '医生': ['临床诊断', '医疗技术', '医患沟通', '循证医学', '医疗管理', '团队协作', '持续学习', '病例分析'],
+    '护士': ['护理技术', '患者关怀', '医疗记录', '急救技能', '沟通协作', '健康宣教', '药物管理', '病情观察'],
+    '运营': ['用户运营', '数据分析', '增长策略', '内容策划', '项目管理', '沟通协作', '活动策划', '市场洞察'],
+    '设计师': ['UI设计', 'UX研究', '设计工具', '设计思维', '用户测试', '创意表达', '视觉传达', '交互设计'],
+    '奶茶店': ['团队管理', '门店运营', '排班调度', '营销推广', '客户服务', '库存管理', '成本核算', '培训带教'],
+    '程序员': ['编程语言', '算法', '数据结构', '系统设计', '调试测试', '代码审查', '数据库', '版本控制'],
+    '律师': ['法律研究', '法律写作', '诉讼技巧', '谈判能力', '客户沟通', '法律伦理', '案例分析', '法律检索'],
+  };
+  let baseSkills = ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
+  for (const [key, value] of Object.entries(baseMap)) {
+    if (job && job.includes(key)) { baseSkills = value; break; }
+  }
+  let goalSkills = [];
+  if (goal) {
+    if (goal.includes('管理') || goal.includes('经理') || goal.includes('总监') || goal.includes('店长')) goalSkills = ['团队管理', '战略规划', '决策能力', '领导力'];
+    if (goal.includes('专家') || goal.includes('工程师')) goalSkills = ['深度研究', '技术创新', '专业认证', '行业洞察'];
+  }
+  let interestSkills = [];
+  if (interest && interest !== '无' && interest !== '没有') {
+    if (interest.includes('AI') || interest.includes('数据')) interestSkills = ['数据分析', 'AI应用', '机器学习'];
+    if (interest.includes('管理') || interest.includes('领导')) interestSkills = ['团队管理', '领导力', '组织发展'];
+    if (interest.includes('安全') || interest.includes('网络')) interestSkills = ['网络安全', '渗透测试', '安全防护'];
+  }
+  return [...new Set([...baseSkills, ...goalSkills, ...interestSkills])].slice(0, 12);
+}
 
 // ============================================
 // 生成成长树
@@ -153,22 +155,16 @@ app.post('/api/generate-tree', async (req, res) => {
     templateData._status = 'AI优化中';
     const sessionId = 'tree_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
     templateData._sessionId = sessionId;
-    treeCache.set(sessionId, { data: templateData, userInput: userInput, optimized: false, timestamp: Date.now() });
-    res.json({ success: true, data: templateData, template: true, sessionId: sessionId, source: templateData._source || 'template' });
+    treeCache.set(sessionId, { data: templateData, userInput, optimized: false, timestamp: Date.now() });
+    res.json({ success: true, data: templateData, template: true, sessionId, source: templateData._source || 'template' });
 
-    // 后台异步优化
     setTimeout(async () => {
       try {
-        console.log('🔄 后台AI优化开始... sessionId:', sessionId);
+        console.log('🔄 后台AI优化开始...');
         const targetYears = parseInt(userInput.targetYears) || 5;
         const workYears = parseInt(userInput.years) || 0;
-        const prompt = `职业:${userInput.job},${workYears}年经验,目标:${userInput.goal},风格:${userInput.styleLabel},兴趣:${userInput.interest},技能:${(userInput.skills || []).join(',')}。生成${targetYears}年职业路径JSON:{"branches":[{"year":1,"icon":"📚","title":"阶段名","goals":"具体目标","skills":["技能"],"milestone":"里程碑"}],"radarData":{"skill":0-100,"experience":0-100,"learning":0-100,"adaptability":0-100,"leadership":0-100},"challenges":{"icon":"⚡","text":"挑战"},"badges":["徽章1","徽章2","徽章3"]}只返回JSON，branches数组必须包含${targetYears}个元素`;
-        const requestData = {
-          appId: '202607APmEQJ20464969',
-          query: prompt,
-          userId: 'user_' + Date.now(),
-          stream: false,
-        };
+        const prompt = `职业:${userInput.job},${workYears}年,性别:${userInput.gender||''},年龄:${userInput.age||''}岁,目标:${userInput.goal},兴趣:${userInput.interest},技能:${(userInput.skills||[]).join(',')}。生成${targetYears}年职业路径JSON:{"branches":[{...}],"radarData":{...},"challenges":{...},"badges":[...]}只返回JSON`;
+        const requestData = { appId: '202607APmEQJ20464969', query: prompt, userId: 'user_' + Date.now(), stream: false };
         const response = await axios.post(TBOX_CONFIG.apiUrl, requestData, {
           headers: { 'Content-Type': 'application/json', 'Authorization': TBOX_CONFIG.apiKey },
           timeout: 300000,
@@ -180,97 +176,47 @@ app.post('/api/generate-tree', async (req, res) => {
             const result = JSON.parse(jsonMatch[0]);
             if (result.branches && result.branches.length > 0) {
               let optimizedBranches = result.branches;
-              const icons = ['📚', '📝', '💡', '👥', '🏆', '🌐', '🎯', '🌟', '🏛️', '💎'];
+              const icons = ['📚','📝','💡','👥','🏆','🌐','🎯','🌟','🏛️','💎'];
               while (optimizedBranches.length < targetYears) {
                 const i = optimizedBranches.length;
-                optimizedBranches.push({ year: i + 1, icon: icons[i] || '📌', title: `第${i + 1}年成长`, goals: '持续成长与突破', skills: ['专业技能', '持续学习', '创新思维'], milestone: `第${i + 1}年里程碑` });
+                optimizedBranches.push({ year: i+1, icon: icons[i]||'📌', title: `第${i+1}年成长`, goals: '持续成长', skills: ['专业技能'], milestone: `第${i+1}年里程碑` });
               }
               if (optimizedBranches.length > targetYears) optimizedBranches = optimizedBranches.slice(0, targetYears);
               let radarData = result.radarData || templateData.radarData;
-              if (workYears === 0) {
-                radarData = { ...radarData, experience: 0, leadership: 0, skill: Math.min(40, radarData.skill || 30) };
-              }
-              let badges = result.badges || templateData.badges;
-              if (workYears === 0) badges = ['🌟 初入职场', '🚀 快速成长', '💪 潜力无限'];
-              let challenges = result.challenges || templateData.challenges;
-              if (workYears === 0 && challenges && challenges.text) {
-                challenges.text = `作为职场新人，需要快速学习和积累经验。${challenges.text}`;
-              }
+              if (workYears === 0) radarData = { ...radarData, experience: 0, leadership: 0 };
               const optimizedData = {
                 tree: { branches: optimizedBranches },
-                recommendedSkills: result.recommendedSkills || ['AI应用', '数据分析', '项目管理'],
-                radarData: radarData,
-                challenges: challenges,
-                badges: badges,
-                _isTemplate: false,
-                _sessionId: sessionId,
-                _status: '已优化 ✓'
+                radarData,
+                challenges: result.challenges || templateData.challenges,
+                badges: result.badges || templateData.badges,
+                _isTemplate: false, _status: '已优化 ✓'
               };
-              treeCache.set(sessionId, { data: optimizedData, userInput: userInput, optimized: true, timestamp: Date.now() });
+              treeCache.set(sessionId, { data: optimizedData, userInput, optimized: true, timestamp: Date.now() });
               console.log('✅ 后台AI优化成功');
             }
           }
         }
       } catch (aiError) {
-        console.log('⏱️ 后台AI优化失败:', aiError.message);
-        const cachedData = treeCache.get(sessionId);
-        if (cachedData) {
-          cachedData.optimized = true;
-          cachedData.data._status = 'AI优化失败，使用基础版本';
-          cachedData.data._optimizeError = aiError.message;
-          treeCache.set(sessionId, cachedData);
-        }
+        console.log('⏱️ 优化失败:', aiError.message);
+        const cached = treeCache.get(sessionId);
+        if (cached) { cached.optimized = true; cached.data._status = 'AI优化失败'; treeCache.set(sessionId, cached); }
       }
     }, 100);
   } catch (error) {
-    console.error('❌ 生成树失败:', error.message);
-    const defaultData = generateCareerTree(req.body);
-    defaultData._fallback = true;
-    res.json({ success: true, data: defaultData, fallback: true });
+    console.error('❌ 生成失败:', error.message);
+    res.json({ success: true, data: generateCareerTree(req.body), fallback: true });
   }
 });
 
-// ============================================
-// 获取优化结果
-// ============================================
 app.get('/api/get-optimized-tree/:sessionId', async (req, res) => {
-  try {
-    const sessionId = req.params.sessionId;
-    const cached = treeCache.get(sessionId);
-    if (!cached) {
-      return res.json({ success: false, error: 'sessionId不存在或已过期' });
-    }
-    if (cached.optimized) {
-      return res.json({ success: true, data: cached.data, optimized: true });
-    } else {
-      const elapsed = Date.now() - cached.timestamp;
-      const remaining = Math.max(0, Math.ceil((15000 - elapsed) / 1000));
-      return res.json({ success: true, data: cached.data, optimized: false, message: remaining > 0 ? `⏳ AI优化中（约${remaining}秒）` : '⏳ AI优化中，请稍后重试' });
-    }
-  } catch (error) {
-    console.error('❌ 获取优化结果失败:', error.message);
-    res.json({ success: false, error: error.message });
-  }
+  const cached = treeCache.get(req.params.sessionId);
+  if (!cached) return res.json({ success: false, error: 'sessionId不存在' });
+  if (cached.optimized) return res.json({ success: true, data: cached.data, optimized: true });
+  const remaining = Math.max(0, Math.ceil((15000 - (Date.now() - cached.timestamp)) / 1000));
+  return res.json({ success: true, data: cached.data, optimized: false, message: `⏳ 优化中（约${remaining}秒）` });
 });
 
-// ============================================
-// 健康检查
-// ============================================
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: '服务正常运行', timestamp: new Date().toISOString(), uptime: process.uptime() });
-});
-
-app.get('/api/test', (req, res) => {
-  res.json({ status: 'ok', message: 'API服务正常运行', timestamp: new Date().toISOString() });
-});
-
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use(express.static(path.join(__dirname, '/')));
-
 const PORT = process.env.PORT || 8081;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('='.repeat(55));
-  console.log('🚀 服务已启动 (稳定版 v3.2)');
-  console.log(`📡 端口: ${PORT}`);
-  console.log(`🌐 访问: http://localhost:${PORT}`);
-  console.log('='.repeat(55));
-});
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 服务已启动 v4.0 端口:${PORT}`));
