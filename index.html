@@ -294,7 +294,7 @@
         <div class="form-group full-width">
           <label><i class="fas fa-tags"></i> 核心技能（点击选择，至少3项）
             <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">请选择你针对当前选定职业「已掌握」的核心技能。AI将根据你选择的职业自动推荐，至少选3项。</span>
+              <span class="tooltip">请选择你针对目标职业「已掌握」的核心技能。AI将根据你的职业目标自动推荐，至少选3项。</span>
             </i>
           </label>
           <div class="skills-tag-group" id="skillTags"><div class="empty-skills-hint">选择职业后AI自动推荐</div></div>
@@ -519,6 +519,9 @@ function debouncedRecommend() {
   }, 1000);
 }
 
+// ============================================
+// 核心修复：recommendSkills 正确传递 goal
+// ============================================
 async function recommendSkills(job) {
   if (skillInProgress) return;
   const goal = $('userGoal').value.trim();
@@ -530,7 +533,15 @@ async function recommendSkills(job) {
   try {
     const res = await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ job, education: $('userEdu').value, goal: goal, interest: $('userInterest').value, style: selectedStyle, gender: $('userGender').value, age: $('userAge').value })
+      body: JSON.stringify({ 
+        job: job,
+        goal: goal,
+        education: $('userEdu').value, 
+        interest: $('userInterest').value, 
+        style: selectedStyle, 
+        gender: $('userGender').value, 
+        age: $('userAge').value 
+      })
     });
     const data = await res.json();
     if (data.success && data.skills && data.skills.length >= 3) renderSkillTags(data.skills);
