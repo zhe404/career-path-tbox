@@ -41,12 +41,42 @@ function parseAIResponse(data) {
 }
 
 // ============================================
-// 检测是否为在校学生
+// 检测是否为在校学生（修复版 - 精确匹配）
 // ============================================
 function isStudentJob(job) {
   if (!job) return false;
-  const studentKeywords = ['学生', '初中', '高中', '大学', '硕士', '博士', '应届', '中学生', '大学生', '研究生', '本科', '专科'];
-  return studentKeywords.some(keyword => job.includes(keyword));
+  
+  // 1. 先排除明确不是学生的职业（含"大学"但非学生）
+  const excludeKeywords = [
+    '教师', '教授', '讲师', '副教授', '助教',
+    '辅导员', '班主任', '导师',
+    '医生', '护士', '医师', '主任', '院长',
+    '教务', '行政', '管理', '后勤',
+    '研究员', '科研', '实验员'
+  ];
+  if (excludeKeywords.some(keyword => job.includes(keyword))) {
+    return false;
+  }
+  
+  // 2. 匹配学生关键词（精确匹配，不含"大学"）
+  const studentKeywords = [
+    '初中生', '高中生', '中学生',
+    '本科生', '硕士生', '博士生', '研究生',
+    '应届生', '专科生',
+    '学生',      // 兜底，但已被排除词优先过滤
+    '大学生'     // 只精确匹配"大学生"，不匹配"大学教师"
+  ];
+  
+  if (studentKeywords.some(keyword => job.includes(keyword))) {
+    return true;
+  }
+  
+  // 3. 额外检查：如果包含"大学"但不含排除词，且不含学生关键词，则不是学生
+  if (job.includes('大学')) {
+    return false;
+  }
+  
+  return false;
 }
 
 // AI调用带重试
@@ -236,12 +266,13 @@ app.post('/api/consult-ai-fast', async (req, res) => {
 });
 
 // ============================================
-// 接口2: 技能推荐
+// 接口2: 技能推荐（修复版 - 基于当前职业）
 // ============================================
 app.post('/api/recommend-skills', async (req, res) => {
   try {
     const { job, education, goal, interest, style, gender, age } = req.body;
     console.log('🎯 技能推荐:', job);
+    console.log(`📌 目标职业: ${goal || '未填写'}`);
     
     const styleDesc = {
       'default': '稳扎稳打',
@@ -250,12 +281,24 @@ app.post('/api/recommend-skills', async (req, res) => {
       'balanced': '均衡发展'
     };
     
-    const prompt = `请直接输出8-12个技能名称，用逗号分隔。不要任何解释、不要复述、不要前缀。\n\n职业:${job}\n教育:${education||''}\n目标:${goal||''}\n兴趣:${interest||''}\n风格:${styleDesc[style]||''}\n\n直接输出：`;
+    // ========== 核心修复：提示词明确基于当前职业 ==========
+    const prompt = `当前职业是"${job}"。请根据这个职业，推荐该岗位从业者通常具备的8-12项核心技能名称。
+
+要求：
+1. 只推荐当前职业"${job}"相关的技能
+2. 不要推荐目标职业"${goal || '无'}"的技能
+3. 直接输出技能名称，用逗号分隔
+4. 不要任何解释、不要序号、不要前缀
+
+直接输出：`;
+    
+    console.log('📝 提示词:', prompt.substring(0, 200) + '...');
     
     const reply = await callAIWithRetry(prompt, 2, 45000);
     
     let skills = [];
     if (reply) {
+      // 增强过滤
       const invalidWords = [
         '我直接','为你','分析','不需要','创建','计划','目标','风格',
         '稳扎稳打','项核心','技能：','**','根据','结合','搜索','用户',
@@ -267,21 +310,35 @@ app.post('/api/recommend-skills', async (req, res) => {
         '或','等','为','在','有','你','我','直接输出','直接'
       ];
       
+      // 新增：过滤短语
+      const invalidPhrases = [
+        '根据搜索结果', '结合用户', '为您推荐', '以下技能', 
+        '建议如下', '核心技能', '能力分析', '职业匹配',
+        '根据您', '结合您', '为您提供', '我建议', '推荐如下',
+        '搜索结果', '搜索', '用户信息', '综合分析',
+        '当前职业', '目标职业', '根据当前'
+      ];
+      
       const parts = reply.split(/[,，、\s\n\r\t]+/);
       for (const part of parts) {
         let trimmed = part.trim()
           .replace(/^["'""''【】\[\]()（）]+|["'""''【】\[\]()（）]+$/g, '')
           .replace(/^\*+|\*+$/g, '')
           .replace(/^\d+[.、\)]\s*/, '');
+        
         if (trimmed.length < 2 || trimmed.length > 12) continue;
         if (/^[0-9]+$/.test(trimmed)) continue;
         if (invalidWords.some(w => trimmed.includes(w))) continue;
+        if (invalidPhrases.some(p => trimmed.includes(p))) continue;
+        
         skills.push(trimmed);
       }
       skills = [...new Set(skills)].slice(0, 12);
     }
     
+    // 如果过滤后少于4个，使用fallback
     if (skills.length < 4) {
+      console.log('⚠️ AI返回技能不足，使用fallback');
       skills = getFallbackSkills(job, education, goal, interest, style);
     }
     
@@ -295,42 +352,47 @@ app.post('/api/recommend-skills', async (req, res) => {
 });
 
 function getFallbackSkills(job, education, goal, interest, style) {
+  // ========== 核心修复：基于当前职业，不考虑目标 ==========
   const baseMap = {
+    '全栈': ['JavaScript', 'Python', 'React', 'Node.js', '数据库', 'API设计', 'Docker', 'Git', '前端工程化', '后端架构'],
+    '前端': ['HTML', 'CSS', 'JavaScript', 'React', 'Vue', 'Angular', '前端工程化', '性能优化', 'UI组件', '浏览器调试'],
+    '后端': ['Java', 'Python', 'Go', 'Spring Boot', 'Django', '数据库', 'API设计', '微服务', 'Docker', '系统架构'],
+    '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '商业分析', '沟通协作', '需求分析', '竞品分析'],
+    '设计师': ['UI设计', 'UX研究', '设计工具', '设计思维', '用户测试', '创意表达', '视觉传达', '交互设计'],
+    '运营': ['用户运营', '数据分析', '增长策略', '内容策划', '项目管理', '沟通协作', '活动策划', '市场洞察'],
+    '人力资源': ['招聘管理', '员工关系', '薪酬福利', '绩效管理', '培训发展', '劳动法规', '组织发展', 'HRIS系统'],
+    'HR': ['招聘管理', '员工关系', '薪酬福利', '绩效管理', '培训发展', '劳动法规', '组织发展', 'HRIS系统'],
+    '会计': ['财务会计', '管理会计', '税务筹划', '审计', '财务软件', 'Excel', '财务分析', '成本控制'],
+    '市场': ['市场调研', '品牌管理', '数字营销', '内容营销', 'SEO/SEM', '数据分析', '项目管理', '创意策划'],
+    '销售': ['客户开发', '商务谈判', '销售技巧', 'CRM系统', '数据分析', '沟通表达', '市场洞察', '客户关系'],
     '学生': ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达', '研究能力', '团队协作', '持续学习'],
-    '初中': ['学习方法', '时间管理', '基础知识', '阅读能力', '写作能力', '数学思维', '英语基础', '科学素养'],
-    '高中': ['学习方法', '时间管理', '学科知识', '考试技巧', '自主学习', '研究能力', '团队协作', '持续学习'],
+    '初中生': ['学习方法', '时间管理', '基础知识', '阅读能力', '写作能力', '数学思维', '英语基础', '科学素养'],
+    '高中生': ['学习方法', '时间管理', '学科知识', '考试技巧', '自主学习', '研究能力', '团队协作', '持续学习'],
+    '大学生': ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达', '研究能力', '团队协作', '持续学习'],
     '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
     '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
-    '网络安全': ['网络协议', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '日志分析', '安全策略', '系统安全'],
-    '产品经理': ['用户研究', '产品设计', '数据分析', '项目管理', '商业分析', '沟通协作', '需求分析', '竞品分析'],
+    '大学教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
     '医生': ['临床诊断', '医疗技术', '医患沟通', '循证医学', '医疗管理', '团队协作', '持续学习', '病例分析'],
     '护士': ['护理技术', '患者关怀', '医疗记录', '急救技能', '沟通协作', '健康宣教', '药物管理', '病情观察'],
-    '运营': ['用户运营', '数据分析', '增长策略', '内容策划', '项目管理', '沟通协作', '活动策划', '市场洞察'],
-    '设计师': ['UI设计', 'UX研究', '设计工具', '设计思维', '用户测试', '创意表达', '视觉传达', '交互设计'],
-    '奶茶店': ['团队管理', '门店运营', '排班调度', '营销推广', '客户服务', '库存管理', '成本核算', '培训带教'],
-    '程序员': ['编程语言', '算法', '数据结构', '系统设计', '调试测试', '代码审查', '数据库', '版本控制'],
     '律师': ['法律研究', '法律写作', '诉讼技巧', '谈判能力', '客户沟通', '法律伦理', '案例分析', '法律检索'],
+    '程序员': ['编程语言', '算法', '数据结构', '系统设计', '调试测试', '代码审查', '数据库', '版本控制'],
+    '网络安全': ['网络协议', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '日志分析', '安全策略', '系统安全'],
+    '奶茶店': ['团队管理', '门店运营', '排班调度', '营销推广', '客户服务', '库存管理', '成本核算', '培训带教'],
   };
+  
+  // 基于当前职业查找
   let baseSkills = ['专业技能', '沟通协作', '问题解决', '持续学习', '团队合作'];
   for (const [key, value] of Object.entries(baseMap)) {
     if (job && job.includes(key)) { baseSkills = value; break; }
   }
-  let goalSkills = [];
-  if (goal) {
-    if (goal.includes('管理') || goal.includes('经理') || goal.includes('总监') || goal.includes('店长')) {
-      goalSkills = ['团队管理', '战略规划', '决策能力', '领导力'];
-    }
-    if (goal.includes('专家') || goal.includes('工程师')) {
-      goalSkills = ['深度研究', '技术创新', '专业认证', '行业洞察'];
-    }
+  
+  // 如果当前职业匹配不到，根据教育背景调整
+  if (education && education.includes('本科') && baseSkills.length < 6) {
+    baseSkills = ['专业知识', '研究能力', '学术写作', '沟通表达', '团队协作', '持续学习'];
   }
-  let interestSkills = [];
-  if (interest && interest !== '无' && interest !== '没有') {
-    if (interest.includes('AI') || interest.includes('数据')) interestSkills = ['数据分析', 'AI应用', '机器学习'];
-    if (interest.includes('管理') || interest.includes('领导')) interestSkills = ['团队管理', '领导力', '组织发展'];
-    if (interest.includes('安全') || interest.includes('网络')) interestSkills = ['网络安全', '渗透测试', '安全防护'];
-  }
-  return [...new Set([...baseSkills, ...goalSkills, ...interestSkills])].slice(0, 12);
+  
+  // 只返回当前职业的技能，不考虑目标职业
+  return [...new Set(baseSkills)].slice(0, 12);
 }
 
 // ============================================
