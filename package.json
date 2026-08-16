@@ -1,8 +1,18 @@
 {
-  "name": "ai-career-growth-center",
+  "name": "career-path-tbox",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {"start":"node server.js","dev":"node --watch server.js"},
-  "dependencies": {"dotenv":"^16.6.1","express":"^5.1.0","tbox-nodejs-sdk":"0.0.19"}
+  "description": "AI职业导航与终身学习伙伴系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.19.0",
+    "cors": "^2.8.6",
+    "express": "^4.22.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
 }
