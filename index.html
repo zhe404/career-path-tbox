@@ -96,7 +96,6 @@
     .info-icon .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
     .info-icon:hover .tooltip { visibility: visible; opacity: 1; }
     
-    /* 优化进度条 */
     .optimize-progress {
       margin-top: 12px;
       padding: 12px 16px;
@@ -137,7 +136,6 @@
       50% { opacity: 0.4; }
     }
     
-    /* 优化状态标签 */
     .status-badge {
       display: inline-block;
       padding: 2px 12px;
@@ -159,14 +157,6 @@
       color: #383d41;
     }
     
-    .btn-optimize {
-      position: relative;
-      transition: all 0.3s;
-    }
-    .btn-optimize:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
     .btn-optimize .spinner {
       display: inline-block;
       width: 16px;
@@ -179,7 +169,6 @@
       margin-right: 6px;
     }
     
-    /* Toast提示 */
     .toast {
       position: fixed;
       top: 20px;
@@ -209,7 +198,7 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v9.0</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v9.2</span>
   </div>
   <div class="main-card">
     <div class="tab-nav">
@@ -351,8 +340,17 @@
 </div>
 
 <script>
+// ============================================
+// 职业级联数据（已修复：区分学生和职业）
+// ============================================
 const JOB_CASCADE = {
-  '🎓 学生': { children: { '中学生': ['初中生','高中生'], '大学生': ['本科生','硕士生','博士生'], '应届生': ['本科应届','硕士应届'] } },
+  '🎓 在校学生': { 
+    children: { 
+      '中学生': ['初中生','高中生'], 
+      '大学生': ['本科生','硕士生','博士生'],
+      '应届毕业生': ['本科应届','硕士应届','博士应届'] 
+    } 
+  },
   '💻 技术/IT': { children: { '软件开发': ['前端工程师','后端工程师','全栈工程师'], '网络安全': ['网络安全工程师','渗透测试工程师','安全运维工程师'], '数据/AI': ['数据分析师','算法工程师','AI工程师'], '运维/测试': ['运维工程师','测试工程师'], '架构/管理': ['架构师','技术经理','CTO'] } },
   '📚 教育': { children: { '基础教育': ['小学教师','初中教师','高中教师'], '高等教育': ['大学教师','讲师','教授'] } },
   '🏥 医疗': { children: { '临床': ['医生','外科医生','内科医生'], '护理': ['护士','护师','护士长'] } },
@@ -371,14 +369,21 @@ let selectedStyle = 'default';
 let skillTimer = null;
 let lastSkillKey = '';
 let skillInProgress = false;
-let optimizeTimer = null;
 let optimizeAttempts = 0;
 const MAX_OPTIMIZE_ATTEMPTS = 45;
 let isOptimizing = false;
 let cascadeLevel = 0, cascadePath = [];
 
 // ============================================
-// Toast 提示
+// 检测是否为在校学生
+// ============================================
+function isStudentJob(job) {
+  const studentKeywords = ['学生', '初中', '高中', '大学', '硕士', '博士', '应届', '中学生', '大学生', '研究生', '本科', '专科'];
+  return studentKeywords.some(keyword => job.includes(keyword));
+}
+
+// ============================================
+// Toast
 // ============================================
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
@@ -555,11 +560,14 @@ function getUserInput() {
 }
 
 // ============================================
-// 本地生成树（增强版 - 兜底方案）
+// 本地生成树（修复版 - 支持学生检测）
 // ============================================
 function generateLocalTreeEnhanced(input) {
   const targetYears = parseInt(input.targetYears) || 5;
   const workYears = parseInt(input.years) || 0;
+  const job = input.job || '';
+  const isStudent = isStudentJob(job);
+  
   const icons = ['📚','📝','💡','👥','🏆','🌐','🎯','🌟','🏛️','💎'];
   const milestones = [
     '建立基础能力',
@@ -592,38 +600,73 @@ function generateLocalTreeEnhanced(input) {
     branches.push({
       year: i,
       icon: icons[idx % icons.length],
-      title: `第${i}年 · ${input.job || '职业成长'}`,
+      title: `第${i}年 · ${job || '职业成长'}`,
       goals: goals[idx] || '持续成长',
       skills: ['专业技能', '沟通协作', '持续学习'].slice(0, Math.min(3, i)),
       milestone: milestones[idx] || `第${i}年里程碑`
     });
   }
   
-  // 根据工作年限调整雷达图
-  let skill = Math.min(90, 40 + workYears * 8 + targetYears * 2);
-  let experience = Math.min(95, workYears * 12 + targetYears * 3);
-  let leadership = Math.min(80, workYears * 5 + targetYears * 3);
-  
-  if (workYears === 0) {
-    skill = Math.min(40, skill);
-    experience = Math.min(15, experience);
-    leadership = Math.min(10, leadership);
+  // ==========================================
+  // 核心修复：根据职业类型设置雷达图
+  // ==========================================
+  let radarData;
+  if (isStudent) {
+    // 在校学生：没有工作经验，以学习能力为主
+    radarData = {
+      skill: 30,
+      experience: 0,
+      learning: 85,
+      adaptability: 60,
+      leadership: 5
+    };
+  } else if (workYears === 0) {
+    radarData = {
+      skill: 25,
+      experience: 5,
+      learning: 85,
+      adaptability: 65,
+      leadership: 3
+    };
+  } else if (workYears <= 2) {
+    radarData = {
+      skill: 40,
+      experience: 25,
+      learning: 80,
+      adaptability: 65,
+      leadership: 15
+    };
+  } else if (workYears <= 5) {
+    radarData = {
+      skill: 60,
+      experience: 50,
+      learning: 80,
+      adaptability: 70,
+      leadership: 35
+    };
+  } else {
+    radarData = {
+      skill: 75,
+      experience: 75,
+      learning: 80,
+      adaptability: 70,
+      leadership: 50
+    };
   }
   
   return {
     tree: { branches },
-    radarData: { 
-      skill: skill,
-      experience: experience,
-      learning: 85,
-      adaptability: 70,
-      leadership: leadership
-    },
-    challenges: { 
+    radarData: radarData,
+    challenges: isStudent ? { 
+      icon: '📚', 
+      text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识' 
+    } : { 
       icon: '⚡', 
       text: '持续学习，把握机遇，在变化中成长' 
     },
-    badges: workYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期'],
+    badges: isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] : 
+            (workYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : 
+            ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期']),
     _isTemplate: false,
     _status: '📋 本地生成',
     _source: 'local'
@@ -636,6 +679,8 @@ function generateLocalTreeEnhanced(input) {
 function renderTree(data, input) {
   const defaultIcons = ['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
   const userYears = input.years || 0;
+  const job = input.job || '';
+  const isStudent = isStudentJob(job);
   
   if (data && data.tree && data.tree.branches) {
     data.tree.branches.forEach((b, i) => {
@@ -643,43 +688,91 @@ function renderTree(data, input) {
       if (!b.title) b.title = `第${i+1}年成长`;
       if (!b.goals) b.goals = '持续成长';
       if (!b.milestone) b.milestone = `第${i+1}年里程碑`;
-      if (!b.icon) b.icon = defaultIcons[i] || '📌';
+      if (!b.icon) b.icon = defaultIcons[i % defaultIcons.length] || '📌';
     });
   }
   
-  // 修复：根据用户实际工作年限修正雷达图
-  if (data.radarData) {
-    if (userYears === 0) {
-      data.radarData.experience = Math.min(15, data.radarData.experience || 5);
-      data.radarData.leadership = Math.min(10, data.radarData.leadership || 5);
-      data.radarData.skill = Math.min(40, data.radarData.skill || 30);
-    } else if (userYears <= 2) {
-      data.radarData.experience = Math.min(30, data.radarData.experience || 20);
-      data.radarData.leadership = Math.min(20, data.radarData.leadership || 10);
-    }
-    // 确保数值在合理范围
-    data.radarData.skill = Math.min(100, Math.max(10, data.radarData.skill || 30));
-    data.radarData.experience = Math.min(100, Math.max(0, data.radarData.experience || 0));
-    data.radarData.learning = Math.min(100, Math.max(50, data.radarData.learning || 80));
-    data.radarData.adaptability = Math.min(100, Math.max(40, data.radarData.adaptability || 60));
-    data.radarData.leadership = Math.min(100, Math.max(0, data.radarData.leadership || 0));
+  // ==========================================
+  // 核心修复：根据职业类型强制修正雷达图
+  // ==========================================
+  if (!data.radarData) {
+    data.radarData = {};
   }
   
-  if (!data.radarData) {
+  if (isStudent) {
+    // 在校学生：没有工作经验，以学习能力为主
     data.radarData = {
-      skill: userYears === 0 ? 30 : 50 + userYears * 5,
-      experience: userYears * 10,
-      learning: 85,
-      adaptability: 60,
-      leadership: userYears === 0 ? 5 : userYears * 5
+      skill: Math.min(50, data.radarData.skill || 30),
+      experience: 0,
+      learning: Math.min(95, Math.max(70, data.radarData.learning || 85)),
+      adaptability: Math.min(80, Math.max(50, data.radarData.adaptability || 60)),
+      leadership: Math.min(10, data.radarData.leadership || 5)
+    };
+    // 覆盖 badges 和 challenges
+    if (!data.badges || data.badges.length === 0 || data.badges.some(b => b.includes('初入职场'))) {
+      data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
+    }
+    if (!data.challenges || !data.challenges.text || data.challenges.text.includes('职场新人')) {
+      data.challenges = {
+        icon: '📚',
+        text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'
+      };
+    }
+    console.log('🎓 学生模式：雷达图已调整');
+  } else if (userYears === 0) {
+    // 应届生
+    data.radarData = {
+      skill: Math.min(35, data.radarData.skill || 25),
+      experience: Math.min(10, data.radarData.experience || 5),
+      learning: Math.min(95, Math.max(70, data.radarData.learning || 85)),
+      adaptability: Math.min(80, Math.max(50, data.radarData.adaptability || 65)),
+      leadership: Math.min(8, data.radarData.leadership || 3)
+    };
+    if (!data.badges || data.badges.length === 0) {
+      data.badges = ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'];
+    }
+  } else if (userYears <= 2) {
+    data.radarData = {
+      skill: Math.min(55, Math.max(25, data.radarData.skill || 40)),
+      experience: Math.min(35, Math.max(10, data.radarData.experience || 25)),
+      learning: Math.min(95, Math.max(65, data.radarData.learning || 80)),
+      adaptability: Math.min(85, Math.max(50, data.radarData.adaptability || 65)),
+      leadership: Math.min(30, Math.max(5, data.radarData.leadership || 15))
+    };
+  } else if (userYears <= 5) {
+    data.radarData = {
+      skill: Math.min(80, Math.max(50, data.radarData.skill || 60)),
+      experience: Math.min(70, Math.max(40, data.radarData.experience || 50)),
+      learning: Math.min(95, Math.max(60, data.radarData.learning || 80)),
+      adaptability: Math.min(90, Math.max(50, data.radarData.adaptability || 70)),
+      leadership: Math.min(60, Math.max(20, data.radarData.leadership || 35))
+    };
+  } else {
+    data.radarData = {
+      skill: Math.min(95, Math.max(60, data.radarData.skill || 75)),
+      experience: Math.min(100, Math.max(60, data.radarData.experience || 75)),
+      learning: Math.min(100, Math.max(60, data.radarData.learning || 80)),
+      adaptability: Math.min(100, Math.max(50, data.radarData.adaptability || 70)),
+      leadership: Math.min(95, Math.max(30, data.radarData.leadership || 50))
     };
   }
   
+  // 最终确保所有值有效
+  data.radarData.skill = Math.min(100, Math.max(5, data.radarData.skill || 25));
+  data.radarData.experience = Math.min(100, Math.max(0, data.radarData.experience || 0));
+  data.radarData.learning = Math.min(100, Math.max(50, data.radarData.learning || 80));
+  data.radarData.adaptability = Math.min(100, Math.max(40, data.radarData.adaptability || 60));
+  data.radarData.leadership = Math.min(100, Math.max(0, data.radarData.leadership || 0));
+  
   if (!data.challenges || !data.challenges.text) {
-    data.challenges = {icon:'⚡', text:'持续学习，抓住职业发展机遇'};
+    data.challenges = isStudent ? 
+      {icon:'📚', text:'从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'} :
+      {icon:'⚡', text:'持续学习，抓住职业发展机遇'};
   }
   if (!data.badges || data.badges.length === 0) {
-    data.badges = userYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : ['初入职场','快速成长','潜力无限'];
+    data.badges = isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] :
+                   (userYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : 
+                   ['初入职场','快速成长','潜力无限']);
   }
   
   if (!data?.tree?.branches?.length) {
@@ -692,10 +785,12 @@ function renderTree(data, input) {
   const challengeText = data.challenges.text;
   let badges = data.badges.filter(b => typeof b === 'string' && b.length > 0);
   if (badges.length === 0) {
-    badges = userYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : ['初入职场','快速成长','潜力无限'];
+    badges = isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] :
+             (userYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : 
+             ['初入职场','快速成长','潜力无限']);
   }
 
-  let html = `<div class="tree-container"><div class="tree"><div class="tree-root-node">📍 ${input.job} · ${userYears}年${data._isTemplate ? ' · ⏳AI优化中' : ''}</div><div class="tree-trunk"></div><div class="tree-branches-row">`;
+  let html = `<div class="tree-container"><div class="tree"><div class="tree-root-node">📍 ${job} · ${userYears}年${data._isTemplate ? ' · ⏳AI优化中' : ''}</div><div class="tree-trunk"></div><div class="tree-branches-row">`;
   branches.forEach((b, i) => {
     const yearText = String(b.year).replace(/第|年/g, '');
     html += `<div class="tree-branch"><div class="tree-branch-node ${i === branches.length - 1 ? 'goal' : ''}"><span class="branch-year">第${yearText}年</span><div class="branch-icon">${b.icon || defaultIcons[i % defaultIcons.length]}</div><div class="branch-title">${b.title}</div><div class="branch-goals">${b.goals}</div><div class="branch-milestone">🎯 ${b.milestone}</div></div></div>`;
@@ -705,7 +800,7 @@ function renderTree(data, input) {
 
   $('profileSummary').innerHTML = `
     <span>👤 ${input.name} · ${input.gender} · ${input.age}岁</span>
-    <span>💼 ${input.job} · ${userYears}年</span>
+    <span>💼 ${job} · ${userYears}年</span>
     <span>🎓 ${input.education}</span>
     <span>🎯 ${input.goal}</span>
     ${data._status ? `<span class="status-badge ${data._status.includes('✅') ? 'done' : data._status.includes('本地') ? 'local' : 'optimizing'}">${data._status}</span>` : ''}
@@ -722,7 +817,7 @@ function renderTree(data, input) {
   const badgeIcons = ['🌟','🚀','👑','💎','🏅','🏅','🏅','🏅','🏅','🏅'];
   $('badgesContainer').innerHTML = badges.map((b, i) => `<span class="badge-item">${badgeIcons[i % badgeIcons.length] || '🏅'} ${b}</span>`).join('');
 
-  $('eventContainer').innerHTML = `<div style="background:#fff3cd;border-radius:16px;padding:14px;margin-top:10px;">⚡ ${challengeText}</div>`;
+  $('eventContainer').innerHTML = `<div style="background:#fff3cd;border-radius:16px;padding:14px;margin-top:10px;">${data.challenges.icon || '⚡'} ${challengeText}</div>`;
 }
 
 function renderRadar(data) {
@@ -763,7 +858,6 @@ $('generateBtn').addEventListener('click', async function() {
   if (!input.job) { alert('请选择职业'); return; }
   if (input.skills.length < 3) { alert('请至少选择3项技能'); return; }
   
-  // 重置优化状态
   isOptimizing = false;
   optimizeAttempts = 0;
   $('optimizeProgress').classList.remove('show');
@@ -789,7 +883,6 @@ $('generateBtn').addEventListener('click', async function() {
       
       if (data.template) {
         showToast('🌳 初始版本已生成，AI正在后台优化...', 'info');
-        // 自动开始优化
         setTimeout(() => {
           $('optimizeBtn').click();
         }, 1500);
@@ -808,7 +901,7 @@ $('generateBtn').addEventListener('click', async function() {
 });
 
 // ============================================
-// 优化轮询（修复版）
+// 优化轮询
 // ============================================
 $('optimizeBtn').addEventListener('click', async function() {
   if (!currentSessionId) {
@@ -854,14 +947,7 @@ async function pollForOptimization() {
     const data = await res.json();
     
     if (data.success && data.optimized) {
-      // ✅ 优化完成
       const input = getUserInput();
-      // 确保工作年限不被覆盖
-      if (data.data.radarData && input.years === 0) {
-        data.data.radarData.experience = Math.min(15, data.data.radarData.experience || 5);
-        data.data.radarData.leadership = Math.min(10, data.data.radarData.leadership || 5);
-        data.data.radarData.skill = Math.min(40, data.data.radarData.skill || 30);
-      }
       currentPathData = data.data;
       renderTree(currentPathData, input);
       
@@ -881,7 +967,6 @@ async function pollForOptimization() {
       return;
     }
     
-    // 还没完成，继续轮询
     optimizeAttempts++;
     
     const progress = Math.min(95, (optimizeAttempts / MAX_OPTIMIZE_ATTEMPTS) * 100);
@@ -901,7 +986,6 @@ async function pollForOptimization() {
     $('progressTimeText').textContent = `⏳ 约 ${Math.ceil(remaining)} 秒`;
     
     if (optimizeAttempts >= MAX_OPTIMIZE_ATTEMPTS) {
-      // 超时 - 使用本地版本
       $('progressBarFill').style.width = '100%';
       $('progressStatusText').textContent = '⏳ 优化超时，使用本地版本';
       $('progressTimeText').textContent = '📋 已就绪';
