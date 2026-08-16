@@ -198,7 +198,7 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> AI•职业生涯规划</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v9.2</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v10.1</span>
   </div>
   <div class="main-card">
     <div class="tab-nav">
@@ -341,7 +341,7 @@
 
 <script>
 // ============================================
-// 职业级联数据（已修复：区分学生和职业）
+// 职业级联数据
 // ============================================
 const JOB_CASCADE = {
   '🎓 在校学生': { 
@@ -352,7 +352,7 @@ const JOB_CASCADE = {
     } 
   },
   '💻 技术/IT': { children: { '软件开发': ['前端工程师','后端工程师','全栈工程师'], '网络安全': ['网络安全工程师','渗透测试工程师','安全运维工程师'], '数据/AI': ['数据分析师','算法工程师','AI工程师'], '运维/测试': ['运维工程师','测试工程师'], '架构/管理': ['架构师','技术经理','CTO'] } },
-  '📚 教育': { children: { '基础教育': ['小学教师','初中教师','高中教师'], '高等教育': ['大学教师','讲师','教授'] } },
+  '📚 教育': { children: { '基础教育': ['小学教师','初中教师','高中教师'], '高等教育': ['大学教师','讲师','教授','大学辅导员'] } },
   '🏥 医疗': { children: { '临床': ['医生','外科医生','内科医生'], '护理': ['护士','护师','护士长'] } },
   '💰 金融': { children: { '银行': ['柜员','客户经理'], '证券': ['证券分析师','投资顾问'] } },
   '🎨 产品/设计': { children: { '产品': ['产品助理','产品经理','产品总监'], 'UI/UX': ['UI设计师','UX设计师'] } },
@@ -378,8 +378,25 @@ let cascadeLevel = 0, cascadePath = [];
 // 检测是否为在校学生
 // ============================================
 function isStudentJob(job) {
-  const studentKeywords = ['学生', '初中', '高中', '大学', '硕士', '博士', '应届', '中学生', '大学生', '研究生', '本科', '专科'];
+  if (!job) return false;
+  // 先排除职业身份
+  const staffKeywords = ['教师', '老师', '教授', '讲师', '导师', '辅导员', '班主任', '医生', '医师', '护士', '教务', '行政', '管理', '职员', '员工', '助理'];
+  for (const kw of staffKeywords) {
+    if (job.includes(kw)) return false;
+  }
+  const studentKeywords = ['学生', '初中生', '初中', '高中生', '高中', '大学生', '研究生', '硕士', '博士', '应届', '中学生', '本科生', '专科生', '大专生', '职高', '中专', '技校'];
   return studentKeywords.some(keyword => job.includes(keyword));
+}
+
+// ============================================
+// 获取工作年限对应的经验值
+// ============================================
+function getExperienceByYears(years, isStudent) {
+  if (isStudent) return 0;
+  if (years === 0) return 5;
+  if (years <= 2) return 25;
+  if (years <= 5) return 50;
+  return 75;
 }
 
 // ============================================
@@ -607,12 +624,8 @@ function generateLocalTreeEnhanced(input) {
     });
   }
   
-  // ==========================================
-  // 核心修复：根据职业类型设置雷达图
-  // ==========================================
   let radarData;
   if (isStudent) {
-    // 在校学生：没有工作经验，以学习能力为主
     radarData = {
       skill: 30,
       experience: 0,
@@ -674,13 +687,35 @@ function generateLocalTreeEnhanced(input) {
 }
 
 // ============================================
-// 渲染成长树（修复版）
+// 渲染成长树（核心修复版）
 // ============================================
 function renderTree(data, input) {
   const defaultIcons = ['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
   const userYears = input.years || 0;
   const job = input.job || '';
   const isStudent = isStudentJob(job);
+  
+  // ==========================================
+  // ⭐ 核心修复：强制修正 experience 为 0 的问题
+  // ==========================================
+  if (!data.radarData) {
+    data.radarData = {};
+  }
+  
+  // 根据工作年限计算正确的经验值
+  const correctExperience = getExperienceByYears(userYears, isStudent);
+  
+  // 如果当前 experience 为 0 或 undefined，或者与预期值差异过大，强制修正
+  const currentExp = data.radarData.experience;
+  if (currentExp === 0 || currentExp === undefined || currentExp === null) {
+    data.radarData.experience = correctExperience;
+    console.log(`🔧 前端修正 experience: ${correctExperience}% (工作${userYears}年, ${isStudent ? '学生' : '非学生'})`);
+  } else if (userYears > 0 && currentExp < 10) {
+    // 如果工作年限 > 0 但经验值 < 10%，也强制修正
+    data.radarData.experience = correctExperience;
+    console.log(`🔧 前端强制修正异常 experience: ${currentExp} → ${correctExperience}%`);
+  }
+  // ==========================================
   
   if (data && data.tree && data.tree.branches) {
     data.tree.branches.forEach((b, i) => {
@@ -692,69 +727,49 @@ function renderTree(data, input) {
     });
   }
   
-  // ==========================================
-  // 核心修复：根据职业类型强制修正雷达图
-  // ==========================================
-  if (!data.radarData) {
-    data.radarData = {};
-  }
-  
+  // 修正雷达图其他维度
   if (isStudent) {
-    // 在校学生：没有工作经验，以学习能力为主
-    data.radarData = {
-      skill: Math.min(50, data.radarData.skill || 30),
-      experience: 0,
-      learning: Math.min(95, Math.max(70, data.radarData.learning || 85)),
-      adaptability: Math.min(80, Math.max(50, data.radarData.adaptability || 60)),
-      leadership: Math.min(10, data.radarData.leadership || 5)
-    };
-    // 覆盖 badges 和 challenges
-    if (!data.badges || data.badges.length === 0 || data.badges.some(b => b.includes('初入职场'))) {
+    data.radarData.skill = Math.min(50, data.radarData.skill || 30);
+    data.radarData.experience = 0;
+    data.radarData.learning = Math.min(95, Math.max(70, data.radarData.learning || 85));
+    data.radarData.adaptability = Math.min(80, Math.max(50, data.radarData.adaptability || 60));
+    data.radarData.leadership = Math.min(10, data.radarData.leadership || 5);
+    if (!data.badges || data.badges.length === 0) {
       data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
     }
-    if (!data.challenges || !data.challenges.text || data.challenges.text.includes('职场新人')) {
+    if (!data.challenges || !data.challenges.text) {
       data.challenges = {
         icon: '📚',
         text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'
       };
     }
-    console.log('🎓 学生模式：雷达图已调整');
   } else if (userYears === 0) {
-    // 应届生
-    data.radarData = {
-      skill: Math.min(35, data.radarData.skill || 25),
-      experience: Math.min(10, data.radarData.experience || 5),
-      learning: Math.min(95, Math.max(70, data.radarData.learning || 85)),
-      adaptability: Math.min(80, Math.max(50, data.radarData.adaptability || 65)),
-      leadership: Math.min(8, data.radarData.leadership || 3)
-    };
+    data.radarData.skill = Math.min(35, data.radarData.skill || 25);
+    data.radarData.experience = Math.min(10, data.radarData.experience || 5);
+    data.radarData.learning = Math.min(95, Math.max(70, data.radarData.learning || 85));
+    data.radarData.adaptability = Math.min(80, Math.max(50, data.radarData.adaptability || 65));
+    data.radarData.leadership = Math.min(8, data.radarData.leadership || 3);
     if (!data.badges || data.badges.length === 0) {
       data.badges = ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'];
     }
   } else if (userYears <= 2) {
-    data.radarData = {
-      skill: Math.min(55, Math.max(25, data.radarData.skill || 40)),
-      experience: Math.min(35, Math.max(10, data.radarData.experience || 25)),
-      learning: Math.min(95, Math.max(65, data.radarData.learning || 80)),
-      adaptability: Math.min(85, Math.max(50, data.radarData.adaptability || 65)),
-      leadership: Math.min(30, Math.max(5, data.radarData.leadership || 15))
-    };
+    data.radarData.skill = Math.min(55, Math.max(25, data.radarData.skill || 40));
+    data.radarData.experience = Math.min(35, Math.max(10, data.radarData.experience || 25));
+    data.radarData.learning = Math.min(95, Math.max(65, data.radarData.learning || 80));
+    data.radarData.adaptability = Math.min(85, Math.max(50, data.radarData.adaptability || 65));
+    data.radarData.leadership = Math.min(30, Math.max(5, data.radarData.leadership || 15));
   } else if (userYears <= 5) {
-    data.radarData = {
-      skill: Math.min(80, Math.max(50, data.radarData.skill || 60)),
-      experience: Math.min(70, Math.max(40, data.radarData.experience || 50)),
-      learning: Math.min(95, Math.max(60, data.radarData.learning || 80)),
-      adaptability: Math.min(90, Math.max(50, data.radarData.adaptability || 70)),
-      leadership: Math.min(60, Math.max(20, data.radarData.leadership || 35))
-    };
+    data.radarData.skill = Math.min(80, Math.max(50, data.radarData.skill || 60));
+    data.radarData.experience = Math.min(70, Math.max(40, data.radarData.experience || 50));
+    data.radarData.learning = Math.min(95, Math.max(60, data.radarData.learning || 80));
+    data.radarData.adaptability = Math.min(90, Math.max(50, data.radarData.adaptability || 70));
+    data.radarData.leadership = Math.min(60, Math.max(20, data.radarData.leadership || 35));
   } else {
-    data.radarData = {
-      skill: Math.min(95, Math.max(60, data.radarData.skill || 75)),
-      experience: Math.min(100, Math.max(60, data.radarData.experience || 75)),
-      learning: Math.min(100, Math.max(60, data.radarData.learning || 80)),
-      adaptability: Math.min(100, Math.max(50, data.radarData.adaptability || 70)),
-      leadership: Math.min(95, Math.max(30, data.radarData.leadership || 50))
-    };
+    data.radarData.skill = Math.min(95, Math.max(60, data.radarData.skill || 75));
+    data.radarData.experience = Math.min(100, Math.max(60, data.radarData.experience || 75));
+    data.radarData.learning = Math.min(100, Math.max(60, data.radarData.learning || 80));
+    data.radarData.adaptability = Math.min(100, Math.max(50, data.radarData.adaptability || 70));
+    data.radarData.leadership = Math.min(95, Math.max(30, data.radarData.leadership || 50));
   }
   
   // 最终确保所有值有效
