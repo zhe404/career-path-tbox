@@ -95,7 +95,6 @@
     .info-icon .tooltip { visibility: hidden; width: 220px; background-color: #333; color: #fff; text-align: left; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 1000; bottom: 150%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: 400; line-height: 1.5; }
     .info-icon .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
     .info-icon:hover .tooltip { visibility: visible; opacity: 1; }
-    
     .optimize-progress {
       margin-top: 12px;
       padding: 12px 16px;
@@ -135,7 +134,6 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.4; }
     }
-    
     .status-badge {
       display: inline-block;
       padding: 2px 12px;
@@ -156,7 +154,6 @@
       background: #e2e3e5;
       color: #383d41;
     }
-    
     .btn-optimize .spinner {
       display: inline-block;
       width: 16px;
@@ -168,7 +165,6 @@
       vertical-align: middle;
       margin-right: 6px;
     }
-    
     .toast {
       position: fixed;
       top: 20px;
@@ -197,7 +193,7 @@
 
 <div class="container">
   <div class="header">
-    <h1><i class="fas fa-tree"></i> AI•职业生涯规划</h1>
+    <h1><i class="fas fa-tree"></i> 职业成长树 · AI导航</h1>
     <span class="badge"><i class="fas fa-sparkles"></i> v9.2</span>
   </div>
   <div class="main-card">
@@ -298,7 +294,7 @@
         <div class="form-group full-width">
           <label><i class="fas fa-tags"></i> 核心技能（点击选择，至少3项）
             <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">选择你对于目标职业已具备或希望发展的核心技能，AI会根据职业推荐，至少选3项。</span>
+              <span class="tooltip">请选择你针对当前选定职业「已掌握」的核心技能。AI将根据你选择的职业自动推荐，至少选3项。</span>
             </i>
           </label>
           <div class="skills-tag-group" id="skillTags"><div class="empty-skills-hint">选择职业后AI自动推荐</div></div>
@@ -341,7 +337,7 @@
 
 <script>
 // ============================================
-// 职业级联数据（已修复：区分学生和职业）
+// 职业级联数据
 // ============================================
 const JOB_CASCADE = {
   '🎓 在校学生': { 
@@ -375,11 +371,42 @@ let isOptimizing = false;
 let cascadeLevel = 0, cascadePath = [];
 
 // ============================================
-// 检测是否为在校学生
+// 检测是否为在校学生（前端修复版 - 与后端保持一致）
 // ============================================
 function isStudentJob(job) {
-  const studentKeywords = ['学生', '初中', '高中', '大学', '硕士', '博士', '应届', '中学生', '大学生', '研究生', '本科', '专科'];
-  return studentKeywords.some(keyword => job.includes(keyword));
+  if (!job) return false;
+  
+  // 1. 先排除明确不是学生的职业（含"大学"但非学生）
+  const excludeKeywords = [
+    '教师', '教授', '讲师', '副教授', '助教',
+    '辅导员', '班主任', '导师',
+    '医生', '护士', '医师', '主任', '院长',
+    '教务', '行政', '管理', '后勤',
+    '研究员', '科研', '实验员'
+  ];
+  if (excludeKeywords.some(keyword => job.includes(keyword))) {
+    return false;
+  }
+  
+  // 2. 匹配学生关键词（精确匹配，不含"大学"）
+  const studentKeywords = [
+    '初中生', '高中生', '中学生',
+    '本科生', '硕士生', '博士生', '研究生',
+    '应届生', '专科生',
+    '学生',      // 兜底，但已被排除词优先过滤
+    '大学生'     // 只精确匹配"大学生"，不匹配"大学教师"
+  ];
+  
+  if (studentKeywords.some(keyword => job.includes(keyword))) {
+    return true;
+  }
+  
+  // 3. 如果包含"大学"但不含排除词和学生词，则不是学生
+  if (job.includes('大学')) {
+    return false;
+  }
+  
+  return false;
 }
 
 // ============================================
@@ -414,6 +441,7 @@ function setUserJob(job) {
   document.getElementById('userJob').value = job;
   document.getElementById('userJobText').textContent = job;
   document.getElementById('userJobText').style.color = '#0a1a33';
+  debouncedRecommend();
 }
 
 function renderCascade() {
@@ -479,7 +507,6 @@ document.querySelectorAll('.style-card').forEach(c => c.addEventListener('click'
   document.querySelectorAll('.style-card').forEach(x => x.classList.remove('selected'));
   this.classList.add('selected');
   selectedStyle = this.dataset.style;
-  if ($('userJob').value.trim().length >= 2) debouncedRecommend();
 }));
 
 $('targetYears').addEventListener('change', function() { $('goalYearLabel').textContent = this.value; });
@@ -494,7 +521,8 @@ function debouncedRecommend() {
 
 async function recommendSkills(job) {
   if (skillInProgress) return;
-  const key = `${job}_${$('userEdu').value}_${$('userGoal').value}_${$('userInterest').value}_${selectedStyle}`;
+  const goal = $('userGoal').value.trim();
+  const key = `${job}_${goal}_${$('userEdu').value}_${$('userInterest').value}_${selectedStyle}`;
   if (key === lastSkillKey) return;
   lastSkillKey = key;
   skillInProgress = true;
@@ -502,7 +530,7 @@ async function recommendSkills(job) {
   try {
     const res = await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ job, education: $('userEdu').value, goal: $('userGoal').value, interest: $('userInterest').value, style: selectedStyle, gender: $('userGender').value, age: $('userAge').value })
+      body: JSON.stringify({ job, education: $('userEdu').value, goal: goal, interest: $('userInterest').value, style: selectedStyle, gender: $('userGender').value, age: $('userAge').value })
     });
     const data = await res.json();
     if (data.success && data.skills && data.skills.length >= 3) renderSkillTags(data.skills);
@@ -560,7 +588,7 @@ function getUserInput() {
 }
 
 // ============================================
-// 本地生成树（修复版 - 支持学生检测）
+// 本地生成树（兜底方案）
 // ============================================
 function generateLocalTreeEnhanced(input) {
   const targetYears = parseInt(input.targetYears) || 5;
@@ -607,12 +635,8 @@ function generateLocalTreeEnhanced(input) {
     });
   }
   
-  // ==========================================
-  // 核心修复：根据职业类型设置雷达图
-  // ==========================================
   let radarData;
   if (isStudent) {
-    // 在校学生：没有工作经验，以学习能力为主
     radarData = {
       skill: 30,
       experience: 0,
@@ -700,7 +724,6 @@ function renderTree(data, input) {
   }
   
   if (isStudent) {
-    // 在校学生：没有工作经验，以学习能力为主
     data.radarData = {
       skill: Math.min(50, data.radarData.skill || 30),
       experience: 0,
@@ -708,19 +731,12 @@ function renderTree(data, input) {
       adaptability: Math.min(80, Math.max(50, data.radarData.adaptability || 60)),
       leadership: Math.min(10, data.radarData.leadership || 5)
     };
-    // 覆盖 badges 和 challenges
-    if (!data.badges || data.badges.length === 0 || data.badges.some(b => b.includes('初入职场'))) {
-      data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
-    }
-    if (!data.challenges || !data.challenges.text || data.challenges.text.includes('职场新人')) {
-      data.challenges = {
-        icon: '📚',
-        text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'
-      };
-    }
-    console.log('🎓 学生模式：雷达图已调整');
+    data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
+    data.challenges = {
+      icon: '📚',
+      text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'
+    };
   } else if (userYears === 0) {
-    // 应届生
     data.radarData = {
       skill: Math.min(35, data.radarData.skill || 25),
       experience: Math.min(10, data.radarData.experience || 5),
@@ -757,7 +773,6 @@ function renderTree(data, input) {
     };
   }
   
-  // 最终确保所有值有效
   data.radarData.skill = Math.min(100, Math.max(5, data.radarData.skill || 25));
   data.radarData.experience = Math.min(100, Math.max(0, data.radarData.experience || 0));
   data.radarData.learning = Math.min(100, Math.max(50, data.radarData.learning || 80));
@@ -1000,10 +1015,10 @@ async function pollForOptimization() {
       }, 2000);
       
       $('optimizeBtn').disabled = false;
-      $('optimizeBtn').innerHTML = '<i class="fas fa-magic"></i> 本地版';
+      $('optimizeBtn').innerHTML = '<i class="fas fa-redo"></i> 重试';
       isOptimizing = false;
       
-      showToast('⏳ 优化超时，已使用本地生成版本', 'warning');
+      showToast('⏳ 优化超时，已使用本地生成版本，点击"重试"可再次尝试', 'warning');
       return;
     }
     
@@ -1020,10 +1035,10 @@ async function pollForOptimization() {
       setTimeout(pollForOptimization, 3000);
     } else {
       $('optimizeBtn').disabled = false;
-      $('optimizeBtn').innerHTML = '<i class="fas fa-magic"></i> 重试';
+      $('optimizeBtn').innerHTML = '<i class="fas fa-redo"></i> 重试';
       isOptimizing = false;
       $('optimizeProgress').classList.remove('show');
-      showToast('❌ 连接失败，请点击"获取优化版"重试', 'error');
+      showToast('❌ 连接失败，请点击"重试"', 'error');
     }
   }
 }
