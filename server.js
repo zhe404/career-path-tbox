@@ -54,7 +54,7 @@ function parseAIResponse(data) {
 // ============================================
 function isStudentJob(job) {
   if (!job) return false;
-  const studentKeywords = ['学生', '初中', '高中', '大学', '硕士', '博士', '应届', '中学生', '大学生', '研究生', '本科', '专科'];
+  const studentKeywords = ['学生', '应届生', '中学生', '大学生', '本科生', '专科生', '研究生'];
   return studentKeywords.some(keyword => job.includes(keyword));
 }
 
