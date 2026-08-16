@@ -40,6 +40,15 @@ function parseAIResponse(data) {
   return reply;
 }
 
+// ============================================
+// 检测是否为在校学生
+// ============================================
+function isStudentJob(job) {
+  if (!job) return false;
+  const studentKeywords = ['学生', '初中', '高中', '大学', '硕士', '博士', '应届', '中学生', '大学生', '研究生', '本科', '专科'];
+  return studentKeywords.some(keyword => job.includes(keyword));
+}
+
 // AI调用带重试
 async function callAIWithRetry(query, maxRetries = 3, timeout = 90000) {
   let lastError = null;
@@ -78,10 +87,15 @@ async function callAIWithRetry(query, maxRetries = 3, timeout = 90000) {
   throw new Error(`AI调用失败 ${maxRetries} 次: ${lastError?.message || '未知错误'}`);
 }
 
-// 本地生成树（增强版 - 兜底方案）
+// ============================================
+// 本地生成树（增强版 - 支持学生检测）
+// ============================================
 function generateLocalTreeEnhanced(userInput) {
   const targetYears = parseInt(userInput.targetYears) || 5;
   const workYears = parseInt(userInput.years) || 0;
+  const job = userInput.job || '';
+  const isStudent = isStudentJob(job);
+  
   const icons = ['📚','📝','💡','👥','🏆','🌐','🎯','🌟','🏛️','💎'];
   const milestones = [
     '建立基础能力',
@@ -114,38 +128,74 @@ function generateLocalTreeEnhanced(userInput) {
     branches.push({
       year: i,
       icon: icons[idx % icons.length],
-      title: `第${i}年 · ${userInput.job || '职业成长'}`,
+      title: `第${i}年 · ${job || '职业成长'}`,
       goals: goals[idx] || '持续成长',
       skills: ['专业技能', '沟通协作', '持续学习'].slice(0, Math.min(3, i)),
       milestone: milestones[idx] || `第${i}年里程碑`
     });
   }
   
-  // 根据工作年限调整雷达图
-  let skill = Math.min(90, 40 + workYears * 8 + targetYears * 2);
-  let experience = Math.min(95, workYears * 12 + targetYears * 3);
-  let leadership = Math.min(80, workYears * 5 + targetYears * 3);
-  
-  if (workYears === 0) {
-    skill = Math.min(40, skill);
-    experience = Math.min(15, experience);
-    leadership = Math.min(10, leadership);
+  // ==========================================
+  // 根据职业类型设置雷达图
+  // ==========================================
+  let radarData;
+  if (isStudent) {
+    // 在校学生：没有工作经验，以学习能力为主
+    radarData = {
+      skill: 30,
+      experience: 0,
+      learning: 85,
+      adaptability: 60,
+      leadership: 5
+    };
+    console.log('🎓 学生模式：生成学生专属雷达图');
+  } else if (workYears === 0) {
+    radarData = {
+      skill: 25,
+      experience: 5,
+      learning: 85,
+      adaptability: 65,
+      leadership: 3
+    };
+  } else if (workYears <= 2) {
+    radarData = {
+      skill: 40,
+      experience: 25,
+      learning: 80,
+      adaptability: 65,
+      leadership: 15
+    };
+  } else if (workYears <= 5) {
+    radarData = {
+      skill: 60,
+      experience: 50,
+      learning: 80,
+      adaptability: 70,
+      leadership: 35
+    };
+  } else {
+    radarData = {
+      skill: 75,
+      experience: 75,
+      learning: 80,
+      adaptability: 70,
+      leadership: 50
+    };
   }
   
   return {
     tree: { branches },
-    radarData: { 
-      skill: skill,
-      experience: experience,
-      learning: 85,
-      adaptability: 70,
-      leadership: leadership
-    },
-    challenges: { 
+    radarData: radarData,
+    challenges: isStudent ? { 
+      icon: '📚', 
+      text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识' 
+    } : { 
       icon: '⚡', 
       text: '持续学习，把握机遇，在变化中成长' 
     },
-    badges: workYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期'],
+    badges: isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] : 
+            (workYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : 
+            ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期']),
     _isTemplate: false,
     _status: '📋 本地生成',
     _source: 'local'
@@ -247,6 +297,8 @@ app.post('/api/recommend-skills', async (req, res) => {
 function getFallbackSkills(job, education, goal, interest, style) {
   const baseMap = {
     '学生': ['学习方法', '时间管理', '专业知识', '学术写作', '沟通表达', '研究能力', '团队协作', '持续学习'],
+    '初中': ['学习方法', '时间管理', '基础知识', '阅读能力', '写作能力', '数学思维', '英语基础', '科学素养'],
+    '高中': ['学习方法', '时间管理', '学科知识', '考试技巧', '自主学习', '研究能力', '团队协作', '持续学习'],
     '老师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
     '教师': ['教学设计', '课堂管理', '教育心理学', '学科知识', '沟通表达', '评估反馈', '教育技术', '学生指导'],
     '网络安全': ['网络协议', '渗透测试', '安全防护', '漏洞挖掘', '应急响应', '日志分析', '安全策略', '系统安全'],
@@ -290,10 +342,15 @@ app.post('/api/generate-tree', async (req, res) => {
     console.log('🌳 生成成长树:', userInput.job);
     console.log(`📊 用户工作年限: ${userInput.years || 0}年`);
     
+    const isStudent = isStudentJob(userInput.job || '');
+    if (isStudent) {
+      console.log('🎓 检测到在校学生，启用学生模式');
+    }
+    
     const sessionId = 'tree_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
     
-    // 立即返回本地模板
-    const templateData = generateCareerTree(userInput);
+    // 立即返回本地模板（使用增强版）
+    const templateData = generateLocalTreeEnhanced(userInput);
     templateData._sessionId = sessionId;
     templateData._status = '⏳ AI优化中...';
     templateData._isTemplate = true;
@@ -303,8 +360,7 @@ app.post('/api/generate-tree', async (req, res) => {
       userInput: userInput,
       optimized: false,
       timestamp: Date.now(),
-      retryCount: 0,
-      lastAttempt: Date.now()
+      retryCount: 0
     });
     
     res.json({ 
@@ -326,7 +382,7 @@ app.post('/api/generate-tree', async (req, res) => {
 });
 
 // ============================================
-// 后台优化函数（修复版 - 保留工作年限）
+// 后台优化函数（修复版 - 支持学生检测）
 // ============================================
 async function optimizeInBackground(sessionId, retryCount = 0) {
   const cached = treeCache.get(sessionId);
@@ -354,11 +410,16 @@ async function optimizeInBackground(sessionId, retryCount = 0) {
     const { userInput } = cached;
     const targetYears = parseInt(userInput.targetYears) || 5;
     const workYears = parseInt(userInput.years) || 0;
+    const job = userInput.job || '';
+    const isStudent = isStudentJob(job);
     
     console.log(`🔄 AI优化 (尝试 ${retryCount + 1}/${maxRetries})...`);
     console.log(`📊 用户工作年限: ${workYears}年`);
+    if (isStudent) {
+      console.log('🎓 学生模式：AI优化将使用学生专属配置');
+    }
     
-    const prompt = `职业:${userInput.job},工作${workYears}年,性别:${userInput.gender||''},年龄:${userInput.age||''}岁,目标:${userInput.goal},兴趣:${userInput.interest},技能:${(userInput.skills||[]).join(',')}。生成${targetYears}年职业路径JSON:{"branches":[{"year":年份,"icon":"图标","title":"标题","goals":"目标","skills":["技能"],"milestone":"里程碑"}],"radarData":{"skill":数值,"experience":数值,"learning":数值,"adaptability":数值,"leadership":数值},"challenges":{"icon":"图标","text":"挑战描述"},"badges":["徽章1","徽章2"]}只返回JSON，不要任何解释。`;
+    const prompt = `职业:${job},工作${workYears}年,性别:${userInput.gender||''},年龄:${userInput.age||''}岁,目标:${userInput.goal},兴趣:${userInput.interest},技能:${(userInput.skills||[]).join(',')}。生成${targetYears}年职业路径JSON:{"branches":[{"year":年份,"icon":"图标","title":"标题","goals":"目标","skills":["技能"],"milestone":"里程碑"}],"radarData":{"skill":数值,"experience":数值,"learning":数值,"adaptability":数值,"leadership":数值},"challenges":{"icon":"图标","text":"挑战描述"},"badges":["徽章1","徽章2"]}只返回JSON，不要任何解释。`;
     
     const reply = await callAIWithRetry(prompt, 2, 90000);
     
@@ -367,7 +428,6 @@ async function optimizeInBackground(sessionId, retryCount = 0) {
       if (jsonMatch) {
         const result = JSON.parse(jsonMatch[0]);
         if (result.branches && result.branches.length > 0) {
-          // 确保分支数量匹配目标年数
           let branches = result.branches;
           const icons = ['📚','📝','💡','👥','🏆','🌐','🎯','🌟','🏛️','💎'];
           while (branches.length < targetYears) {
@@ -383,40 +443,68 @@ async function optimizeInBackground(sessionId, retryCount = 0) {
           }
           if (branches.length > targetYears) branches = branches.slice(0, targetYears);
           
-          // ========== 关键修复：基于用户工作年限调整雷达图 ==========
-          let radarData = result.radarData || cached.data.radarData;
+          // ==========================================
+          // 核心修复：根据职业类型强制设置雷达图
+          // ==========================================
+          let radarData = {};
           
-          // 如果用户是应届生（工作年限为0），强制调整经验值和领导力
-          if (workYears === 0) {
-            radarData.experience = Math.min(15, radarData.experience || 5);
-            radarData.leadership = Math.min(10, radarData.leadership || 5);
-            radarData.skill = Math.min(40, radarData.skill || 30);
-            console.log('🎓 应届生模式：调整雷达图数据');
+          if (isStudent) {
+            // 在校学生：忽略AI返回，使用固定值
+            radarData = {
+              skill: 30,
+              experience: 0,
+              learning: 85,
+              adaptability: 60,
+              leadership: 5
+            };
+            console.log('🎓 后端学生模式：强制设置雷达图 (经验=0)');
+          } else if (workYears === 0) {
+            radarData = {
+              skill: Math.min(35, result.radarData?.skill || 25),
+              experience: Math.min(10, result.radarData?.experience || 5),
+              learning: Math.min(95, Math.max(70, result.radarData?.learning || 85)),
+              adaptability: Math.min(80, Math.max(50, result.radarData?.adaptability || 65)),
+              leadership: Math.min(8, result.radarData?.leadership || 3)
+            };
           } else if (workYears <= 2) {
-            radarData.experience = Math.min(30, radarData.experience || 20);
-            radarData.leadership = Math.min(20, radarData.leadership || 10);
+            radarData = {
+              skill: Math.min(55, Math.max(25, result.radarData?.skill || 40)),
+              experience: Math.min(35, Math.max(10, result.radarData?.experience || 25)),
+              learning: Math.min(95, Math.max(65, result.radarData?.learning || 80)),
+              adaptability: Math.min(85, Math.max(50, result.radarData?.adaptability || 65)),
+              leadership: Math.min(30, Math.max(5, result.radarData?.leadership || 15))
+            };
           } else if (workYears <= 5) {
-            radarData.experience = Math.min(60, radarData.experience || 50);
-            radarData.leadership = Math.min(40, radarData.leadership || 30);
+            radarData = {
+              skill: Math.min(80, Math.max(50, result.radarData?.skill || 60)),
+              experience: Math.min(70, Math.max(40, result.radarData?.experience || 50)),
+              learning: Math.min(95, Math.max(60, result.radarData?.learning || 80)),
+              adaptability: Math.min(90, Math.max(50, result.radarData?.adaptability || 70)),
+              leadership: Math.min(60, Math.max(20, result.radarData?.leadership || 35))
+            };
+          } else {
+            radarData = {
+              skill: Math.min(95, Math.max(60, result.radarData?.skill || 75)),
+              experience: Math.min(100, Math.max(60, result.radarData?.experience || 75)),
+              learning: Math.min(100, Math.max(60, result.radarData?.learning || 80)),
+              adaptability: Math.min(100, Math.max(50, result.radarData?.adaptability || 70)),
+              leadership: Math.min(95, Math.max(30, result.radarData?.leadership || 50))
+            };
           }
           
-          // 确保数值在合理范围
-          radarData.skill = Math.min(100, Math.max(10, radarData.skill || 30));
-          radarData.experience = Math.min(100, Math.max(0, radarData.experience || 0));
-          radarData.learning = Math.min(100, Math.max(50, radarData.learning || 80));
-          radarData.adaptability = Math.min(100, Math.max(40, radarData.adaptability || 60));
-          radarData.leadership = Math.min(100, Math.max(0, radarData.leadership || 0));
-          
+          // 构建优化数据
           const optimizedData = {
             tree: { branches },
             radarData: radarData,
-            challenges: result.challenges || cached.data.challenges,
-            badges: result.badges || cached.data.badges,
+            challenges: isStudent ? {
+              icon: '📚',
+              text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'
+            } : (result.challenges || cached.data.challenges),
+            badges: isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] :
+                    (result.badges || cached.data.badges),
             _isTemplate: false,
             _status: '✅ AI优化完成 ✨',
-            _source: 'ai',
-            _userYears: workYears,
-            _targetYears: targetYears
+            _source: 'ai'
           };
           
           treeCache.set(sessionId, {
@@ -494,6 +582,6 @@ app.use(express.static(path.join(__dirname, '/')));
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 服务已启动 v9.0 端口:${PORT}`);
+  console.log(`🚀 服务已启动 v9.2 端口:${PORT}`);
   console.log(`📊 缓存容量: ${treeCache.size}`);
 });
