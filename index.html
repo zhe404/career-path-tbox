@@ -1028,63 +1028,6 @@ function renderTree(data, input) {
     data.radarData = {};
   }
   
-  if (isStudent) {
-    // 在校学生：没有工作经验，以学习能力为主
-    data.radarData = {
-      skill: Math.min(50, data.radarData.skill || 30),
-      experience: 0,
-      learning: Math.min(95, Math.max(70, data.radarData.learning || 85)),
-      adaptability: Math.min(80, Math.max(50, data.radarData.adaptability || 60)),
-      leadership: Math.min(10, data.radarData.leadership || 5)
-    };
-    // 覆盖 badges 和 challenges
-    if (!data.badges || data.badges.length === 0 || data.badges.some(b => b.includes('初入职场'))) {
-      data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
-    }
-    if (!data.challenges || !data.challenges.text || data.challenges.text.includes('职场新人')) {
-      data.challenges = {
-        icon: '📚',
-        text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'
-      };
-    }
-    console.log('🎓 学生模式：雷达图已调整');
-  } else if (userYears === 0) {
-    // 应届生
-    data.radarData = {
-      skill: Math.min(35, data.radarData.skill || 25),
-      experience: Math.min(10, data.radarData.experience || 5),
-      learning: Math.min(95, Math.max(70, data.radarData.learning || 85)),
-      adaptability: Math.min(80, Math.max(50, data.radarData.adaptability || 65)),
-      leadership: Math.min(8, data.radarData.leadership || 3)
-    };
-    if (!data.badges || data.badges.length === 0) {
-      data.badges = ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'];
-    }
-  } else if (userYears <= 2) {
-    data.radarData = {
-      skill: Math.min(55, Math.max(25, data.radarData.skill || 40)),
-      experience: Math.min(35, Math.max(10, data.radarData.experience || 25)),
-      learning: Math.min(95, Math.max(65, data.radarData.learning || 80)),
-      adaptability: Math.min(85, Math.max(50, data.radarData.adaptability || 65)),
-      leadership: Math.min(30, Math.max(5, data.radarData.leadership || 15))
-    };
-  } else if (userYears <= 5) {
-    data.radarData = {
-      skill: Math.min(80, Math.max(50, data.radarData.skill || 60)),
-      experience: Math.min(70, Math.max(40, data.radarData.experience || 50)),
-      learning: Math.min(95, Math.max(60, data.radarData.learning || 80)),
-      adaptability: Math.min(90, Math.max(50, data.radarData.adaptability || 70)),
-      leadership: Math.min(60, Math.max(20, data.radarData.leadership || 35))
-    };
-  } else {
-    data.radarData = {
-      skill: Math.min(95, Math.max(60, data.radarData.skill || 75)),
-      experience: Math.min(100, Math.max(60, data.radarData.experience || 75)),
-      learning: Math.min(100, Math.max(60, data.radarData.learning || 80)),
-      adaptability: Math.min(100, Math.max(50, data.radarData.adaptability || 70)),
-      leadership: Math.min(95, Math.max(30, data.radarData.leadership || 50))
-    };
-  }
   
   // 最终确保所有值有效
   data.radarData.skill = Math.min(100, Math.max(5, data.radarData.skill || 25));
@@ -1093,15 +1036,14 @@ function renderTree(data, input) {
   data.radarData.adaptability = Math.min(100, Math.max(40, data.radarData.adaptability || 60));
   data.radarData.leadership = Math.min(100, Math.max(0, data.radarData.leadership || 0));
   
-  if (!data.challenges || !data.challenges.text) {
-    data.challenges = isStudent ? 
-      {icon:'📚', text:'从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'} :
-      {icon:'⚡', text:'持续学习，抓住职业发展机遇'};
-  }
+ if (!data.challenges || !data.challenges.text) {
+     data.challenges = {
+         icon:'⚡',
+         text:'持续学习，抓住职业发展机遇'
+     };
+ }
   if (!data.badges || data.badges.length === 0) {
-    data.badges = isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] :
-                   (userYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : 
-                   ['初入职场','快速成长','潜力无限']);
+    data.badges = ['🌱 职业成长', '🚀 能力提升', '⭐ 持续发展'];
   }
   
   if (!data?.tree?.branches?.length) {

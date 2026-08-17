@@ -54,7 +54,36 @@ function parseAIResponse(data) {
 // ============================================
 function isStudentJob(job) {
   if (!job) return false;
-  const studentKeywords = ['学生', '应届生', '中学生', '大学生', '本科生', '专科生', '研究生'];
+
+  // 明确排除已经工作的职业身份
+  const excludeKeywords = [
+    '老师',
+    '教师',
+    '教授',
+    '讲师',
+    '医生',
+    '护士',
+    '辅导员',
+    '工程师',
+    '经理',
+    '主管',
+    '专员'
+  ];
+
+  if (excludeKeywords.some(keyword => job.includes(keyword))) {
+    return false;
+  }
+
+  // 只保留真正学生身份
+  const studentKeywords = [
+    '学生',
+    '应届生',
+    '中学生',
+    '本科在读',
+    '专科在读',
+    '研究生在读'
+  ];
+
   return studentKeywords.some(keyword => job.includes(keyword));
 }
 
