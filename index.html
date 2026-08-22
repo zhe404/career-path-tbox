@@ -57,28 +57,156 @@
     .cascade-option:hover { background: #f0f7ff; }
     .cascade-option.active { background: #1e4a8a; color: white; font-weight: 600; }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .tree-container { overflow-x: auto; padding: 20px 0; }
-    .tree { display: flex; flex-direction: column; align-items: center; min-width: 900px; }
-    .tree-root-node { background: linear-gradient(135deg, #1e4a8a, #2d6bb8); color: white; padding: 16px 40px; border-radius: 60px; font-weight: 700; }
-    .tree-trunk { width: 3px; height: 40px; background: #1e4a8a; }
-    .tree-branches-row { display: flex; gap: 20px; position: relative; padding-top: 30px; }
-    .tree-branches-row::before { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 3px; background: #1e4a8a; }
-    .tree-branch { display: flex; flex-direction: column; align-items: center; min-width: 130px; position: relative; }
-    .tree-branch::before { content: ''; width: 3px; height: 30px; background: #1e4a8a; }
-    .tree-branch-node { background: white; border: 2px solid #1e4a8a; border-radius: 16px; padding: 12px 10px; text-align: center; width: 100%; }
-    .tree-branch-node.goal { border-color: #ffd700; background: #fffbe6; }
-    .branch-year { font-size: 11px; font-weight: 700; color: #1e4a8a; background: rgba(30,74,138,0.1); padding: 2px 10px; border-radius: 12px; display: inline-block; margin-bottom: 4px; }
-    .branch-icon { font-size: 24px; margin: 4px 0; }
-    .branch-title { font-weight: 700; font-size: 13px; }
-    .branch-goals { font-size: 11px; color: #666; margin-top: 4px; }
-    .branch-milestone { font-size: 10px; color: #1e4a8a; margin-top: 6px; }
-    .ai-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 99999; }
-    .ai-modal-content { background: white; border-radius: 24px; width: 90%; max-width: 800px; max-height: 85vh; overflow: auto; animation: slideUp 0.3s ease; }
-    .ai-modal-header { padding: 20px 24px; border-bottom: 1px solid #e5edf8; font-weight: 700; font-size: 18px; position: sticky; top: 0; background: white; display: flex; justify-content: space-between; align-items: center; }
-    .ai-modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-    .ai-modal-body { padding: 24px; line-height: 1.8; font-size: 15px; white-space: pre-wrap; max-height: 65vh; overflow-y: auto; }
-    .ai-modal-footer { padding: 16px 24px; border-top: 1px solid #e5edf8; text-align: right; }
-    .ai-modal-footer button { padding: 10px 30px; background: #1e4a8a; color: white; border: none; border-radius: 30px; cursor: pointer; }
+    
+    /* ===== 修复：树形容器 - 改进滚动和布局 ===== */
+    .tree-wrapper {
+      overflow-x: auto;
+      overflow-y: visible;
+      padding: 20px 10px 30px;
+      margin: 0 -10px;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    .tree-wrapper::-webkit-scrollbar {
+      height: 8px;
+    }
+    .tree-wrapper::-webkit-scrollbar-track {
+      background: #e5edf8;
+      border-radius: 10px;
+    }
+    .tree-wrapper::-webkit-scrollbar-thumb {
+      background: #1e4a8a;
+      border-radius: 10px;
+    }
+    
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: max-content;
+      padding: 0 20px;
+    }
+    .tree-root-node {
+      background: linear-gradient(135deg, #1e4a8a, #2d6bb8);
+      color: white;
+      padding: 16px 40px;
+      border-radius: 60px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .tree-trunk {
+      width: 3px;
+      height: 40px;
+      background: #1e4a8a;
+      flex-shrink: 0;
+    }
+    .tree-branches-row {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      padding-top: 30px;
+      flex-wrap: nowrap;
+      justify-content: center;
+    }
+    .tree-branches-row::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 5%;
+      right: 5%;
+      height: 3px;
+      background: #1e4a8a;
+    }
+    .tree-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 120px;
+      max-width: 160px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .tree-branch::before {
+      content: '';
+      width: 3px;
+      height: 30px;
+      background: #1e4a8a;
+      flex-shrink: 0;
+    }
+    .tree-branch-node {
+      background: white;
+      border: 2px solid #1e4a8a;
+      border-radius: 16px;
+      padding: 12px 10px;
+      text-align: center;
+      width: 100%;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .tree-branch-node:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(30,74,138,0.15);
+    }
+    .tree-branch-node.goal {
+      border-color: #ffd700;
+      background: #fffbe6;
+    }
+    .branch-year {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e4a8a;
+      background: rgba(30,74,138,0.1);
+      padding: 2px 12px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+    .branch-icon {
+      font-size: 22px;
+      margin: 2px 0;
+    }
+    .branch-title {
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    .branch-goals {
+      font-size: 10px;
+      color: #666;
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    .branch-milestone {
+      font-size: 10px;
+      color: #1e4a8a;
+      margin-top: 4px;
+      background: rgba(30,74,138,0.06);
+      padding: 2px 8px;
+      border-radius: 8px;
+    }
+
+    /* ===== 滚动提示 ===== */
+    .scroll-hint {
+      text-align: center;
+      font-size: 12px;
+      color: #4a6f9c;
+      padding: 8px 0 4px;
+      opacity: 0.7;
+      animation: pulseHint 2s ease-in-out infinite;
+    }
+    @keyframes pulseHint {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .scroll-hint i {
+      margin-right: 6px;
+    }
+
     .radar-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
     .radar-container { background: white; border-radius: 20px; padding: 16px; height: 300px; }
     .stat-item { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
@@ -90,107 +218,61 @@
     .flex { display: flex; gap: 12px; flex-wrap: wrap; }
     .text-center { text-align: center; }
     .text-muted { color: #4a6f9c; }
-    @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .radar-section { grid-template-columns: 1fr; } .tree { min-width: 600px; } }
+    
+    @media (max-width: 768px) { 
+      .form-grid { grid-template-columns: 1fr; } 
+      .radar-section { grid-template-columns: 1fr; } 
+      .tree-branch { min-width: 100px; max-width: 130px; }
+      .tree-branch-node { padding: 10px 8px; min-height: 100px; }
+      .branch-title { font-size: 11px; }
+      .tree-root-node { padding: 12px 24px; font-size: 14px; }
+      .tree-branches-row { gap: 12px; padding-top: 20px; }
+    }
+    @media (max-width: 480px) {
+      .tree-branch { min-width: 80px; max-width: 100px; }
+      .tree-branch-node { padding: 8px 6px; min-height: 85px; }
+      .branch-title { font-size: 10px; }
+      .branch-goals { font-size: 9px; }
+      .branch-year { font-size: 10px; padding: 1px 8px; }
+      .branch-icon { font-size: 18px; }
+      .branch-milestone { font-size: 9px; }
+      .tree-branches-row { gap: 8px; }
+    }
+
     .info-icon { color: #aaa; font-size: 14px; margin-left: 4px; cursor: help; position: relative; display: inline-flex; align-items: center; }
     .info-icon .tooltip { visibility: hidden; width: 220px; background-color: #333; color: #fff; text-align: left; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 1000; bottom: 150%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: 400; line-height: 1.5; }
     .info-icon .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
     .info-icon:hover .tooltip { visibility: visible; opacity: 1; }
     
-    .optimize-progress {
-      margin-top: 12px;
-      padding: 12px 16px;
-      background: rgba(255,255,255,0.6);
-      border-radius: 12px;
-      border: 1px solid #e5edf8;
-      display: none;
-    }
-    .optimize-progress.show {
-      display: block;
-      animation: fadeUp 0.3s ease;
-    }
-    .optimize-progress .progress-bar-wrap {
-      background: #e5edf8;
-      border-radius: 8px;
-      height: 8px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .optimize-progress .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #1e4a8a, #4a8bc2, #6ab0e6);
-      border-radius: 8px;
-      transition: width 0.5s ease;
-    }
-    .optimize-progress .progress-text {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: #4a6f9c;
-    }
-    .optimize-progress .progress-text .status-icon {
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    .optimize-progress { margin-top: 12px; padding: 12px 16px; background: rgba(255,255,255,0.6); border-radius: 12px; border: 1px solid #e5edf8; display: none; }
+    .optimize-progress.show { display: block; animation: fadeUp 0.3s ease; }
+    .optimize-progress .progress-bar-wrap { background: #e5edf8; border-radius: 8px; height: 8px; overflow: hidden; margin-top: 6px; }
+    .optimize-progress .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #1e4a8a, #4a8bc2, #6ab0e6); border-radius: 8px; transition: width 0.5s ease; }
+    .optimize-progress .progress-text { display: flex; justify-content: space-between; font-size: 13px; color: #4a6f9c; }
+    .optimize-progress .progress-text .status-icon { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     
-    .status-badge {
-      display: inline-block;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-    .status-badge.optimizing {
-      background: #fff3cd;
-      color: #856404;
-    }
-    .status-badge.done {
-      background: #d4edda;
-      color: #155724;
-    }
-    .status-badge.local {
-      background: #e2e3e5;
-      color: #383d41;
-    }
+    .status-badge { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+    .status-badge.optimizing { background: #fff3cd; color: #856404; }
+    .status-badge.done { background: #d4edda; color: #155724; }
+    .status-badge.local { background: #e2e3e5; color: #383d41; }
     
-    .btn-optimize .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
+    .btn-optimize .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
     
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 14px 24px;
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-      z-index: 999999;
-      max-width: 400px;
-      font-size: 14px;
-      font-weight: 500;
-      animation: slideIn 0.3s ease;
-      transition: opacity 0.3s;
-    }
-    @keyframes slideIn {
-      from { transform: translateX(100px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 24px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); z-index: 999999; max-width: 400px; font-size: 14px; font-weight: 500; animation: slideIn 0.3s ease; transition: opacity 0.3s; }
+    @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .toast-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .toast-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
     .toast-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     .toast-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+    .ai-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 99999; }
+    .ai-modal-content { background: white; border-radius: 24px; width: 90%; max-width: 800px; max-height: 85vh; overflow: auto; animation: slideUp 0.3s ease; }
+    .ai-modal-header { padding: 20px 24px; border-bottom: 1px solid #e5edf8; font-weight: 700; font-size: 18px; position: sticky; top: 0; background: white; display: flex; justify-content: space-between; align-items: center; }
+    .ai-modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+    .ai-modal-body { padding: 24px; line-height: 1.8; font-size: 15px; white-space: pre-wrap; max-height: 65vh; overflow-y: auto; }
+    .ai-modal-footer { padding: 16px 24px; border-top: 1px solid #e5edf8; text-align: right; }
+    .ai-modal-footer button { padding: 10px 30px; background: #1e4a8a; color: white; border: none; border-radius: 30px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -198,7 +280,7 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-tree"></i> AI•职业生涯规划</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v10.1</span>
+    <span class="badge"><i class="fas fa-sparkles"></i> v10.2</span>
   </div>
   <div class="main-card">
     <div class="tab-nav">
@@ -308,7 +390,12 @@
     </div>
     <div id="tab2" class="tab-content">
       <div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;font-size:14px;display:flex;align-items:center;flex-wrap:wrap;gap:12px;"></div>
-      <div id="treeDisplay"><div class="text-center text-muted" style="padding:40px;">请先生成成长树</div></div>
+      
+      <!-- ===== 树形显示区域（带滚动容器） ===== -->
+      <div id="treeDisplay">
+        <div class="text-center text-muted" style="padding:40px;">请先生成成长树</div>
+      </div>
+      
       <div id="eventContainer"></div>
       <div class="radar-section"><div id="radarContainer" class="radar-container"></div><div id="statsContainer"></div></div>
       <div class="mt-20"><div id="badgesContainer" class="badges-container"></div></div>
@@ -379,7 +466,6 @@ let cascadeLevel = 0, cascadePath = [];
 // ============================================
 function isStudentJob(job) {
   if (!job) return false;
-  // 先排除职业身份
   const staffKeywords = ['教师', '老师', '教授', '讲师', '导师', '辅导员', '班主任', '医生', '医师', '护士', '教务', '行政', '管理', '职员', '员工', '助理'];
   for (const kw of staffKeywords) {
     if (job.includes(kw)) return false;
@@ -577,7 +663,7 @@ function getUserInput() {
 }
 
 // ============================================
-// 本地生成树（修复版 - 支持学生检测）
+// 本地生成树
 // ============================================
 function generateLocalTreeEnhanced(input) {
   const targetYears = parseInt(input.targetYears) || 5;
@@ -687,7 +773,7 @@ function generateLocalTreeEnhanced(input) {
 }
 
 // ============================================
-// 渲染成长树（核心修复版）
+// 渲染成长树（核心修复版 - 带滚动提示）
 // ============================================
 function renderTree(data, input) {
   const defaultIcons = ['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
@@ -695,27 +781,15 @@ function renderTree(data, input) {
   const job = input.job || '';
   const isStudent = isStudentJob(job);
   
-  // ==========================================
-  // ⭐ 核心修复：强制修正 experience 为 0 的问题
-  // ==========================================
-  if (!data.radarData) {
-    data.radarData = {};
-  }
-  
-  // 根据工作年限计算正确的经验值
+  // 修正雷达数据
+  if (!data.radarData) data.radarData = {};
   const correctExperience = getExperienceByYears(userYears, isStudent);
-  
-  // 如果当前 experience 为 0 或 undefined，或者与预期值差异过大，强制修正
   const currentExp = data.radarData.experience;
   if (currentExp === 0 || currentExp === undefined || currentExp === null) {
     data.radarData.experience = correctExperience;
-    console.log(`🔧 前端修正 experience: ${correctExperience}% (工作${userYears}年, ${isStudent ? '学生' : '非学生'})`);
   } else if (userYears > 0 && currentExp < 10) {
-    // 如果工作年限 > 0 但经验值 < 10%，也强制修正
     data.radarData.experience = correctExperience;
-    console.log(`🔧 前端强制修正异常 experience: ${currentExp} → ${correctExperience}%`);
   }
-  // ==========================================
   
   if (data && data.tree && data.tree.branches) {
     data.tree.branches.forEach((b, i) => {
@@ -727,21 +801,16 @@ function renderTree(data, input) {
     });
   }
   
-  // 修正雷达图其他维度
+  // 修正雷达图
   if (isStudent) {
     data.radarData.skill = Math.min(50, data.radarData.skill || 30);
     data.radarData.experience = 0;
     data.radarData.learning = Math.min(95, Math.max(70, data.radarData.learning || 85));
     data.radarData.adaptability = Math.min(80, Math.max(50, data.radarData.adaptability || 60));
     data.radarData.leadership = Math.min(10, data.radarData.leadership || 5);
-    if (!data.badges || data.badges.length === 0) {
-      data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
-    }
+    if (!data.badges || data.badges.length === 0) data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
     if (!data.challenges || !data.challenges.text) {
-      data.challenges = {
-        icon: '📚',
-        text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识'
-      };
+      data.challenges = { icon: '📚', text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识' };
     }
   } else if (userYears === 0) {
     data.radarData.skill = Math.min(35, data.radarData.skill || 25);
@@ -749,9 +818,7 @@ function renderTree(data, input) {
     data.radarData.learning = Math.min(95, Math.max(70, data.radarData.learning || 85));
     data.radarData.adaptability = Math.min(80, Math.max(50, data.radarData.adaptability || 65));
     data.radarData.leadership = Math.min(8, data.radarData.leadership || 3);
-    if (!data.badges || data.badges.length === 0) {
-      data.badges = ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'];
-    }
+    if (!data.badges || data.badges.length === 0) data.badges = ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'];
   } else if (userYears <= 2) {
     data.radarData.skill = Math.min(55, Math.max(25, data.radarData.skill || 40));
     data.radarData.experience = Math.min(35, Math.max(10, data.radarData.experience || 25));
@@ -772,7 +839,6 @@ function renderTree(data, input) {
     data.radarData.leadership = Math.min(95, Math.max(30, data.radarData.leadership || 50));
   }
   
-  // 最终确保所有值有效
   data.radarData.skill = Math.min(100, Math.max(5, data.radarData.skill || 25));
   data.radarData.experience = Math.min(100, Math.max(0, data.radarData.experience || 0));
   data.radarData.learning = Math.min(100, Math.max(50, data.radarData.learning || 80));
@@ -805,14 +871,40 @@ function renderTree(data, input) {
              ['初入职场','快速成长','潜力无限']);
   }
 
-  let html = `<div class="tree-container"><div class="tree"><div class="tree-root-node">📍 ${job} · ${userYears}年${data._isTemplate ? ' · ⏳AI优化中' : ''}</div><div class="tree-trunk"></div><div class="tree-branches-row">`;
+  // ===== 构建树形HTML（带滚动容器 + 滚动提示） =====
+  let html = `
+    <div class="tree-wrapper">
+      ${branches.length > 3 ? `<div class="scroll-hint"><i class="fas fa-arrows-left-right"></i> 左右滑动查看更多年份</div>` : ''}
+      <div class="tree">
+        <div class="tree-root-node">📍 ${job} · ${userYears}年${data._isTemplate ? ' · ⏳AI优化中' : ''}</div>
+        <div class="tree-trunk"></div>
+        <div class="tree-branches-row">
+  `;
+  
   branches.forEach((b, i) => {
     const yearText = String(b.year).replace(/第|年/g, '');
-    html += `<div class="tree-branch"><div class="tree-branch-node ${i === branches.length - 1 ? 'goal' : ''}"><span class="branch-year">第${yearText}年</span><div class="branch-icon">${b.icon || defaultIcons[i % defaultIcons.length]}</div><div class="branch-title">${b.title}</div><div class="branch-goals">${b.goals}</div><div class="branch-milestone">🎯 ${b.milestone}</div></div></div>`;
+    html += `
+      <div class="tree-branch">
+        <div class="tree-branch-node ${i === branches.length - 1 ? 'goal' : ''}">
+          <span class="branch-year">第${yearText}年</span>
+          <div class="branch-icon">${b.icon || defaultIcons[i % defaultIcons.length]}</div>
+          <div class="branch-title">${b.title}</div>
+          <div class="branch-goals">${b.goals}</div>
+          <div class="branch-milestone">🎯 ${b.milestone}</div>
+        </div>
+      </div>
+    `;
   });
-  html += '</div></div></div>';
+  
+  html += `
+        </div>
+      </div>
+    </div>
+  `;
+  
   $('treeDisplay').innerHTML = html;
 
+  // 更新概览信息
   $('profileSummary').innerHTML = `
     <span>👤 ${input.name} · ${input.gender} · ${input.age}岁</span>
     <span>💼 ${job} · ${userYears}年</span>
