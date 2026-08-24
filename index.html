@@ -1440,10 +1440,32 @@ $('consultBtn').addEventListener('click', async function() {
   }
 });
 
+function formatAIResponse(reply) {
+  const raw = reply || 'AI没有返回内容';
+
+  const cleaned = raw
+    .replace(/\r/g, '')
+    .replace(/^\s*#{1,6}\s*/gm, '')
+    .replace(/^\s*>\s?/gm, '')
+    .replace(/^\s*---+\s*$/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/^\s*[-*+]\s+/gm, '• ');
+
+  return cleaned
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/\n/g, '<br>');
+}
+
 function showAIResponse(reply) {
   const overlay = document.createElement('div');
   overlay.className = 'ai-modal-overlay';
-  overlay.innerHTML = `<div class="ai-modal-content"><div class="ai-modal-header"><span>🤖 AI 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button></div><div class="ai-modal-body">${(reply||'AI没有返回内容').replace(/\n/g,'<br>')}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
+  overlay.innerHTML = `<div class="ai-modal-content"><div class="ai-modal-header"><span>💡 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button></div><div class="ai-modal-body">${formatAIResponse(reply)}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
   document.body.appendChild(overlay);
   overlay.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
 }
