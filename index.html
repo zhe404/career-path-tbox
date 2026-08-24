@@ -1130,6 +1130,40 @@ body::after{bottom:-50px;left:-50px;background:radial-gradient(circle,rgba(196,9
 #careerModule .tree{width:auto!important;}
 
 </style>
+
+<style id="career-modal-global-fix">
+.ai-modal-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;
+  z-index:99999;
+}
+.ai-modal-content{
+  background:#fffaf3;border:1.5px solid #e0d0b8;border-radius:24px;
+  width:90%;max-width:800px;max-height:85vh;overflow:auto;
+  box-shadow:4px 4px 0 #e0d0b8,0 8px 28px rgba(61,50,40,.10);
+}
+.ai-modal-header{
+  padding:20px 24px;border-bottom:1px solid #ebe0cf;font-weight:700;font-size:18px;
+  position:sticky;top:0;background:#fffaf3;display:flex;justify-content:space-between;
+  align-items:center;color:#3d3228;
+}
+.ai-modal-header button{
+  background:none;border:none;font-size:24px;cursor:pointer;color:#999;
+}
+.ai-modal-body{
+  padding:24px;line-height:1.8;font-size:15px;white-space:pre-wrap;
+  max-height:65vh;overflow-y:auto;color:#3d3228;
+}
+.ai-modal-footer{
+  padding:16px 24px;border-top:1px solid #ebe0cf;text-align:right;background:#fffaf3;
+  position:sticky;bottom:0;
+}
+.ai-modal-footer button{
+  padding:10px 30px;background:#c45d1e;color:white;border:none;border-radius:12px;
+  cursor:pointer;
+}
+</style>
+
 </head>
 <body>
 
