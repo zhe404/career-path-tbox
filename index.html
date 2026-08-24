@@ -428,38 +428,6 @@ body::after{bottom:-50px;left:-50px;background:radial-gradient(circle,rgba(196,9
 .global-tab{color:var(--warm-muted)!important;border-radius:10px!important;font-size:16px!important;padding:12px 16px!important;}
 .global-tab.active{background:#fff!important;color:var(--warm-accent)!important;box-shadow:0 1px 4px rgba(61,50,40,.07)!important;}
 
-/* 职业规划模块 */
-#careerModule .container>.header h1{color:var(--warm-text)!important;}
-#careerModule .container>.header h1 i{background:var(--warm-accent)!important;color:#fff!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;}
-#careerModule .badge{background:var(--warm-accent-light)!important;color:var(--warm-accent)!important;border:1px solid var(--warm-border-light)!important;}
-#careerModule .main-card{background:var(--warm-card)!important;border:1.5px solid var(--warm-border)!important;border-radius:24px!important;box-shadow:4px 4px 0 var(--warm-border),var(--warm-soft-shadow)!important;position:relative!important;}
-#careerModule .main-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--warm-accent),var(--warm-gold));}
-#careerModule .tab-nav{background:var(--warm-soft)!important;border:1px solid var(--warm-border-light)!important;border-radius:12px!important;}
-#careerModule .tab-btn{color:var(--warm-muted)!important;border-radius:8px!important;}
-#careerModule .tab-btn.active{background:white!important;color:var(--warm-accent)!important;}
-#careerModule .form-group label,#careerModule .section-title{color:var(--warm-text)!important;}
-#careerModule .form-group label i,#careerModule .section-title i{color:var(--warm-accent)!important;}
-#careerModule .form-group input,#careerModule .form-group select,#careerModule .form-group textarea,#userJobDisplay{background:#fcf9f4!important;border-color:var(--warm-border)!important;border-radius:12px!important;color:var(--warm-text)!important;}
-#careerModule .form-group input:focus,#careerModule .form-group select:focus,#careerModule .form-group textarea:focus{border-color:var(--warm-accent)!important;box-shadow:0 0 0 3px var(--warm-accent-light)!important;background:#fff!important;}
-#careerModule .style-card{border-color:var(--warm-border)!important;border-radius:12px!important;}
-#careerModule .style-card.selected{border-color:var(--warm-accent)!important;background:var(--warm-accent-light)!important;}
-#careerModule .skills-tag-group{background:#fcf9f4!important;border-color:var(--warm-border)!important;}
-#careerModule .skill-tag{border-color:var(--warm-border)!important;}
-#careerModule .skill-tag.active{background:var(--warm-accent)!important;border-color:var(--warm-accent)!important;}
-#careerModule .btn-primary{background:var(--warm-accent)!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;border-radius:12px!important;}
-#careerModule .btn-primary:hover{background:var(--warm-accent-dark)!important;}
-#careerModule .btn-secondary{border-color:var(--warm-border)!important;color:var(--warm-text)!important;border-radius:12px!important;}
-#careerModule .btn-secondary:hover{background:var(--warm-soft)!important;border-color:var(--warm-gold)!important;}
-#careerModule .tree-root-node{background:var(--warm-accent)!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;}
-#careerModule .tree-trunk,#careerModule .tree-branches-row::before,#careerModule .tree-branch::before{background:var(--warm-gold)!important;}
-#careerModule .tree-branch-node{border-color:var(--warm-border)!important;box-shadow:0 2px 8px rgba(61,50,40,.06)!important;}
-#careerModule .branch-year,#careerModule .branch-milestone{color:var(--warm-accent)!important;background:var(--warm-accent-light)!important;}
-#careerModule .tree-branch-node.goal{border-color:var(--warm-gold)!important;background:var(--warm-gold-light)!important;}
-#careerModule .radar-container{border:1.5px solid var(--warm-border)!important;border-radius:18px!important;box-shadow:0 2px 8px rgba(61,50,40,.06)!important;}
-#careerModule .stat-bar{background:#e8dcc8!important;}
-#careerModule .stat-fill{background:linear-gradient(90deg,var(--warm-accent),var(--warm-gold))!important;}
-#careerModule .badge-item{background:var(--warm-gold-light)!important;border-color:var(--warm-gold)!important;color:#7a5a10!important;}
-#careerModule .optimize-progress{background:var(--warm-soft)!important;border-color:var(--warm-border-light)!important;}
 
 /* 职场模拟模块：功能不改，只统一视觉 */
 #simulationModule .app{color:var(--warm-text)!important;}
@@ -504,11 +472,664 @@ body::after{bottom:-50px;left:-50px;background:radial-gradient(circle,rgba(196,9
 .cascade-option.active{background:var(--warm-accent)!important;color:#fff!important;}
 
 @media(max-width:760px){#simulationModule .shell{padding:18px!important}.global-tab{font-size:14px!important}.global-logo{width:52px!important;height:52px!important}.global-brand h1{font-size:22px!important;}}
-#careerModule #tab1>div[style*="font-size:18px"]{color:var(--warm-text)!important;}
-#careerModule #tab1>div[style*="font-size:18px"] i{color:var(--warm-accent)!important;}
-#careerModule #profileSummary{background:var(--warm-soft)!important;border:1px solid var(--warm-border-light)!important;color:var(--warm-text)!important;}
 </style>
 
+
+<style id="career-original-restored">
+
+    #careerModule{
+      --bg: #faf6f0;
+      --card: #fffaf3;
+      --card-warm: #f8eed8;
+      --text: #3d3228;
+      --text-secondary: #7a6b5d;
+      --accent: #c45d1e;
+      --accent-dark: #a04a15;
+      --accent-light: #fdf0e4;
+      --gold: #d4a043;
+      --gold-light: #fdf5e6;
+      --border: #e0d0b8;
+      --border-light: #ebe0cf;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --radius-lg: 24px;
+      --shadow-hard: 3px 3px 0 var(--border);
+      --shadow-hard-lg: 4px 4px 0 var(--border);
+      --shadow-soft: 0 2px 8px rgba(61,50,40,0.06);
+      --shadow-card: 0 4px 16px rgba(61,50,40,0.08), 0 1px 3px rgba(61,50,40,0.06);
+    }
+    #careerModule *{ margin: 0; padding: 0; box-sizing: border-box; }
+    #careerModule{ scroll-behavior: smooth; }
+    #careerModule{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 24px 48px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      background-image: radial-gradient(circle at 1px 1px, rgba(224,208,184,0.3) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+    #careerModule::before, #careerModule::after{
+      content: "";
+      position: fixed;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #careerModule::before{
+      top: -40px;
+      right: -40px;
+      background: radial-gradient(circle, rgba(196,93,30,0.08) 0%, transparent 70%);
+    }
+    #careerModule::after{
+      bottom: -50px;
+      left: -50px;
+      background: radial-gradient(circle, rgba(212,160,67,0.05) 0%, transparent 70%);
+    }
+    #careerModule .container{ max-width: 1160px; margin: 0 auto; position: relative; z-index: 1; }
+
+    #careerModule .header{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    #careerModule .header h1{
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+    #careerModule .header h1 i{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      color: white;
+      border-radius: 10px;
+      font-size: 16px;
+      transform: rotate(-5deg);
+      box-shadow: 2px 2px 0 var(--accent-dark);
+    }
+    #careerModule .header .badge{
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border-light);
+    }
+
+    #careerModule .main-card{
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-hard-lg), var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+    #careerModule .main-card::before{
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+    }
+    #careerModule .washi-tape{
+      position: absolute;
+      width: 80px;
+      height: 22px;
+      z-index: 10;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+    #careerModule .washi-tape-left{ top: -8px; left: 40px; background: linear-gradient(90deg, rgba(212,160,67,0.5) 0%, rgba(212,160,67,0.3) 50%, rgba(212,160,67,0.5) 100%); transform: rotate(-3deg); border-radius: 2px; }
+    #careerModule .washi-tape-right{ top: -8px; right: 40px; background: linear-gradient(90deg, rgba(196,93,30,0.4) 0%, rgba(196,93,30,0.2) 50%, rgba(196,93,30,0.4) 100%); transform: rotate(2deg); border-radius: 2px; }
+    #careerModule .bookmark-ribbon{ position: absolute; top: -2px; right: 30px; width: 28px; height: 36px; background: var(--accent); z-index: 11; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    #careerModule .fold-corner{ position: absolute; bottom: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 0 20px 20px; border-color: transparent transparent var(--border) transparent; z-index: 5; }
+    #careerModule .fold-corner::after{ content: ""; position: absolute; top: 1px; right: 1px; width: 0; height: 0; border-style: solid; border-width: 0 0 18px 18px; border-color: transparent transparent rgba(255,255,255,0.5) transparent; }
+    #careerModule .wax-seal{ position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: radial-gradient(circle at 30% 30%, #d4a043, #a04a15); border-radius: 50%; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.9); font-weight: 700; pointer-events: none; }
+
+    #careerModule .drawer-toggle{
+      display: flex;
+      gap: 4px;
+      background: var(--card-warm);
+      padding: 5px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 24px;
+      border: 1px solid var(--border-light);
+    }
+    #careerModule .drawer-btn{
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    #careerModule .drawer-btn::after{
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: translateX(-50%);
+      transition: width 0.3s ease;
+    }
+    #careerModule .drawer-btn.active::after{ width: 60%; }
+    #careerModule .drawer-btn.active{
+      background: white;
+      color: var(--accent);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    #careerModule .drawer-panel{ display: none; animation: fadeUp 0.3s ease; }
+    #careerModule .drawer-panel.active{ display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    #careerModule .section-title{
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.3px;
+    }
+    #careerModule .section-title i{ color: var(--accent); }
+    #careerModule .section-title::after{
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+      margin-left: 6px;
+    }
+
+    #careerModule .form-grid{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 18px;
+    }
+    #careerModule .form-group{ display: flex; flex-direction: column; gap: 5px; }
+    #careerModule .form-group.full-width{ grid-column: 1 / -1; }
+    #careerModule .form-group label{
+      font-size: 12px;
+      font-weight: 600;
+      color: #4a3c30;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #careerModule .form-group label i{ color: var(--accent); font-size: 12px; }
+    #careerModule .form-group input, #careerModule .form-group select, #careerModule .form-group textarea{
+      background: #fcf9f4;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 13px;
+      outline: none;
+      color: var(--text);
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      font-family: inherit;
+    }
+    #careerModule .form-group input:focus, #careerModule .form-group select:focus, #careerModule .form-group textarea:focus{
+      border-color: var(--accent);
+      background: white;
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    #careerModule .form-group select{ appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%237a6b5d' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+    #careerModule .form-group textarea{ resize: vertical; min-height: 50px; }
+
+    #careerModule .style-cards{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+    #careerModule .style-card{
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    #careerModule .style-card:hover{ border-color: var(--gold); transform: translateY(-1px); }
+    #careerModule .style-card.selected{ border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 2px var(--accent-light); }
+    #careerModule .style-card .style-name{ font-weight: 600; font-size: 12px; }
+
+    #careerModule .skills-tag-group{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+      padding: 8px;
+      min-height: 40px;
+      background: #fcf9f4;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius-sm);
+    }
+    #careerModule .skill-tag{
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+    #careerModule .skill-tag::before{
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.4s;
+    }
+    #careerModule .skill-tag:hover::before{ left: 100%; }
+    #careerModule .skill-tag:hover{ border-color: var(--gold); }
+    #careerModule .skill-tag.active{ background: var(--accent); border-color: var(--accent); color: white; }
+    #careerModule .skill-tag.active::before{ left: 100%; }
+    #careerModule .empty-skills-hint{ color: var(--text-secondary); padding: 6px; text-align: center; width: 100%; font-size: 12px; }
+
+    #careerModule .status-text{ font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+    #careerModule .spinner-small{ width: 14px; height: 14px; border: 2px solid #e8dcc8; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #careerModule .hidden{ display: none !important; }
+
+    #careerModule .btn-primary{
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 11px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 14px;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      box-shadow: 2px 2px 0 var(--accent-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    #careerModule .btn-primary::before{
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.5s, height 0.5s;
+    }
+    #careerModule .btn-primary:hover::before{ width: 300px; height: 300px; }
+    #careerModule .btn-primary:hover{ background: var(--accent-dark); transform: translateY(-1px); }
+    #careerModule .btn-primary:active{ transform: translateY(0); box-shadow: 1px 1px 0 var(--accent-dark); }
+    #careerModule .btn-primary:disabled{ opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    #careerModule .btn-secondary{
+      background: white;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #careerModule .btn-secondary:hover{ background: var(--card-warm); border-color: var(--gold); }
+    #careerModule .btn-secondary:disabled{ opacity: 0.6; cursor: not-allowed; }
+
+    #careerModule .tree-wrapper{
+      overflow-x: auto;
+      overflow-y: visible;
+      padding: 16px 8px 24px;
+      margin: 0 -8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    #careerModule .tree-wrapper::-webkit-scrollbar{ height: 6px; }
+    #careerModule .tree-wrapper::-webkit-scrollbar-track{ background: #e8dcc8; border-radius: 3px; }
+    #careerModule .tree-wrapper::-webkit-scrollbar-thumb{ background: var(--gold); border-radius: 3px; }
+    #careerModule .tree{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: max-content;
+      padding: 0 16px;
+    }
+    #careerModule .tree-root-node{
+      background: var(--accent);
+      color: white;
+      padding: 12px 32px;
+      border-radius: 30px;
+      font-weight: 700;
+      white-space: nowrap;
+      font-size: 14px;
+      box-shadow: 2px 2px 0 var(--accent-dark);
+      position: relative;
+      overflow: hidden;
+    }
+    #careerModule .tree-root-node::after{
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+      animation: rootGlow 4s ease-in-out infinite;
+    }
+    @keyframes rootGlow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(10px, 10px); } }
+    #careerModule .tree-trunk{ width: 3px; height: 32px; background: var(--gold); border-radius: 2px; }
+    #careerModule .tree-branches-row{
+      display: flex;
+      gap: 14px;
+      position: relative;
+      padding-top: 24px;
+      flex-wrap: nowrap;
+      justify-content: center;
+    }
+    #careerModule .tree-branches-row::before{
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 5%;
+      right: 5%;
+      height: 2px;
+      background: var(--gold);
+    }
+    #careerModule .tree-branch{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 110px;
+      max-width: 140px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px) scale(0.9);
+      animation: branchGrow 0.5s ease forwards;
+    }
+    @keyframes branchGrow { to { opacity: 1; transform: translateY(0) scale(1); } }
+    #careerModule .tree-branch::before{ content: ""; width: 2px; height: 22px; background: var(--gold); }
+    #careerModule .tree-branch-node{
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      text-align: center;
+      width: 100%;
+      min-height: 95px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      transform: rotate(var(--rotate, 0deg));
+      box-shadow: 1px 2px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03);
+    }
+    #careerModule .tree-branch-node::before{
+      content: "";
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 6px;
+      background: rgba(212,160,67,0.35);
+      border-radius: 4px;
+      z-index: 2;
+    }
+    #careerModule .tree-branch-node.goal::before{ background: rgba(196,93,30,0.3); }
+    #careerModule .tree-branch-node:hover{ border-color: var(--accent); box-shadow: 0 4px 12px rgba(196,93,30,0.12); transform: translateY(-2px) rotate(var(--rotate, 0deg)); }
+    #careerModule .tree-branch-node.goal{ border-color: var(--gold); background: var(--gold-light); }
+    #careerModule .branch-year{ font-size: 9px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 1px 10px; border-radius: 10px; display: inline-block; margin-bottom: 3px; }
+    #careerModule .branch-title{ font-weight: 700; font-size: 11px; line-height: 1.3; }
+    #careerModule .branch-goals{ font-size: 9px; color: #7a6b5d; margin-top: 2px; line-height: 1.3; }
+    #careerModule .branch-milestone{ font-size: 8px; color: var(--accent); margin-top: 3px; background: var(--accent-light); padding: 1px 6px; border-radius: 6px; }
+    #careerModule .scroll-hint{ text-align: center; font-size: 11px; color: #b0a090; padding: 6px 0 2px; opacity: 0.8; }
+    #careerModule .scroll-hint i{ display: inline-block; animation: scrollHint 2s ease-in-out infinite; }
+    @keyframes scrollHint { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
+
+    #careerModule .radar-section{ display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+    #careerModule .radar-container{ background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px; height: 260px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden; }
+    #careerModule .radar-container::after{ content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 30% 70%, rgba(212,160,67,0.05) 0%, transparent 50%); pointer-events: none; }
+    #careerModule .stat-item{ display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    #careerModule .stat-bar{ flex: 1; height: 6px; background: #e8dcc8; border-radius: 3px; overflow: hidden; }
+    #careerModule .stat-fill{ height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 3px; transition: width 0.8s ease; width: 0%; }
+    #careerModule .badges-container{ display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    #careerModule .badge-item{ background: var(--gold-light); border: 1.5px solid var(--gold); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: #7a5a10; font-weight: 600; animation: badgeFloat 3s ease-in-out infinite; }
+    #careerModule .badge-item:nth-child(2){ animation-delay: 0.3s; }
+    #careerModule .badge-item:nth-child(3){ animation-delay: 0.6s; }
+    #careerModule .badge-item:nth-child(4){ animation-delay: 0.9s; }
+    #careerModule .badge-item:nth-child(5){ animation-delay: 1.2s; }
+    @keyframes badgeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+
+    #careerModule .mt-12{ margin-top: 12px; }
+    #careerModule .mt-16{ margin-top: 16px; }
+    #careerModule .mt-20{ margin-top: 20px; }
+    #careerModule .flex{ display: flex; gap: 8px; flex-wrap: wrap; }
+    #careerModule .text-center{ text-align: center; }
+    #careerModule .text-muted{ color: var(--text-secondary); }
+
+    #careerModule .info-icon{ color: #c0b0a0; font-size: 11px; margin-left: 3px; cursor: help; position: relative; display: inline-flex; align-items: center; }
+    #careerModule .info-icon .tooltip{ visibility: hidden; width: 200px; background-color: var(--text); color: #fff; text-align: left; border-radius: 8px; padding: 6px 10px; position: absolute; z-index: 1000; bottom: 140%; left: 50%; margin-left: -100px; opacity: 0; transition: opacity 0.2s ease; font-size: 11px; line-height: 1.5; }
+    #careerModule .info-icon .tooltip::after{ content: ""; position: absolute; top: 100%; left: 50%; margin-left: -4px; border-width: 4px; border-style: solid; border-color: var(--text) transparent transparent transparent; }
+    #careerModule .info-icon:hover .tooltip{ visibility: visible; opacity: 1; }
+
+    #careerModule .optimize-progress{ margin-top: 12px; padding: 10px 14px; background: var(--card-warm); border-radius: var(--radius-sm); border: 1.5px solid var(--border-light); display: none; }
+    #careerModule .optimize-progress.show{ display: block; }
+    #careerModule .optimize-progress .progress-bar-wrap{ background: #e8dcc8; border-radius: 4px; height: 6px; overflow: hidden; margin-top: 4px; }
+    #careerModule .optimize-progress .progress-bar-fill{ height: 100%; width: 0%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
+    #careerModule .optimize-progress .progress-text{ display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+
+    #careerModule .status-badge{ display: inline-block; padding: 1px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; margin-left: 6px; }
+    #careerModule .status-badge.optimizing{ background: #fff8e1; color: #856404; }
+    #careerModule .status-badge.done{ background: #d4edda; color: #155724; }
+    #careerModule .status-badge.local{ background: #e2e3e5; color: #383d41; }
+
+    #careerModule .toast{
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-hard);
+      z-index: 999999;
+      max-width: 360px;
+      font-size: 13px;
+      font-weight: 500;
+      animation: slideIn 0.25s ease;
+      transition: opacity 0.25s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    #careerModule .toast-success{ background: #d4edda; color: #155724; border: 1.5px solid #b8d4a8; }
+    #careerModule .toast-warning{ background: #fff3cd; color: #856404; border: 1.5px solid #ffe8a0; }
+    #careerModule .toast-error{ background: #f8d7da; color: #721c24; border: 1.5px solid #f0b0b8; }
+    #careerModule .toast-info{ background: #d1ecf1; color: #0c5460; border: 1.5px solid #b0d8e0; }
+
+    #careerModule .modal-overlay{
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(61,50,40,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      backdrop-filter: blur(2px);
+    }
+    #careerModule .modal-content{
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      width: 92%;
+      max-width: 720px;
+      max-height: 80vh;
+      overflow: auto;
+      box-shadow: var(--shadow-hard-lg), var(--shadow-card);
+      border: 1.5px solid var(--border);
+    }
+    #careerModule .modal-header{
+      padding: 16px 20px;
+      border-bottom: 1.5px solid var(--border-light);
+      font-weight: 700;
+      font-size: 16px;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #careerModule .modal-header button{ background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); padding: 0 4px; }
+    #careerModule .modal-body{ padding: 20px; line-height: 1.8; font-size: 14px; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; }
+    #careerModule .modal-footer{ padding: 14px 20px; border-top: 1.5px solid var(--border-light); text-align: right; }
+    #careerModule .modal-footer button{ padding: 8px 22px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 2px 2px 0 var(--accent-dark); }
+
+    #careerModule .profile-summary{
+      background: var(--card-warm);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border: 1px solid var(--border-light);
+    }
+
+    #careerModule .stamp-overlay{
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #careerModule .stamp-overlay.show{ animation: stampFade 1.2s ease forwards; }
+    @keyframes stampFade { 0% { opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
+    #careerModule .stamp-seal{ width: 100px; height: 100px; border: 4px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: var(--accent); transform: scale(3) rotate(-20deg); opacity: 0; animation: stampAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; }
+    #careerModule .stamp-seal::before{ content: ""; position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px; border: 2px dashed var(--accent); border-radius: 50%; }
+    @keyframes stampAppear { to { transform: scale(1) rotate(-5deg); opacity: 0.8; } }
+
+    #careerModule .empty-tree-state{ display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: var(--text-secondary); }
+    #careerModule .empty-tree-state i{ font-size: 48px; color: var(--border); margin-bottom: 16px; opacity: 0.6; }
+    #careerModule .empty-tree-state p{ font-size: 14px; max-width: 300px; text-align: center; }
+
+    #careerModule .cascade-overlay{
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(61,50,40,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(2px);
+    }
+    #careerModule .cascade-modal{
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      width: 95%;
+      max-width: 580px;
+      max-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-hard-lg), var(--shadow-card);
+      border: 1.5px solid var(--border);
+    }
+    #careerModule .cascade-header{ padding: 14px 18px; border-bottom: 1.5px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 15px; }
+    #careerModule .cascade-header button{ background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-secondary); padding: 0 4px; }
+    #careerModule .cascade-body{ display: flex; overflow: hidden; flex: 1; min-height: 260px; }
+    #careerModule .cascade-column{ flex: 1; overflow-y: auto; padding: 6px; border-right: 1px solid var(--border-light); }
+    #careerModule .cascade-column:last-child{ border-right: none; }
+    #careerModule .cascade-column-title{ font-size: 10px; color: #a89888; padding: 4px 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    #careerModule .cascade-option{ padding: 8px 12px; cursor: pointer; border-radius: 8px; font-size: 13px; transition: all 0.15s ease; }
+    #careerModule .cascade-option:hover{ background: var(--accent-light); }
+    #careerModule .cascade-option.active{ background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+    @media (max-width: 768px) {
+      #careerModule{ padding: 16px 12px 32px; }
+      #careerModule .form-grid{ grid-template-columns: 1fr; }
+      #careerModule .radar-section{ grid-template-columns: 1fr; }
+      #careerModule .style-cards{ grid-template-columns: repeat(2, 1fr); }
+      #careerModule .main-card{ padding: 20px 16px; }
+      #careerModule .tree-branch{ min-width: 90px; max-width: 110px; }
+      #careerModule .tree-branch-node{ padding: 8px 6px; min-height: 85px; }
+      #careerModule .branch-title{ font-size: 10px; }
+      #careerModule .tree-root-node{ padding: 10px 20px; font-size: 13px; }
+      #careerModule .tree-branches-row{ gap: 10px; padding-top: 18px; }
+      #careerModule .washi-tape{ width: 50px; height: 16px; }
+      #careerModule .washi-tape-left{ left: 16px; }
+      #careerModule .washi-tape-right{ right: 16px; }
+      #careerModule .bookmark-ribbon{ right: 12px; width: 20px; height: 28px; }
+    }
+    @media (max-width: 480px) {
+      #careerModule .tree-branch{ min-width: 75px; max-width: 95px; }
+      #careerModule .tree-branch-node{ padding: 6px 5px; min-height: 75px; }
+      #careerModule .branch-title{ font-size: 9px; }
+      #careerModule .branch-goals{ font-size: 8px; }
+      #careerModule .branch-year{ font-size: 8px; padding: 1px 7px; }
+      #careerModule .branch-milestone{ font-size: 7px; }
+      #careerModule .tree-branches-row{ gap: 6px; }
+      #careerModule .style-cards{ grid-template-columns: 1fr 1fr; gap: 4px; }
+    }
+  
+#careerModule .tree{width:auto!important;}
+
+</style>
 </head>
 <body>
 
@@ -529,153 +1150,121 @@ body::after{bottom:-50px;left:-50px;background:radial-gradient(circle,rgba(196,9
   </nav>
 
   <section id="careerModule" class="module-panel active">
-    
-
 <div class="container">
-  <div class="header">
-    <h1><i class="fas fa-tree"></i> 职业成长树</h1>
-    <span class="badge">慢慢来，比较快</span>
-  </div>
-  <div class="main-card">
-    <div class="tab-nav">
-      <button class="tab-btn active" data-tab="tab1"><i class="fas fa-pen-to-square"></i> <span>信息采集</span></button>
-      <button class="tab-btn" data-tab="tab2"><i class="fas fa-tree"></i> <span>成长树</span></button>
+    <div class="header">
+      <h1><i class="fas fa-tree"></i> 职业成长树</h1>
+      <span class="badge">慢慢来，比较快</span>
     </div>
-    <div id="tab1" class="tab-content active">
-      <div style="font-size:18px;font-weight:700;color:#0b1e3a;margin-bottom:20px;"><i class="fas fa-user-astronaut" style="color:#1e4a8a;"></i> 你的职业画像</div>
-      <div id="aiSkillStatus" class="ai-status hidden"><span class="spinner-small"></span><span>正在分析...</span></div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label><i class="fas fa-user"></i> 姓名/昵称
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">请输入你的真实姓名或常用昵称，用于个性化称呼。</span>
-            </i>
-          </label>
-          <input type="text" id="userName" placeholder="你的名字">
-        </div>
-        <div class="form-group">
-          <label><i class="fas fa-venus-mars"></i> 性别
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">选择你的性别，用于更精准的职业推荐。</span>
-            </i>
-          </label>
-          <select id="userGender"><option value="">请选择</option><option>男</option><option>女</option><option>其他</option><option>不便透露</option></select>
-        </div>
-        <div class="form-group">
-          <label><i class="fas fa-calendar-alt"></i> 年龄
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">请输入你的实际年龄（14-70岁），用于职业阶段匹配。</span>
-            </i>
-          </label>
-          <input type="number" id="userAge" min="14" max="70" placeholder="年龄">
-        </div>
-        <div class="form-group">
-          <label><i class="fas fa-briefcase"></i> 当前职业
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">点击选择或输入你目前从事的职业，这是生成成长树的基础。</span>
-            </i>
-          </label>
-          <div id="userJobDisplay" onclick="openCascade()" style="background:white;border:1.5px solid #d9e2ef;border-radius:16px;padding:12px 16px;font-size:15px;cursor:pointer;min-height:46px;display:flex;align-items:center;"><span id="userJobText" style="color:#999;">点击选择职业</span></div>
-          <input type="hidden" id="userJob" value="">
-        </div>
-        <div class="form-group">
-          <label><i class="far fa-calendar"></i> 工作年限
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">你已经工作的年数，0表示应届生或实习阶段。</span>
-            </i>
-          </label>
-          <input type="number" id="userYears" min="0" max="40" value="0">
-        </div>
-        <div class="form-group">
-          <label><i class="fas fa-graduation-cap"></i> 教育背景
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">你的最高学历，影响职业起点和成长路径。</span>
-            </i>
-          </label>
-          <select id="userEdu"><option value="">请选择</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option><option>博士后</option></select>
-        </div>
-        <div class="form-group full-width">
-          <label><i class="fas fa-clock"></i> 规划周期
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">选择你希望规划的职业发展年数，成长树将按此生成分支。</span>
-            </i>
-          </label>
-          <select id="targetYears"><option value="3">3年</option><option value="5" selected>5年</option><option value="10">10年</option></select>
-        </div>
-        <div class="form-group full-width">
-          <label><i class="fas fa-bullseye"></i> 职业目标（<span id="goalYearLabel">5</span>年后想成为什么？）
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">例如：技术总监、店长、高级工程师。明确目标有助于生成更贴合实际的路径。</span>
-            </i>
-          </label>
-          <input type="text" id="userGoal" placeholder="例如：技术总监 / 店长">
-        </div>
-        <div class="form-group full-width">
-          <label><i class="fas fa-route"></i> 路径风格
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">选择你偏好的职业发展风格，影响成长树的技能推荐和路线设计。</span>
-            </i>
-          </label>
-          <div class="style-cards" id="styleCards">
-            <div class="style-card selected" data-style="default"><div class="style-name">稳妥晋升</div></div>
-            <div class="style-card" data-style="cross"><div class="style-name">跨界融合</div></div>
-            <div class="style-card" data-style="ideal"><div class="style-name">理想主义</div></div>
-            <div class="style-card" data-style="balanced"><div class="style-name">均衡发展</div></div>
+
+    <div class="main-card">
+      <div class="washi-tape washi-tape-left"></div>
+      <div class="washi-tape washi-tape-right"></div>
+      <div class="bookmark-ribbon"></div>
+      <div class="fold-corner"></div>
+
+      <div class="drawer-toggle">
+        <button class="drawer-btn active" data-panel="panel1"><i class="fas fa-pen-to-square"></i> 信息采集</button>
+        <button class="drawer-btn" data-panel="panel2"><i class="fas fa-tree"></i> 成长树</button>
+      </div>
+
+      <div id="panel1" class="drawer-panel active">
+        <div class="section-title">你的职业画像</div>
+        <div id="skillStatus" class="status-text hidden"><span class="spinner-small"></span><span>加载中...</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> 姓名/昵称 <i class="fas fa-info-circle info-icon"><span class="tooltip">请输入你的真实姓名或常用昵称。</span></i></label>
+            <input type="text" id="userName" placeholder="你的名字">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-venus-mars"></i> 性别 <i class="fas fa-info-circle info-icon"><span class="tooltip">用于更精准的职业推荐。</span></i></label>
+            <select id="userGender"><option value="">请选择</option><option>男</option><option>女</option><option>其他</option><option>不便透露</option></select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-calendar-alt"></i> 年龄 <i class="fas fa-info-circle info-icon"><span class="tooltip">14-70岁，用于职业阶段匹配。</span></i></label>
+            <input type="number" id="userAge" min="14" max="70" placeholder="年龄">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-briefcase"></i> 当前职业 <i class="fas fa-info-circle info-icon"><span class="tooltip">点击选择或输入你目前从事的职业。</span></i></label>
+            <div id="userJobDisplay" onclick="openCascade()" style="background:#fcf9f4;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;cursor:pointer;color:var(--text);font-size:13px;">
+              <span id="userJobText" style="color:#a89888;">点击选择职业</span>
+            </div>
+            <input type="hidden" id="userJob" value="">
+          </div>
+          <div class="form-group">
+            <label><i class="far fa-calendar"></i> 工作年限 <i class="fas fa-info-circle info-icon"><span class="tooltip">已工作的年数，0表示应届生或实习。</span></i></label>
+            <input type="number" id="userYears" min="0" max="40" value="0">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-graduation-cap"></i> 教育背景 <i class="fas fa-info-circle info-icon"><span class="tooltip">最高学历，影响职业起点。</span></i></label>
+            <select id="userEdu"><option value="">请选择</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option><option>博士后</option></select>
+          </div>
+          <div class="form-group full-width">
+            <label><i class="fas fa-clock"></i> 规划周期 <i class="fas fa-info-circle info-icon"><span class="tooltip">职业发展年数，成长树将按此生成分支。</span></i></label>
+            <select id="targetYears"><option value="3">3年</option><option value="5" selected>5年</option><option value="10">10年</option></select>
+          </div>
+          <div class="form-group full-width">
+            <label><i class="fas fa-bullseye"></i> 职业目标（<span id="goalYearLabel">5</span>年后想成为什么？） <i class="fas fa-info-circle info-icon"><span class="tooltip">例如：技术总监、店长、高级工程师。</span></i></label>
+            <input type="text" id="userGoal" placeholder="例如：技术总监 / 店长">
+          </div>
+          <div class="form-group full-width">
+            <label><i class="fas fa-route"></i> 路径风格 <i class="fas fa-info-circle info-icon"><span class="tooltip">影响成长树的技能推荐和路线设计。</span></i></label>
+            <div class="style-cards" id="styleCards">
+              <div class="style-card selected" data-style="default"><div class="style-name">稳妥晋升</div></div>
+              <div class="style-card" data-style="cross"><div class="style-name">跨界融合</div></div>
+              <div class="style-card" data-style="ideal"><div class="style-name">理想主义</div></div>
+              <div class="style-card" data-style="balanced"><div class="style-name">均衡发展</div></div>
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label><i class="fas fa-compass"></i> 职业兴趣/方向 <i class="fas fa-info-circle info-icon"><span class="tooltip">描述你感兴趣的领域或方向。</span></i></label>
+            <textarea id="userInterest" rows="2" placeholder="例如：用技术赋能传统行业"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label><i class="fas fa-tags"></i> 核心技能（点击选择，至少3项） <i class="fas fa-info-circle info-icon"><span class="tooltip">选择你对于目标职业已具备或希望发展的核心技能。</span></i></label>
+            <div class="skills-tag-group" id="skillTags"><div class="empty-skills-hint">选择职业后自动推荐</div></div>
           </div>
         </div>
-        <div class="form-group full-width">
-          <label><i class="fas fa-compass"></i> 职业兴趣/方向
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">描述你感兴趣的领域或方向，例如"想用AI赋能传统行业"。</span>
-            </i>
-          </label>
-          <textarea id="userInterest" rows="2" placeholder="例如：想用AI赋能传统行业"></textarea>
-        </div>
-        <div class="form-group full-width">
-          <label><i class="fas fa-tags"></i> 核心技能（已有 / 希望发展，至少3项）
-            <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">系统会结合当前职业与职业目标推荐候选技能，请选择你目前已经掌握或希望重点发展的技能，至少3项。</span>
-            </i>
-          </label>
-          <div class="skills-tag-group" id="skillTags"><div class="empty-skills-hint">选择职业后自动推荐</div></div>
-        </div>
+        <button class="btn-primary mt-16" id="generateBtn"><i class="fas fa-bolt"></i> 生成成长树</button>
       </div>
-      <button class="btn-primary mt-20" id="generateBtn"><i class="fas fa-wand-magic-sparkles"></i> 生成成长树</button>
-    </div>
-    <div id="tab2" class="tab-content">
-      <div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;font-size:14px;display:flex;align-items:center;flex-wrap:wrap;gap:12px;"></div>
-      <div id="treeDisplay"><div class="text-center text-muted" style="padding:40px;">请先生成成长树</div></div>
-      <div id="eventContainer"></div>
-      <div class="radar-section"><div id="radarContainer" class="radar-container"></div><div id="statsContainer"></div></div>
-      <div class="mt-20"><div id="badgesContainer" class="badges-container"></div></div>
-      <div class="flex mt-20" style="flex-wrap:wrap; gap:10px;">
-        <button class="btn-secondary" id="regenerateBtn"><i class="fas fa-rotate-right"></i> 重新生成</button>
-        <button class="btn-secondary btn-optimize" id="optimizeBtn">
-          <i class="fas fa-magic"></i> 获取优化版
-        </button>
-        <button class="btn-secondary" id="consultBtn"><i class="fas fa-paper-plane"></i> 咨询</button>
-      </div>
-      <div id="optimizeProgress" class="optimize-progress">
-        <div class="progress-text">
-          <span><span class="status-icon">⏳</span> <span id="progressStatusText">处理中...</span></span>
-          <span id="progressTimeText">等待中</span>
+
+      <div id="panel2" class="drawer-panel">
+        <div class="section-title" style="color:var(--accent);">你的成长树</div>
+        <div id="profileSummary" class="profile-summary" style="display:none;"></div>
+        <div id="treeDisplay">
+          <div class="empty-tree-state">
+            <i class="fas fa-tree"></i>
+            <p>请先在「信息采集」页填写资料<br>然后点击「生成成长树」</p>
+          </div>
         </div>
-        <div class="progress-bar-wrap">
-          <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+        <div id="eventContainer"></div>
+        <div class="radar-section" id="radarSection" style="display:none;">
+          <div id="radarContainer" class="radar-container"></div>
+          <div id="statsContainer"></div>
+        </div>
+        <div class="mt-12" id="badgesSection" style="display:none;">
+          <div id="badgesContainer" class="badges-container"></div>
+        </div>
+        <div class="flex mt-16" id="actionButtons" style="display:none; flex-wrap:wrap; gap:8px;">
+          <button class="btn-secondary" id="regenerateBtn"><i class="fas fa-rotate-right"></i> 重新生成</button>
+          <button class="btn-secondary btn-optimize" id="optimizeBtn"><i class="fas fa-sliders"></i> 优化</button>
+          <button class="btn-secondary" id="consultBtn"><i class="fas fa-paper-plane"></i> 咨询</button>
+        </div>
+        <div id="optimizeProgress" class="optimize-progress">
+          <div class="progress-text"><span><span id="progressStatusText">处理中...</span></span><span id="progressTimeText">—</span></div>
+          <div class="progress-bar-wrap"><div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div></div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<div id="cascadeOverlay" class="cascade-overlay hidden">
-  <div class="cascade-modal">
-    <div class="cascade-header"><span>选择你的职业</span><button onclick="closeCascade()">✕</button></div>
-    <div class="cascade-body" id="cascadeBody"></div>
+  <div id="cascadeOverlay" class="cascade-overlay hidden">
+    <div class="cascade-modal">
+      <div class="cascade-header"><span>选择你的职业</span><button onclick="closeCascade()">✕</button></div>
+      <div class="cascade-body" id="cascadeBody"></div>
+    </div>
   </div>
-</div>
 
-
+  <div id="stampOverlay" class="stamp-overlay"><div class="stamp-seal">已完成</div></div>
   </section>
 
   <section id="simulationModule" class="module-panel">
@@ -779,23 +1368,17 @@ body::after{bottom:-50px;left:-50px;background:radial-gradient(circle,rgba(196,9
 </script>
 <script>
 // ============================================
-// 职业级联数据（已修复：区分学生和职业）
+// 职业级联数据 (保留第一份的风格，但数据与第二份对齐)
 // ============================================
 const JOB_CASCADE = {
-  '🎓 在校学生': { 
-    children: { 
-      '中学生': ['初中生','高中生'], 
-      '大学生': ['本科生','硕士生','博士生'],
-      '应届毕业生': ['本科应届','硕士应届','博士应届'] 
-    } 
-  },
-  '💻 技术/IT': { children: { '软件开发': ['前端工程师','后端工程师','全栈工程师'], '网络安全': ['网络安全工程师','渗透测试工程师','安全运维工程师'], '数据/AI': ['数据分析师','算法工程师','AI工程师'], '运维/测试': ['运维工程师','测试工程师'], '架构/管理': ['架构师','技术经理','CTO'] } },
-  '📚 教育': { children: { '基础教育': ['小学教师','初中教师','高中教师'], '高等教育': ['大学教师','讲师','教授'] } },
-  '🏥 医疗': { children: { '临床': ['医生','外科医生','内科医生'], '护理': ['护士','护师','护士长'] } },
-  '💰 金融': { children: { '银行': ['柜员','客户经理'], '证券': ['证券分析师','投资顾问'] } },
-  '🎨 产品/设计': { children: { '产品': ['产品助理','产品经理','产品总监'], 'UI/UX': ['UI设计师','UX设计师'] } },
-  '🏪 服务/零售': { children: { '餐饮': ['奶茶店店员','咖啡师','厨师'], '零售': ['店员','导购','店长'] } },
-  '📌 其他': { children: { '法律': ['律师','法务'], '建筑': ['建筑师','室内设计师'], '自由职业': ['自媒体运营','独立开发者'] } }
+  '在校学生': { children: { '中学生': ['初中生','高中生'], '大学生': ['本科生','硕士生','博士生'], '应届毕业生': ['本科应届','硕士应届','博士应届'] } },
+  '技术/IT': { children: { '软件开发': ['前端工程师','后端工程师','全栈工程师'], '网络安全': ['网络安全工程师','渗透测试工程师','安全运维工程师'], '数据/AI': ['数据分析师','算法工程师','AI工程师'], '运维/测试': ['运维工程师','测试工程师'], '架构/管理': ['架构师','技术经理','CTO'] } },
+  '教育': { children: { '基础教育': ['小学教师','初中教师','高中教师'], '高等教育': ['大学教师','讲师','教授','大学辅导员'] } },
+  '医疗': { children: { '临床': ['医生','外科医生','内科医生'], '护理': ['护士','护师','护士长'] } },
+  '金融': { children: { '银行': ['柜员','客户经理'], '证券': ['证券分析师','投资顾问'] } },
+  '产品/设计': { children: { '产品': ['产品助理','产品经理','产品总监'], 'UI/UX': ['UI设计师','UX设计师'] } },
+  '服务/零售': { children: { '餐饮': ['奶茶店店员','咖啡师','厨师'], '零售': ['店员','导购','店长'] } },
+  '其他': { children: { '法律': ['律师','法务'], '建筑': ['建筑师','室内设计师'], '自由职业': ['自媒体运营','独立开发者'] } }
 };
 
 const API_CONFIG = { baseUrl: '' };
@@ -813,47 +1396,84 @@ let isOptimizing = false;
 let cascadeLevel = 0, cascadePath = [];
 
 // ============================================
-// 检测是否为在校学生
+// 清理AI回复中的Markdown符号 (保留第一份的cleanAIResponse)
 // ============================================
-function isStudentJob(job) {
-  const studentKeywords = ['学生', '初中', '高中', '大学', '硕士', '博士', '应届', '中学生', '大学生', '研究生', '本科', '专科'];
-  return studentKeywords.some(keyword => job.includes(keyword));
+function cleanAIResponse(text) {
+  if (!text) return '暂无回复';
+  
+  let cleaned = text;
+  
+  // 1. 移除 Markdown 标题符号 (##, ###, #### 等)
+  cleaned = cleaned.replace(/^#{1,6}\s*/gm, '');
+  
+  // 2. 移除粗体符号 (**text**)
+  cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
+  
+  // 3. 移除斜体符号 (*text*)
+  cleaned = cleaned.replace(/\*(.*?)\*/g, '$1');
+  
+  // 4. 移除删除线 (~~text~~)
+  cleaned = cleaned.replace(/~~(.*?)~~/g, '$1');
+  
+  // 5. 移除代码块标记 (```)
+  cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
+  
+  // 6. 移除行内代码标记 (`code`)
+  cleaned = cleaned.replace(/`(.*?)`/g, '$1');
+  
+  // 7. 移除列表符号 (-, *, +) 但保留内容
+  cleaned = cleaned.replace(/^[\s]*[-*+]\s+/gm, '• ');
+  
+  // 8. 移除多余的空行（连续多个换行合并为两个）
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+  
+  // 9. 移除开头的多余空格
+  cleaned = cleaned.trim();
+  
+  return cleaned;
 }
 
 // ============================================
-// Toast
+// 检测是否为在校学生 (保留第一份的逻辑)
 // ============================================
+function isStudentJob(job) {
+  if (!job) return false;
+  const staffKeywords = ['教师', '老师', '教授', '讲师', '导师', '辅导员', '班主任', '医生', '医师', '护士', '教务', '行政', '管理', '职员', '员工', '助理'];
+  for (const kw of staffKeywords) { if (job.includes(kw)) return false; }
+  const studentKeywords = ['学生', '初中生', '初中', '高中生', '高中', '大学生', '研究生', '硕士', '博士', '应届', '中学生', '本科生', '专科生', '大专生', '职高', '中专', '技校'];
+  return studentKeywords.some(keyword => job.includes(keyword));
+}
+
+function getExperienceByYears(years, isStudent) {
+  if (isStudent) return 0;
+  if (years === 0) return 5;
+  if (years <= 2) return 25;
+  if (years <= 5) return 50;
+  return 75;
+}
+
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
   toast.textContent = message;
   document.body.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
 // ============================================
-// 级联选择
+// 级联选择 (保留第一份的实现，但使用第二份的数据结构)
 // ============================================
 function openCascade() {
   document.getElementById('cascadeOverlay').classList.remove('hidden');
-  cascadeLevel = 0;
-  cascadePath = [];
+  cascadeLevel = 0; cascadePath = [];
   renderCascade();
 }
-
-function closeCascade() {
-  document.getElementById('cascadeOverlay').classList.add('hidden');
-}
-
+function closeCascade() { document.getElementById('cascadeOverlay').classList.add('hidden'); }
 function setUserJob(job) {
   document.getElementById('userJob').value = job;
   document.getElementById('userJobText').textContent = job;
-  document.getElementById('userJobText').style.color = '#0a1a33';
+  document.getElementById('userJobText').style.color = '#3d3228';
 }
-
 function renderCascade() {
   const body = document.getElementById('cascadeBody');
   body.innerHTML = '';
@@ -863,16 +1483,9 @@ function renderCascade() {
     colDiv.className = 'cascade-column';
     colDiv.innerHTML = `<div class="cascade-column-title">${['大类','子类','具体职业'][col]||''}</div>`;
     let options = [];
-    if (col === 0) {
-      options = Object.keys(JOB_CASCADE);
-    } else if (col === 1) {
-      const p = cascadePath[0];
-      if (JOB_CASCADE[p]) options = [...Object.keys(JOB_CASCADE[p].children), '✏️ 其他'];
-    } else {
-      const p = cascadePath[0], s = cascadePath[1];
-      if (s === '✏️ 其他') options = ['✏️ 手动输入...'];
-      else options = [...(JOB_CASCADE[p]?.children[s] || []), '✏️ 其他...'];
-    }
+    if (col === 0) { options = Object.keys(JOB_CASCADE); }
+    else if (col === 1) { const p = cascadePath[0]; if (JOB_CASCADE[p]) options = [...Object.keys(JOB_CASCADE[p].children), '其他']; }
+    else { const p = cascadePath[0], s = cascadePath[1]; if (s === '其他') options = ['手动输入...']; else options = [...(JOB_CASCADE[p]?.children[s] || []), '其他...']; }
     options.forEach(opt => {
       const d = document.createElement('div');
       d.className = 'cascade-option' + (cascadePath[col] === opt ? ' active' : '');
@@ -883,25 +1496,22 @@ function renderCascade() {
     body.appendChild(colDiv);
   }
 }
-
 function selectCascadeOption(col, opt) {
   cascadePath = cascadePath.slice(0, col);
   cascadePath[col] = opt;
-  if (opt.includes('✏️') || opt.includes('自定义')) { closeCascade(); showManualInput(); return; }
+  if (opt.includes('手动输入') || opt.includes('自定义')) { closeCascade(); showManualInput(); return; }
   if (col === 2) { setUserJob(opt); closeCascade(); debouncedRecommend(); }
   else { cascadeLevel = col + 1; renderCascade(); }
 }
-
 function showManualInput() {
   const o = document.createElement('div');
   o.className = 'cascade-overlay';
   o.id = 'manualOverlay';
-  o.innerHTML = `<div class="cascade-modal" style="max-width:400px;"><div class="cascade-header"><span>请输入职业</span><button onclick="document.getElementById('manualOverlay').remove()">✕</button></div><div style="padding:20px;"><input id="manualInput" placeholder="请输入职业名称" style="width:100%;padding:12px;border:1.5px solid #d9e2ef;border-radius:12px;font-size:15px;"><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="confirmManual()" style="flex:1;padding:12px;background:#1e4a8a;color:white;border:none;border-radius:12px;cursor:pointer;">确认</button><button onclick="document.getElementById('manualOverlay').remove()" style="flex:1;padding:12px;background:#f0f0f0;border:none;border-radius:12px;cursor:pointer;">取消</button></div></div></div>`;
+  o.innerHTML = `<div class="cascade-modal" style="max-width:400px;"><div class="cascade-header"><span>请输入职业</span><button onclick="document.getElementById('manualOverlay').remove()">✕</button></div><div style="padding:20px;"><input id="manualInput" placeholder="请输入职业名称" style="width:100%;padding:12px;border:1.5px solid #e0d0b8;border-radius:12px;font-size:15px;"><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="confirmManual()" style="flex:1;padding:12px;background:#c45d1e;color:white;border:none;border-radius:12px;cursor:pointer;">确认</button><button onclick="document.getElementById('manualOverlay').remove()" style="flex:1;padding:12px;background:#f0f0f0;border:none;border-radius:12px;cursor:pointer;">取消</button></div></div></div>`;
   document.body.appendChild(o);
   setTimeout(() => document.getElementById('manualInput').focus(), 100);
   document.getElementById('manualInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmManual(); });
 }
-
 function confirmManual() {
   const v = document.getElementById('manualInput').value.trim();
   if (v.length < 2) { alert('请输入至少2个字'); return; }
@@ -910,24 +1520,17 @@ function confirmManual() {
   debouncedRecommend();
 }
 
-// ============================================
-// 技能推荐
-// ============================================
 document.querySelectorAll('.style-card').forEach(c => c.addEventListener('click', function() {
   document.querySelectorAll('.style-card').forEach(x => x.classList.remove('selected'));
   this.classList.add('selected');
   selectedStyle = this.dataset.style;
   if ($('userJob').value.trim().length >= 2) debouncedRecommend();
 }));
-
 $('targetYears').addEventListener('change', function() { $('goalYearLabel').textContent = this.value; });
 
 function debouncedRecommend() {
   clearTimeout(skillTimer);
-  skillTimer = setTimeout(() => {
-    const j = $('userJob').value.trim();
-    if (j.length >= 2) recommendSkills(j);
-  }, 1000);
+  skillTimer = setTimeout(() => { const j = $('userJob').value.trim(); if (j.length >= 2) recommendSkills(j); }, 1000);
 }
 
 async function recommendSkills(job) {
@@ -936,7 +1539,7 @@ async function recommendSkills(job) {
   if (key === lastSkillKey) return;
   lastSkillKey = key;
   skillInProgress = true;
-  $('aiSkillStatus').classList.remove('hidden');
+  $('skillStatus').classList.remove('hidden');
   try {
     const res = await fetch(`${API_CONFIG.baseUrl}/api/recommend-skills`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -945,12 +1548,8 @@ async function recommendSkills(job) {
     const data = await res.json();
     if (data.success && data.skills && data.skills.length >= 3) renderSkillTags(data.skills);
     else renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);
-  } catch(e) {
-    renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']);
-  } finally {
-    skillInProgress = false;
-    setTimeout(() => $('aiSkillStatus').classList.add('hidden'), 3000);
-  }
+  } catch(e) { renderSkillTags(['专业技能','沟通协作','问题解决','持续学习','团队合作']); }
+  finally { skillInProgress = false; setTimeout(() => $('skillStatus').classList.add('hidden'), 3000); }
 }
 
 function renderSkillTags(skills) {
@@ -998,7 +1597,7 @@ function getUserInput() {
 }
 
 // ============================================
-// 本地生成树（修复版 - 支持学生检测）
+// 增强版本地生成树 (采用第二份的更丰富逻辑，但保持与第一份数据结构的兼容)
 // ============================================
 function generateLocalTreeEnhanced(input) {
   const targetYears = parseInt(input.targetYears) || 5;
@@ -1007,30 +1606,8 @@ function generateLocalTreeEnhanced(input) {
   const isStudent = isStudentJob(job);
   
   const icons = ['📚','📝','💡','👥','🏆','🌐','🎯','🌟','🏛️','💎'];
-  const milestones = [
-    '建立基础能力',
-    '独立承担项目', 
-    '成为团队骨干',
-    '带领小团队',
-    '独当一面',
-    '拓展影响力',
-    '行业专家',
-    '战略视野',
-    '引领创新',
-    '成就卓越'
-  ];
-  const goals = [
-    '掌握核心技能，适应职场节奏',
-    '深化专业能力，建立个人品牌',
-    '拓展人脉资源，提升影响力',
-    '培养管理能力，开始带团队',
-    '成为领域专家，输出方法论',
-    '跨界学习，拓宽职业边界',
-    '建立行业影响力',
-    '战略思维与全局观',
-    '引领行业创新',
-    '实现职业理想'
-  ];
+  const milestones = ['建立基础能力','独立承担项目','成为团队骨干','带领小团队','独当一面','拓展影响力','行业专家','战略视野','引领创新','成就卓越'];
+  const goals = ['掌握核心技能，适应职场节奏','深化专业能力，建立个人品牌','拓展人脉资源，提升影响力','培养管理能力，开始带团队','成为领域专家，输出方法论','跨界学习，拓宽职业边界','建立行业影响力','战略思维与全局观','引领行业创新','实现职业理想'];
   
   const branches = [];
   for (let i = 1; i <= targetYears; i++) {
@@ -1045,66 +1622,24 @@ function generateLocalTreeEnhanced(input) {
     });
   }
   
-  // ==========================================
-  // 核心修复：根据职业类型设置雷达图
-  // ==========================================
   let radarData;
   if (isStudent) {
-    // 在校学生：没有工作经验，以学习能力为主
-    radarData = {
-      skill: 30,
-      experience: 0,
-      learning: 85,
-      adaptability: 60,
-      leadership: 5
-    };
+    radarData = { skill: 30, experience: 0, learning: 85, adaptability: 60, leadership: 5 };
   } else if (workYears === 0) {
-    radarData = {
-      skill: 25,
-      experience: 5,
-      learning: 85,
-      adaptability: 65,
-      leadership: 3
-    };
+    radarData = { skill: 25, experience: 5, learning: 85, adaptability: 65, leadership: 3 };
   } else if (workYears <= 2) {
-    radarData = {
-      skill: 40,
-      experience: 25,
-      learning: 80,
-      adaptability: 65,
-      leadership: 15
-    };
+    radarData = { skill: 40, experience: 25, learning: 80, adaptability: 65, leadership: 15 };
   } else if (workYears <= 5) {
-    radarData = {
-      skill: 60,
-      experience: 50,
-      learning: 80,
-      adaptability: 70,
-      leadership: 35
-    };
+    radarData = { skill: 60, experience: 50, learning: 80, adaptability: 70, leadership: 35 };
   } else {
-    radarData = {
-      skill: 75,
-      experience: 75,
-      learning: 80,
-      adaptability: 70,
-      leadership: 50
-    };
+    radarData = { skill: 75, experience: 75, learning: 80, adaptability: 70, leadership: 50 };
   }
   
   return {
     tree: { branches },
     radarData: radarData,
-    challenges: isStudent ? { 
-      icon: '📚', 
-      text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识' 
-    } : { 
-      icon: '⚡', 
-      text: '持续学习，把握机遇，在变化中成长' 
-    },
-    badges: isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] : 
-            (workYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : 
-            ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期']),
+    challenges: isStudent ? { icon: '📚', text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识' } : { icon: '⚡', text: '持续学习，把握机遇，在变化中成长' },
+    badges: isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] : (workYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : ['🎯 目标清晰', '📈 持续成长', '💪 潜力无限', '🌟 未来可期']),
     _isTemplate: false,
     _status: '📋 本地生成',
     _source: 'local'
@@ -1112,13 +1647,21 @@ function generateLocalTreeEnhanced(input) {
 }
 
 // ============================================
-// 渲染成长树（修复版）
+// 渲染成长树 (采用第二份的更丰富逻辑，但保持第一份的视觉风格)
 // ============================================
 function renderTree(data, input) {
   const defaultIcons = ['🌱','🌿','🌳','🌲','🌟','🌐','🎯','🌟','🏛️','💎'];
   const userYears = input.years || 0;
   const job = input.job || '';
   const isStudent = isStudentJob(job);
+  
+  if (!data.radarData) data.radarData = {};
+  const correctExperience = getExperienceByYears(userYears, isStudent);
+  if (data.radarData.experience === 0 || data.radarData.experience === undefined || data.radarData.experience === null) {
+    data.radarData.experience = correctExperience;
+  } else if (userYears > 0 && data.radarData.experience < 10) {
+    data.radarData.experience = correctExperience;
+  }
   
   if (data && data.tree && data.tree.branches) {
     data.tree.branches.forEach((b, i) => {
@@ -1130,79 +1673,86 @@ function renderTree(data, input) {
     });
   }
   
-  // ==========================================
-  // 雷达数据：AI正常返回时原样展示，仅在缺失/无效时兜底
-  // ==========================================
-  if (!data.radarData || typeof data.radarData !== 'object') {
-    data.radarData = {};
+  // 修正雷达数据
+  if (isStudent) {
+    data.radarData.skill = Math.min(50, data.radarData.skill || 30);
+    data.radarData.experience = 0;
+    data.radarData.learning = Math.min(95, Math.max(70, data.radarData.learning || 85));
+    data.radarData.adaptability = Math.min(80, Math.max(50, data.radarData.adaptability || 60));
+    data.radarData.leadership = Math.min(10, data.radarData.leadership || 5);
+    if (!data.badges || data.badges.length === 0) data.badges = ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'];
+    if (!data.challenges || !data.challenges.text) data.challenges = { icon: '📚', text: '从校园到职场是重要转折，需要将理论知识转化为实践能力，同时建立职业规划意识' };
+  } else if (userYears === 0) {
+    data.radarData.skill = Math.min(35, data.radarData.skill || 25);
+    data.radarData.experience = Math.min(10, data.radarData.experience || 5);
+    data.radarData.learning = Math.min(95, Math.max(70, data.radarData.learning || 85));
+    data.radarData.adaptability = Math.min(80, Math.max(50, data.radarData.adaptability || 65));
+    data.radarData.leadership = Math.min(8, data.radarData.leadership || 3);
+    if (!data.badges || data.badges.length === 0) data.badges = ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'];
+  } else if (userYears <= 2) {
+    data.radarData.skill = Math.min(55, Math.max(25, data.radarData.skill || 40));
+    data.radarData.experience = Math.min(35, Math.max(10, data.radarData.experience || 25));
+    data.radarData.learning = Math.min(95, Math.max(65, data.radarData.learning || 80));
+    data.radarData.adaptability = Math.min(85, Math.max(50, data.radarData.adaptability || 65));
+    data.radarData.leadership = Math.min(30, Math.max(5, data.radarData.leadership || 15));
+  } else if (userYears <= 5) {
+    data.radarData.skill = Math.min(80, Math.max(50, data.radarData.skill || 60));
+    data.radarData.experience = Math.min(70, Math.max(40, data.radarData.experience || 50));
+    data.radarData.learning = Math.min(95, Math.max(60, data.radarData.learning || 80));
+    data.radarData.adaptability = Math.min(90, Math.max(50, data.radarData.adaptability || 70));
+    data.radarData.leadership = Math.min(60, Math.max(20, data.radarData.leadership || 35));
+  } else {
+    data.radarData.skill = Math.min(95, Math.max(60, data.radarData.skill || 75));
+    data.radarData.experience = Math.min(100, Math.max(60, data.radarData.experience || 75));
+    data.radarData.learning = Math.min(100, Math.max(60, data.radarData.learning || 80));
+    data.radarData.adaptability = Math.min(100, Math.max(50, data.radarData.adaptability || 70));
+    data.radarData.leadership = Math.min(95, Math.max(30, data.radarData.leadership || 50));
   }
-  const radarFallback = {
-    skill: 50,
-    experience: isStudent ? 0 : 50,
-    learning: 70,
-    adaptability: 65,
-    leadership: 40
-  };
-  ['skill','experience','learning','adaptability','leadership'].forEach(key => {
-    const raw = Number(data.radarData[key]);
-    data.radarData[key] = Number.isFinite(raw)
-      ? Math.min(100, Math.max(0, raw))
-      : radarFallback[key];
-  });
-  
- if (!data.challenges || !data.challenges.text) {
-     data.challenges = {
-         icon:'⚡',
-         text:'持续学习，抓住职业发展机遇'
-     };
- }
-  if (!data.badges || data.badges.length === 0) {
-    data.badges = ['🌱 职业成长', '🚀 能力提升', '⭐ 持续发展'];
-  }
+  data.radarData.skill = Math.min(100, Math.max(5, data.radarData.skill || 25));
+  data.radarData.experience = Math.min(100, Math.max(0, data.radarData.experience || 0));
+  data.radarData.learning = Math.min(100, Math.max(50, data.radarData.learning || 80));
+  data.radarData.adaptability = Math.min(100, Math.max(40, data.radarData.adaptability || 60));
+  data.radarData.leadership = Math.min(100, Math.max(0, data.radarData.leadership || 0));
+  if (!data.challenges || !data.challenges.text) data.challenges = { icon: '⚡', text: '持续学习，抓住职业发展机遇' };
+  if (!data.badges || data.badges.length === 0) data.badges = ['初入职场','快速成长','潜力无限'];
   
   if (!data?.tree?.branches?.length) {
-    $('treeDisplay').innerHTML = '<div class="text-center text-muted" style="padding:40px;">暂无数据</div>';
+    $('treeDisplay').innerHTML = '<div class="text-center text-muted" style="padding:40px 0;">暂无数据</div>';
     return;
   }
-  
+
   const branches = data.tree.branches;
   const radarData = data.radarData;
-  const challengeText = data.challenges.text;
   let badges = data.badges.filter(b => typeof b === 'string' && b.length > 0);
-  if (badges.length === 0) {
-    badges = isStudent ? ['🎓 在校学生', '📚 学习成长', '💪 潜力无限'] :
-             (userYears === 0 ? ['🎓 应届生', '🚀 潜力新星', '💪 快速成长'] : 
-             ['初入职场','快速成长','潜力无限']);
-  }
+  if (badges.length === 0) badges = ['初入职场','快速成长','潜力无限'];
 
-  let html = `<div class="tree-container"><div class="tree"><div class="tree-root-node">📍 ${job} · ${userYears}年${data._isTemplate ? ' · ⏳AI优化中' : ''}</div><div class="tree-trunk"></div><div class="tree-branches-row">`;
+  $('profileSummary').style.display = 'flex';
+  $('radarSection').style.display = 'grid';
+  $('badgesSection').style.display = 'block';
+  $('actionButtons').style.display = 'flex';
+
+  let html = `<div class="tree-wrapper">${branches.length > 3 ? `<div class="scroll-hint"><i class="fas fa-arrows-left-right"></i> 左右滑动查看更多年份</div>` : ''}<div class="tree"><div class="tree-root-node"> ${job} · ${userYears}年${data._isTemplate ? ' · ⏳AI优化中' : ''}</div><div class="tree-trunk"></div><div class="tree-branches-row">`;
   branches.forEach((b, i) => {
     const yearText = String(b.year).replace(/第|年/g, '');
-    html += `<div class="tree-branch"><div class="tree-branch-node ${i === branches.length - 1 ? 'goal' : ''}"><span class="branch-year">第${yearText}年</span><div class="branch-icon">${b.icon || defaultIcons[i % defaultIcons.length]}</div><div class="branch-title">${b.title}</div><div class="branch-goals">${b.goals}</div><div class="branch-milestone">🎯 ${b.milestone}</div></div></div>`;
+    html += `<div class="tree-branch"><div class="tree-branch-node ${i === branches.length - 1 ? 'goal' : ''}"><span class="branch-year">第${yearText}年</span><div class="branch-title">${b.icon || '📌'} ${b.title}</div><div class="branch-goals">${b.goals}</div><div class="branch-milestone">🎯 ${b.milestone}</div></div></div>`;
   });
-  html += '</div></div></div>';
+  html += `</div></div></div>`;
   $('treeDisplay').innerHTML = html;
 
-  $('profileSummary').innerHTML = `
-    <span>👤 ${input.name} · ${input.gender} · ${input.age}岁</span>
-    <span>💼 ${job} · ${userYears}年</span>
-    <span>🎓 ${input.education}</span>
-    <span>🎯 ${input.goal}</span>
-    ${data._status ? `<span class="status-badge ${data._status.includes('✅') ? 'done' : data._status.includes('本地') ? 'local' : 'optimizing'}">${data._status}</span>` : ''}
-  `;
+  $('profileSummary').innerHTML = `<span>${input.name} · ${input.gender} · ${input.age}岁</span><span>${job} · ${userYears}年</span><span>${input.education}</span><span>${input.goal}</span>${data._status ? `<span class="status-badge ${data._status.includes('✅') ? 'done' : data._status.includes('本地') ? 'local' : 'optimizing'}">${data._status}</span>` : ''}`;
 
   renderRadar(radarData);
-  const labels = ['💪专业技能','📋工作经验','📚学习能力','🔄适应能力','👥领导力'];
+  const labels = ['专业技能','工作经验','学习能力','适应能力','领导力'];
   const keys = ['skill','experience','learning','adaptability','leadership'];
   $('statsContainer').innerHTML = keys.map((k, i) => {
     const val = Math.min(100, Math.max(0, radarData[k] || 0));
-    return `<div class="stat-item"><span style="width:90px;font-size:13px;">${labels[i]}</span><div class="stat-bar"><div class="stat-fill" style="width:${val}%"></div></div><span style="font-size:13px;font-weight:700;">${val}%</span></div>`;
+    return `<div class="stat-item"><span style="width:80px;font-size:12px;">${labels[i]}</span><div class="stat-bar"><div class="stat-fill" style="width:${val}%"></div></div><span style="font-size:12px;font-weight:700;">${val}%</span></div>`;
   }).join('');
-
-  const badgeIcons = ['🌟','🚀','👑','💎','🏅','🏅','🏅','🏅','🏅','🏅'];
-  $('badgesContainer').innerHTML = badges.map((b, i) => `<span class="badge-item">${badgeIcons[i % badgeIcons.length] || '🏅'} ${b}</span>`).join('');
-
-  $('eventContainer').innerHTML = `<div style="background:#fff3cd;border-radius:16px;padding:14px;margin-top:10px;">${data.challenges.icon || '⚡'} ${challengeText}</div>`;
+  $('badgesContainer').innerHTML = badges.map(b => `<span class="badge-item">${b}</span>`).join('');
+  $('eventContainer').innerHTML = `<div style="background:#fdf5e6;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:12px;line-height:1.6;">${data.challenges.text}</div>`;
+  triggerStamp();
+  setTimeout(randomizeBranches, 100);
+  switchPanel('panel2');
 }
 
 function renderRadar(data) {
@@ -1210,112 +1760,78 @@ function renderRadar(data) {
   if (!c || c.offsetWidth === 0) { setTimeout(() => renderRadar(data), 100); return; }
   if (!radarChart) radarChart = echarts.init(c);
   radarChart.setOption({
-    radar: {
-      indicator: [
-        {name:'专业技能',max:100},{name:'工作经验',max:100},{name:'学习能力',max:100},{name:'适应能力',max:100},{name:'领导力',max:100}
-      ],
-      center: ['50%','50%'],
-      radius: '65%'
-    },
-    series: [{
-      type: 'radar',
-      data: [{
-        value: [data.skill||0, data.experience||0, data.learning||0, data.adaptability||0, data.leadership||0],
-        areaStyle: {color: 'rgba(196,93,30,0.20)'},
-        lineStyle: {color: '#c45d1e', width: 2},
-        itemStyle: {color: '#c45d1e'}
-      }]
-    }]
+    radar: { indicator: [{name:'专业技能',max:100},{name:'工作经验',max:100},{name:'学习能力',max:100},{name:'适应能力',max:100},{name:'领导力',max:100}], center: ['50%','50%'], radius: '65%' },
+    series: [{ type: 'radar', data: [{ value: [data.skill||0, data.experience||0, data.learning||0, data.adaptability||0, data.leadership||0], areaStyle: {color: 'rgba(196,93,30,0.3)'}, lineStyle: {color: '#c45d1e'} }] }]
   }, true);
   radarChart.resize();
 }
 
-function switchTab(tabId) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === tabId));
-  if (tabId === 'tab2' && currentPathData?.radarData) setTimeout(() => renderRadar(currentPathData.radarData), 200);
+function switchPanel(panelId) {
+  document.querySelectorAll('.drawer-btn').forEach(b => b.classList.toggle('active', b.dataset.panel === panelId));
+  document.querySelectorAll('.drawer-panel').forEach(p => p.classList.toggle('active', p.id === panelId));
+  if (panelId === 'panel2' && currentPathData?.radarData) {
+    setTimeout(() => renderRadar(currentPathData.radarData), 200);
+  }
 }
 
 // ============================================
-// 生成成长树
+// 生成成长树 (采用第二份的完整逻辑：自动触发优化)
 // ============================================
 $('generateBtn').addEventListener('click', async function() {
   const input = getUserInput();
   if (!input.job) { alert('请选择职业'); return; }
   if (input.skills.length < 3) { alert('请至少选择3项技能'); return; }
-  
-  isOptimizing = false;
-  optimizeAttempts = 0;
+  isOptimizing = false; optimizeAttempts = 0;
   $('optimizeProgress').classList.remove('show');
   $('optimizeBtn').disabled = false;
-  $('optimizeBtn').innerHTML = '<i class="fas fa-magic"></i> 获取优化版';
-  
+  $('optimizeBtn').innerHTML = '<i class="fas fa-sliders"></i> 优化';
   this.disabled = true;
   this.innerHTML = '<span class="spinner-small"></span> 生成中...';
-  
   try {
     const res = await fetch(`${API_CONFIG.baseUrl}/api/generate-tree`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input)
     });
     const data = await res.json();
-    
     if (data.success) {
       currentPathData = data.data;
       currentSessionId = data.sessionId;
       renderTree(data.data, input);
-      switchTab('tab2');
-      
+      switchPanel('panel2');
       if (data.template) {
-        showToast('🌳 初始版本已生成，AI正在后台优化...', 'info');
-        setTimeout(() => {
-          $('optimizeBtn').click();
-        }, 1500);
+        showToast('初始版本已生成，后台处理中...', 'info');
+        setTimeout(() => { $('optimizeBtn').click(); }, 1500);
       }
     }
   } catch(e) {
     const fb = generateLocalTreeEnhanced(input);
     currentPathData = fb;
     renderTree(fb, input);
-    switchTab('tab2');
-    showToast('📋 使用本地版本', 'warning');
+    switchPanel('panel2');
+    showToast('使用当前版本', 'warning');
   } finally {
     this.disabled = false;
-    this.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树';
+    this.innerHTML = '<i class="fas fa-bolt"></i> 生成成长树';
   }
 });
 
 // ============================================
-// 优化轮询
+// 优化轮询 (采用第二份的完整逻辑)
 // ============================================
 $('optimizeBtn').addEventListener('click', async function() {
-  if (!currentSessionId) {
-    alert('请先生成成长树');
-    return;
-  }
-  
-  if (isOptimizing) {
-    showToast('⏳ 优化正在进行中，请稍候...', 'warning');
-    return;
-  }
-  
+  if (!currentSessionId) { alert('请先生成成长树'); return; }
+  if (isOptimizing) { showToast('处理中，请稍候', 'warning'); return; }
   if (currentPathData && currentPathData._status && currentPathData._status.includes('✅')) {
-    showToast('✅ 已经是优化版本，无需重复获取', 'success');
+    showToast('已经是优化版本，无需重复获取', 'success');
     return;
   }
-  
-  isOptimizing = true;
-  optimizeAttempts = 0;
+  isOptimizing = true; optimizeAttempts = 0;
   this.disabled = true;
-  this.innerHTML = '<span class="spinner"></span> 优化中...';
-  
+  this.innerHTML = '<span class="spinner"></span> 处理中...';
   const progressEl = $('optimizeProgress');
   progressEl.classList.add('show');
   $('progressBarFill').style.width = '0%';
-  $('progressStatusText').textContent = '🤖 AI正在思考您的职业路径...';
-  $('progressTimeText').textContent = '⏳ 预计 15-30 秒';
-  
+  $('progressStatusText').textContent = '正在处理...';
+  $('progressTimeText').textContent = '';
   await pollForOptimization();
 });
 
@@ -1323,102 +1839,68 @@ async function pollForOptimization() {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
-    const res = await fetch(
-      `${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`,
-      { signal: controller.signal }
-    );
+    const res = await fetch(`${API_CONFIG.baseUrl}/api/get-optimized-tree/${currentSessionId}`, { signal: controller.signal });
     clearTimeout(timeoutId);
-    
     const data = await res.json();
-    
     if (data.success && data.optimized) {
       const input = getUserInput();
       currentPathData = data.data;
+      currentPathData._status = '✅ 已优化 ✓';
+      currentPathData._isTemplate = false;
       renderTree(currentPathData, input);
-      
       $('progressBarFill').style.width = '100%';
-      $('progressStatusText').textContent = '✅ 优化完成！';
-      $('progressTimeText').textContent = '🎉 已就绪';
-      
-      setTimeout(() => {
-        $('optimizeProgress').classList.remove('show');
-      }, 2000);
-      
+      $('progressStatusText').textContent = '完成';
+      $('progressTimeText').textContent = '已就绪';
+      setTimeout(() => { $('optimizeProgress').classList.remove('show'); }, 2000);
       $('optimizeBtn').disabled = false;
-      $('optimizeBtn').innerHTML = '<i class="fas fa-magic"></i> 已优化 ✓';
+      $('optimizeBtn').innerHTML = '<i class="fas fa-sliders"></i> 已更新';
       isOptimizing = false;
-      
-      showToast('✅ 职业成长树已优化完成！', 'success');
+      showToast('职业成长树已完成优化', 'success');
       return;
     }
-    
     optimizeAttempts++;
-    
     const progress = Math.min(95, (optimizeAttempts / MAX_OPTIMIZE_ATTEMPTS) * 100);
     $('progressBarFill').style.width = progress + '%';
-    
-    const messages = [
-      '🤖 AI正在分析您的职业背景...',
-      '📊 正在规划成长路径...',
-      '🎯 正在匹配技能与目标...',
-      '✨ 正在优化分支细节...',
-      '🌟 即将完成...'
-    ];
+    const messages = ['正在整理...','规划路径中...','匹配技能...','完善细节...','即将完成...'];
     const msgIndex = Math.min(Math.floor(optimizeAttempts / 5), messages.length - 1);
-    $('progressStatusText').textContent = messages[msgIndex] || '⏳ 优化中...';
-    
-    const remaining = data.remaining || Math.max(0, 30 - optimizeAttempts * 1.5);
-    $('progressTimeText').textContent = `⏳ 约 ${Math.ceil(remaining)} 秒`;
-    
+    $('progressStatusText').textContent = messages[msgIndex] || '处理中...';
     if (optimizeAttempts >= MAX_OPTIMIZE_ATTEMPTS) {
       $('progressBarFill').style.width = '100%';
-      $('progressStatusText').textContent = '⏳ 优化超时，使用本地版本';
-      $('progressTimeText').textContent = '📋 已就绪';
-      
+      $('progressStatusText').textContent = '超时，使用当前版本';
+      $('progressTimeText').textContent = '已就绪';
       const input = getUserInput();
       const localData = generateLocalTreeEnhanced(input);
       currentPathData = localData;
       renderTree(localData, input);
-      
-      setTimeout(() => {
-        $('optimizeProgress').classList.remove('show');
-      }, 2000);
-      
+      setTimeout(() => { $('optimizeProgress').classList.remove('show'); }, 2000);
       $('optimizeBtn').disabled = false;
-      $('optimizeBtn').innerHTML = '<i class="fas fa-magic"></i> 本地版';
+      $('optimizeBtn').innerHTML = '<i class="fas fa-sliders"></i> 当前版';
       isOptimizing = false;
-      
-      showToast('⏳ 优化超时，已使用本地生成版本', 'warning');
+      showToast('超时，已使用当前版本', 'warning');
       return;
     }
-    
     let interval = 2000;
     if (optimizeAttempts > 10) interval = 3000;
     if (optimizeAttempts > 20) interval = 4000;
-    
     setTimeout(pollForOptimization, interval);
-    
   } catch (error) {
-    console.error('轮询失败:', error);
     optimizeAttempts++;
-    if (optimizeAttempts < MAX_OPTIMIZE_ATTEMPTS) {
-      setTimeout(pollForOptimization, 3000);
-    } else {
+    if (optimizeAttempts < MAX_OPTIMIZE_ATTEMPTS) { setTimeout(pollForOptimization, 3000); }
+    else {
       $('optimizeBtn').disabled = false;
-      $('optimizeBtn').innerHTML = '<i class="fas fa-magic"></i> 重试';
+      $('optimizeBtn').innerHTML = '<i class="fas fa-sliders"></i> 重试';
       isOptimizing = false;
       $('optimizeProgress').classList.remove('show');
-      showToast('❌ 连接失败，请点击"获取优化版"重试', 'error');
+      showToast('连接失败，请重试', 'error');
     }
   }
 }
 
-// ============================================
-// 重新生成 & 咨询
-// ============================================
 $('regenerateBtn').addEventListener('click', () => $('generateBtn').click());
 
+// ============================================
+// 咨询 (保留第一份的cleanAIResponse)
+// ============================================
 $('consultBtn').addEventListener('click', async function() {
   if (!currentPathData) { alert('请先生成成长树'); return; }
   const input = getUserInput();
@@ -1430,60 +1912,63 @@ $('consultBtn').addEventListener('click', async function() {
       body: JSON.stringify({ message: `我是${input.name}，${input.job}，${input.years}年。请给我5条职业建议。` })
     });
     const data = await res.json();
-    if (data.success) showAIResponse(data.reply);
-    else alert('咨询失败');
+    if (data.success) {
+      const cleanedReply = cleanAIResponse(data.reply);
+      showAIResponse(cleanedReply);
+    } else {
+      alert('咨询失败');
+    }
   } catch(e) {
-    alert('咨询失败');
+    alert('咨询失败，请稍后重试');
   } finally {
     this.disabled = false;
-    this.innerHTML = '<i class="fas fa-paper-plane"></i> 咨询AI助手';
+    this.innerHTML = '<i class="fas fa-paper-plane"></i> 咨询';
   }
 });
 
-function formatAIResponse(reply) {
-  const raw = String(reply || 'AI没有返回内容').replace(/\r\n?/g, '\n');
-
-  const cleaned = raw
-    // 标题：允许 # 后面没有空格，也允许前导空白
-    .replace(/^\s*#{1,6}\s*/gm, '')
-    // 引用符号
-    .replace(/^\s*>+\s?/gm, '')
-    // Markdown 分隔线（--- / *** / ___）
-    .replace(/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '')
-    // 粗体/斜体标记；反复处理，避免嵌套残留
-    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
-    .replace(/__([^_\n]+)__/g, '$1')
-    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
-    .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '$1')
-    // 行内代码
-    .replace(/`([^`\n]+)`/g, '$1')
-    // 无序列表统一成圆点
-    .replace(/^\s*[-*+]\s+/gm, '• ')
-    // 清掉分隔线留下的多余空行
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-
-  return cleaned
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/\n/g, '<br>');
-}
-
 function showAIResponse(reply) {
   const overlay = document.createElement('div');
-  overlay.className = 'ai-modal-overlay';
-  overlay.innerHTML = `<div class="ai-modal-content"><div class="ai-modal-header"><span>💡 职业建议</span><button onclick="this.closest('.ai-modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button></div><div class="ai-modal-body">${formatAIResponse(reply)}</div><div class="ai-modal-footer"><button onclick="this.closest('.ai-modal-overlay').remove()">我知道了</button></div></div>`;
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <span><i class="fas fa-lightbulb" style="color:var(--accent);"></i> 职业建议</span>
+        <button onclick="this.closest('.modal-overlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-secondary);">✕</button>
+      </div>
+      <div class="modal-body" style="white-space:pre-wrap;line-height:1.8;">
+        ${(reply||'暂无内容').replace(/\n/g,'<br>')}
+      </div>
+      <div class="modal-footer">
+        <button onclick="this.closest('.modal-overlay').remove()" style="padding:8px 22px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;box-shadow:2px 2px 0 var(--accent-dark);">我知道了</button>
+      </div>
+    </div>
+  `;
   document.body.appendChild(overlay);
   overlay.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
 }
 
-// ============================================
-// 初始化
-// ============================================
-document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', function() { switchTab(this.dataset.tab); }));
+function triggerStamp() {
+  const overlay = document.getElementById('stampOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  void overlay.offsetWidth;
+  overlay.classList.add('show');
+  setTimeout(() => { overlay.classList.remove('show'); }, 1200);
+}
+
+function randomizeBranches() {
+  const branches = document.querySelectorAll('.tree-branch');
+  branches.forEach((b, i) => {
+    const rotate = (Math.random() - 0.5) * 4;
+    const delay = i * 0.08;
+    b.style.setProperty('--rotate', rotate + 'deg');
+    b.style.animationDelay = delay + 's';
+  });
+}
+
+document.querySelectorAll('.drawer-btn').forEach(b => b.addEventListener('click', function() {
+  switchPanel(this.dataset.panel);
+}));
 
 document.addEventListener('DOMContentLoaded', function() {
   if (!$('userYears').value) $('userYears').value = '0';
