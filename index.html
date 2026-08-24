@@ -1441,17 +1441,27 @@ $('consultBtn').addEventListener('click', async function() {
 });
 
 function formatAIResponse(reply) {
-  const raw = reply || 'AI没有返回内容';
+  const raw = String(reply || 'AI没有返回内容').replace(/\r\n?/g, '\n');
 
   const cleaned = raw
-    .replace(/\r/g, '')
+    // 标题：允许 # 后面没有空格，也允许前导空白
     .replace(/^\s*#{1,6}\s*/gm, '')
-    .replace(/^\s*>\s?/gm, '')
-    .replace(/^\s*---+\s*$/gm, '')
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/__(.*?)__/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/^\s*[-*+]\s+/gm, '• ');
+    // 引用符号
+    .replace(/^\s*>+\s?/gm, '')
+    // Markdown 分隔线（--- / *** / ___）
+    .replace(/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '')
+    // 粗体/斜体标记；反复处理，避免嵌套残留
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+    .replace(/__([^_\n]+)__/g, '$1')
+    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
+    .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '$1')
+    // 行内代码
+    .replace(/`([^`\n]+)`/g, '$1')
+    // 无序列表统一成圆点
+    .replace(/^\s*[-*+]\s+/gm, '• ')
+    // 清掉分隔线留下的多余空行
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 
   return cleaned
     .replace(/&/g, '&amp;')
