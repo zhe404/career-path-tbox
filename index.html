@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-  <title>AI职业导航 · 成长树</title>
+  <title>职业成长 · 训练中心</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
@@ -400,6 +400,115 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
 
 
 </style>
+
+<style id="warm-unified-theme">
+/* ===== 最终融合：整体视觉统一为队长暖色手账风 ===== */
+:root{
+  --warm-bg:#faf6f0;--warm-card:#fffaf3;--warm-soft:#f8eed8;--warm-text:#3d3228;
+  --warm-muted:#7a6b5d;--warm-accent:#c45d1e;--warm-accent-dark:#a04a15;
+  --warm-accent-light:#fdf0e4;--warm-gold:#d4a043;--warm-gold-light:#fdf5e6;
+  --warm-border:#e0d0b8;--warm-border-light:#ebe0cf;
+  --warm-shadow:3px 3px 0 #e0d0b8;--warm-soft-shadow:0 4px 16px rgba(61,50,40,.08);
+}
+html,body{background:var(--warm-bg)!important;color:var(--warm-text)!important;}
+body{
+  background-image:radial-gradient(circle at 1px 1px,rgba(224,208,184,.30) 1px,transparent 0)!important;
+  background-size:24px 24px!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif!important;
+}
+body::before,body::after{content:"";position:fixed;width:170px;height:170px;border-radius:50%;pointer-events:none;z-index:0;}
+body::before{top:-45px;right:-45px;background:radial-gradient(circle,rgba(212,160,67,.10),transparent 70%);}
+body::after{bottom:-50px;left:-50px;background:radial-gradient(circle,rgba(196,93,30,.07),transparent 70%);}
+.global-app{position:relative;z-index:1;}
+.global-header{margin:4px 4px 22px!important;}
+.global-logo{background:var(--warm-accent)!important;border-radius:12px!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;transform:rotate(-4deg);}
+.global-brand h1{color:var(--warm-text)!important;font-size:clamp(24px,3vw,34px)!important;letter-spacing:-.4px!important;}
+.global-brand p{color:var(--warm-muted)!important;}
+.global-badge{background:var(--warm-accent-light)!important;color:var(--warm-accent)!important;border:1px solid var(--warm-border-light)!important;border-radius:20px!important;padding:7px 16px!important;}
+.global-nav{background:var(--warm-soft)!important;border:1px solid var(--warm-border-light)!important;border-radius:14px!important;padding:5px!important;box-shadow:none!important;}
+.global-tab{color:var(--warm-muted)!important;border-radius:10px!important;font-size:16px!important;padding:12px 16px!important;}
+.global-tab.active{background:#fff!important;color:var(--warm-accent)!important;box-shadow:0 1px 4px rgba(61,50,40,.07)!important;}
+
+/* 职业规划模块 */
+#careerModule .container>.header h1{color:var(--warm-text)!important;}
+#careerModule .container>.header h1 i{background:var(--warm-accent)!important;color:#fff!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;}
+#careerModule .badge{background:var(--warm-accent-light)!important;color:var(--warm-accent)!important;border:1px solid var(--warm-border-light)!important;}
+#careerModule .main-card{background:var(--warm-card)!important;border:1.5px solid var(--warm-border)!important;border-radius:24px!important;box-shadow:4px 4px 0 var(--warm-border),var(--warm-soft-shadow)!important;position:relative!important;}
+#careerModule .main-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--warm-accent),var(--warm-gold));}
+#careerModule .tab-nav{background:var(--warm-soft)!important;border:1px solid var(--warm-border-light)!important;border-radius:12px!important;}
+#careerModule .tab-btn{color:var(--warm-muted)!important;border-radius:8px!important;}
+#careerModule .tab-btn.active{background:white!important;color:var(--warm-accent)!important;}
+#careerModule .form-group label,#careerModule .section-title{color:var(--warm-text)!important;}
+#careerModule .form-group label i,#careerModule .section-title i{color:var(--warm-accent)!important;}
+#careerModule .form-group input,#careerModule .form-group select,#careerModule .form-group textarea,#userJobDisplay{background:#fcf9f4!important;border-color:var(--warm-border)!important;border-radius:12px!important;color:var(--warm-text)!important;}
+#careerModule .form-group input:focus,#careerModule .form-group select:focus,#careerModule .form-group textarea:focus{border-color:var(--warm-accent)!important;box-shadow:0 0 0 3px var(--warm-accent-light)!important;background:#fff!important;}
+#careerModule .style-card{border-color:var(--warm-border)!important;border-radius:12px!important;}
+#careerModule .style-card.selected{border-color:var(--warm-accent)!important;background:var(--warm-accent-light)!important;}
+#careerModule .skills-tag-group{background:#fcf9f4!important;border-color:var(--warm-border)!important;}
+#careerModule .skill-tag{border-color:var(--warm-border)!important;}
+#careerModule .skill-tag.active{background:var(--warm-accent)!important;border-color:var(--warm-accent)!important;}
+#careerModule .btn-primary{background:var(--warm-accent)!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;border-radius:12px!important;}
+#careerModule .btn-primary:hover{background:var(--warm-accent-dark)!important;}
+#careerModule .btn-secondary{border-color:var(--warm-border)!important;color:var(--warm-text)!important;border-radius:12px!important;}
+#careerModule .btn-secondary:hover{background:var(--warm-soft)!important;border-color:var(--warm-gold)!important;}
+#careerModule .tree-root-node{background:var(--warm-accent)!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;}
+#careerModule .tree-trunk,#careerModule .tree-branches-row::before,#careerModule .tree-branch::before{background:var(--warm-gold)!important;}
+#careerModule .tree-branch-node{border-color:var(--warm-border)!important;box-shadow:0 2px 8px rgba(61,50,40,.06)!important;}
+#careerModule .branch-year,#careerModule .branch-milestone{color:var(--warm-accent)!important;background:var(--warm-accent-light)!important;}
+#careerModule .tree-branch-node.goal{border-color:var(--warm-gold)!important;background:var(--warm-gold-light)!important;}
+#careerModule .radar-container{border:1.5px solid var(--warm-border)!important;border-radius:18px!important;box-shadow:0 2px 8px rgba(61,50,40,.06)!important;}
+#careerModule .stat-bar{background:#e8dcc8!important;}
+#careerModule .stat-fill{background:linear-gradient(90deg,var(--warm-accent),var(--warm-gold))!important;}
+#careerModule .badge-item{background:var(--warm-gold-light)!important;border-color:var(--warm-gold)!important;color:#7a5a10!important;}
+#careerModule .optimize-progress{background:var(--warm-soft)!important;border-color:var(--warm-border-light)!important;}
+
+/* 职场模拟模块：功能不改，只统一视觉 */
+#simulationModule .app{color:var(--warm-text)!important;}
+#simulationModule .shell{background:var(--warm-card)!important;border:1.5px solid var(--warm-border)!important;border-radius:24px!important;box-shadow:4px 4px 0 var(--warm-border),var(--warm-soft-shadow)!important;padding:28px!important;position:relative;overflow:hidden;}
+#simulationModule .shell::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--warm-accent),var(--warm-gold));}
+#simulationModule .progress{background:var(--warm-soft)!important;border:1px solid var(--warm-border-light)!important;border-radius:12px!important;padding:5px!important;}
+#simulationModule .step{color:var(--warm-muted)!important;border-radius:8px!important;}
+#simulationModule .step.active{background:#fff!important;color:var(--warm-accent)!important;box-shadow:0 1px 4px rgba(61,50,40,.06)!important;}
+#simulationModule .step.done{color:#7a5a10!important;}
+#simulationModule .intro,#simulationModule .setup-card,#simulationModule .chat-card,#simulationModule .result-card{background:#fffdf8!important;border:1.5px solid var(--warm-border)!important;border-radius:18px!important;box-shadow:0 2px 8px rgba(61,50,40,.06)!important;}
+#simulationModule .intro{background:linear-gradient(145deg,#fffaf3,#f8eed8)!important;}
+#simulationModule .eyebrow{color:var(--warm-accent)!important;}
+#simulationModule .intro h2,#simulationModule .section-title{color:var(--warm-text)!important;}
+#simulationModule .intro p{color:var(--warm-muted)!important;}
+#simulationModule .chip,#simulationModule .meta{background:var(--warm-accent-light)!important;color:var(--warm-accent)!important;border:1px solid var(--warm-border-light)!important;}
+#simulationModule .job-input,#simulationModule .composer textarea{background:#fcf9f4!important;color:var(--warm-text)!important;border:1.5px solid var(--warm-border)!important;border-radius:12px!important;}
+#simulationModule .job-input:focus,#simulationModule .composer textarea:focus{border-color:var(--warm-accent)!important;box-shadow:0 0 0 3px var(--warm-accent-light)!important;}
+#simulationModule .scene{background:#fff!important;color:var(--warm-text)!important;border-color:var(--warm-border)!important;border-radius:12px!important;}
+#simulationModule .scene:hover{border-color:var(--warm-gold)!important;}
+#simulationModule .scene.selected{background:var(--warm-accent)!important;border-color:var(--warm-accent)!important;color:#fff!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;}
+#simulationModule .primary,#simulationModule .send,#simulationModule .again{background:var(--warm-accent)!important;color:#fff!important;border-radius:12px!important;box-shadow:2px 2px 0 var(--warm-accent-dark)!important;}
+#simulationModule .ghost,#simulationModule .back{background:#fff!important;border:1.5px solid var(--warm-border)!important;color:var(--warm-text)!important;border-radius:12px!important;}
+#simulationModule .workplace-bar{background:linear-gradient(90deg,var(--warm-accent-dark),var(--warm-accent))!important;}
+#simulationModule .online::before{background:#f1d56c!important;}
+#simulationModule .messages{background:linear-gradient(#fffdf9,#faf6f0)!important;}
+#simulationModule .avatar{background:var(--warm-accent)!important;}
+#simulationModule .message.user .avatar{background:#9b806b!important;}
+#simulationModule .bubble{color:var(--warm-text)!important;background:#fff!important;border-color:var(--warm-border-light)!important;box-shadow:0 3px 10px rgba(61,50,40,.06)!important;}
+#simulationModule .message.user .bubble{color:#fff!important;background:linear-gradient(145deg,var(--warm-accent),var(--warm-accent-dark))!important;}
+#simulationModule .composer{border-top-color:var(--warm-border-light)!important;background:var(--warm-card)!important;}
+#simulationModule .result-card{background:#fffdf8!important;}
+#simulationModule .bar{background:#e8dcc8!important;}
+#simulationModule .bar > div{background:linear-gradient(90deg,var(--warm-accent),var(--warm-gold))!important;}
+#simulationModule .evaluation{background:var(--warm-soft)!important;border-color:var(--warm-border-light)!important;color:var(--warm-text)!important;}
+#simulationModule .score-value{color:var(--warm-accent)!important;}
+#simulationModule .sim-toast{background:var(--warm-text)!important;color:#fff!important;}
+
+/* 弹窗统一 */
+.cascade-modal,.ai-modal-content,.modal-content{background:var(--warm-card)!important;border:1.5px solid var(--warm-border)!important;box-shadow:4px 4px 0 var(--warm-border),0 8px 28px rgba(61,50,40,.10)!important;}
+.cascade-header,.ai-modal-header,.modal-header{border-bottom-color:var(--warm-border-light)!important;background:var(--warm-card)!important;color:var(--warm-text)!important;}
+.cascade-option:hover{background:var(--warm-accent-light)!important;}
+.cascade-option.active{background:var(--warm-accent)!important;color:#fff!important;}
+
+@media(max-width:760px){#simulationModule .shell{padding:18px!important}.global-tab{font-size:14px!important}.global-logo{width:52px!important;height:52px!important}.global-brand h1{font-size:22px!important;}}
+#careerModule #tab1>div[style*="font-size:18px"]{color:var(--warm-text)!important;}
+#careerModule #tab1>div[style*="font-size:18px"] i{color:var(--warm-accent)!important;}
+#careerModule #profileSummary{background:var(--warm-soft)!important;border:1px solid var(--warm-border-light)!important;color:var(--warm-text)!important;}
+</style>
+
 </head>
 <body>
 
@@ -408,11 +517,11 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
     <div class="global-brand">
       <div class="global-logo"><i class="fa-solid fa-compass"></i></div>
       <div>
-        <h1>AI职业导航 · 成长与训练中心</h1>
-        <p>职业路径规划 + 互动式职场训练，一站式完成成长闭环</p>
+        <h1>职业成长 · 训练中心</h1>
+        <p>从职业路径规划到职场情境训练，在同一页面持续积累成长</p>
       </div>
     </div>
-    <div class="global-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 驱动</div>
+    <div class="global-badge"><i class="fa-solid fa-compass"></i> 成长导航</div>
   </header>
   <nav class="global-nav">
     <button class="global-tab active" data-module="career"><i class="fa-solid fa-tree"></i>职业规划</button>
@@ -424,8 +533,8 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
 
 <div class="container">
   <div class="header">
-    <h1><i class="fas fa-tree"></i> AI•职业生涯规划</h1>
-    <span class="badge"><i class="fas fa-sparkles"></i> v9.2</span>
+    <h1><i class="fas fa-tree"></i> 职业成长树</h1>
+    <span class="badge">慢慢来，比较快</span>
   </div>
   <div class="main-card">
     <div class="tab-nav">
@@ -434,7 +543,7 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
     </div>
     <div id="tab1" class="tab-content active">
       <div style="font-size:18px;font-weight:700;color:#0b1e3a;margin-bottom:20px;"><i class="fas fa-user-astronaut" style="color:#1e4a8a;"></i> 你的职业画像</div>
-      <div id="aiSkillStatus" class="ai-status hidden"><span class="spinner-small"></span><span>AI 正在分析...</span></div>
+      <div id="aiSkillStatus" class="ai-status hidden"><span class="spinner-small"></span><span>正在分析...</span></div>
       <div class="form-grid">
         <div class="form-group">
           <label><i class="fas fa-user"></i> 姓名/昵称
@@ -496,7 +605,7 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
         <div class="form-group full-width">
           <label><i class="fas fa-bullseye"></i> 职业目标（<span id="goalYearLabel">5</span>年后想成为什么？）
             <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">例如：技术总监、店长、高级工程师。明确目标有助于AI生成精准路径。</span>
+              <span class="tooltip">例如：技术总监、店长、高级工程师。明确目标有助于生成更贴合实际的路径。</span>
             </i>
           </label>
           <input type="text" id="userGoal" placeholder="例如：技术总监 / 店长">
@@ -525,13 +634,13 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
         <div class="form-group full-width">
           <label><i class="fas fa-tags"></i> 核心技能（已有 / 希望发展，至少3项）
             <i class="fas fa-info-circle info-icon">
-              <span class="tooltip">AI会结合当前职业与职业目标推荐候选技能，请选择你目前已经掌握或希望重点发展的技能，至少3项。</span>
+              <span class="tooltip">系统会结合当前职业与职业目标推荐候选技能，请选择你目前已经掌握或希望重点发展的技能，至少3项。</span>
             </i>
           </label>
-          <div class="skills-tag-group" id="skillTags"><div class="empty-skills-hint">选择职业后AI自动推荐</div></div>
+          <div class="skills-tag-group" id="skillTags"><div class="empty-skills-hint">选择职业后自动推荐</div></div>
         </div>
       </div>
-      <button class="btn-primary mt-20" id="generateBtn"><i class="fas fa-wand-magic-sparkles"></i> 🌳 生成我的职业成长树</button>
+      <button class="btn-primary mt-20" id="generateBtn"><i class="fas fa-wand-magic-sparkles"></i> 生成成长树</button>
     </div>
     <div id="tab2" class="tab-content">
       <div id="profileSummary" style="background:rgba(255,255,255,0.5);border-radius:20px;padding:12px 18px;margin-bottom:16px;font-size:14px;display:flex;align-items:center;flex-wrap:wrap;gap:12px;"></div>
@@ -544,11 +653,11 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
         <button class="btn-secondary btn-optimize" id="optimizeBtn">
           <i class="fas fa-magic"></i> 获取优化版
         </button>
-        <button class="btn-secondary" id="consultBtn"><i class="fas fa-paper-plane"></i> 咨询AI助手</button>
+        <button class="btn-secondary" id="consultBtn"><i class="fas fa-paper-plane"></i> 咨询</button>
       </div>
       <div id="optimizeProgress" class="optimize-progress">
         <div class="progress-text">
-          <span><span class="status-icon">⏳</span> <span id="progressStatusText">AI优化中...</span></span>
+          <span><span class="status-icon">⏳</span> <span id="progressStatusText">处理中...</span></span>
           <span id="progressTimeText">等待中</span>
         </div>
         <div class="progress-bar-wrap">
@@ -584,7 +693,7 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
 <article class="intro">
 <div class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> 沉浸式远程协作训练</div>
 <h2>不是背标准答案，<br/>而是在事件中作出你的判断。</h2>
-<p>选择目标岗位与训练场景。AI将扮演与你协作的同事、负责人或外部对接人，根据你的真实决策推进事件，并在结束后形成能力评价。</p>
+<p>选择目标岗位与训练场景。系统将模拟与你协作的同事、负责人或外部对接人，根据你的真实决策推进事件，并在结束后形成能力评价。</p>
 <div class="abilities">
 <span class="chip">沟通表达</span><span class="chip">团队协作</span>
 <span class="chip">任务协调</span><span class="chip">信息管理</span>
@@ -619,7 +728,7 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
 <article class="chat-card">
 <div class="workplace-bar">
 <strong><i class="fa-solid fa-headset"></i> 远程协作工作台</strong>
-<span class="online">Agent 在线</span>
+<span class="online">模拟进行中</span>
 </div>
 <div class="messages" id="messages"></div>
 <div class="composer">
@@ -637,7 +746,7 @@ html,body{min-height:100%}body{margin:0!important;padding:28px 18px 40px!importa
 <article class="result-card">
 <h3 class="section-title"><i class="fa-solid fa-ranking-star"></i> 六维能力评分</h3>
 <div class="score-list" id="scoreList"></div>
-<h3 class="section-title" style="margin-top:26px;"><i class="fa-solid fa-file-circle-check"></i> Agent评价</h3>
+<h3 class="section-title" style="margin-top:26px;"><i class="fa-solid fa-file-circle-check"></i> 综合评价</h3>
 <div class="evaluation" id="evaluationText"></div>
 <div class="result-actions">
 <button class="again" id="againBtn"><i class="fa-solid fa-repeat"></i> 再训练一次</button>
@@ -1022,19 +1131,24 @@ function renderTree(data, input) {
   }
   
   // ==========================================
-  // 核心修复：根据职业类型强制修正雷达图
+  // 雷达数据：AI正常返回时原样展示，仅在缺失/无效时兜底
   // ==========================================
-  if (!data.radarData) {
+  if (!data.radarData || typeof data.radarData !== 'object') {
     data.radarData = {};
   }
-  
-  
-  // 最终确保所有值有效
-  data.radarData.skill = Math.min(100, Math.max(5, data.radarData.skill || 25));
-  data.radarData.experience = Math.min(100, Math.max(0, data.radarData.experience || 0));
-  data.radarData.learning = Math.min(100, Math.max(50, data.radarData.learning || 80));
-  data.radarData.adaptability = Math.min(100, Math.max(40, data.radarData.adaptability || 60));
-  data.radarData.leadership = Math.min(100, Math.max(0, data.radarData.leadership || 0));
+  const radarFallback = {
+    skill: 50,
+    experience: isStudent ? 0 : 50,
+    learning: 70,
+    adaptability: 65,
+    leadership: 40
+  };
+  ['skill','experience','learning','adaptability','leadership'].forEach(key => {
+    const raw = Number(data.radarData[key]);
+    data.radarData[key] = Number.isFinite(raw)
+      ? Math.min(100, Math.max(0, raw))
+      : radarFallback[key];
+  });
   
  if (!data.challenges || !data.challenges.text) {
      data.challenges = {
@@ -1107,8 +1221,9 @@ function renderRadar(data) {
       type: 'radar',
       data: [{
         value: [data.skill||0, data.experience||0, data.learning||0, data.adaptability||0, data.leadership||0],
-        areaStyle: {color: 'rgba(30,74,138,0.3)'},
-        lineStyle: {color: '#1e4a8a'}
+        areaStyle: {color: 'rgba(196,93,30,0.20)'},
+        lineStyle: {color: '#c45d1e', width: 2},
+        itemStyle: {color: '#c45d1e'}
       }]
     }]
   }, true);
@@ -1588,17 +1703,17 @@ window.addEventListener('resize', function() { if (radarChart) radarChart.resize
         radius: "66%",
         indicator: abilityNames.map(name => ({name, max:100})),
         splitNumber: 5,
-        axisName: {color:"#18366f", fontWeight:700},
-        splitArea: {areaStyle:{color:["#f8faff","#edf3fc"]}},
-        splitLine: {lineStyle:{color:"#cbd8ed"}},
-        axisLine: {lineStyle:{color:"#cbd8ed"}}
+        axisName: {color:"#7a6b5d", fontWeight:700},
+        splitArea: {areaStyle:{color:["#fffdf8","#f8eed8"]}},
+        splitLine: {lineStyle:{color:"#e0d0b8"}},
+        axisLine: {lineStyle:{color:"#e0d0b8"}}
       },
       series: [{
         type:"radar",
         data:[{ value: abilityNames.map(n => scores[n]), name:"本次表现",
-          areaStyle:{color:"rgba(49,90,166,.28)"},
-          lineStyle:{color:"#315aa6", width:3},
-          itemStyle:{color:"#315aa6"} }]
+          areaStyle:{color:"rgba(196,93,30,.20)"},
+          lineStyle:{color:"#c45d1e", width:3},
+          itemStyle:{color:"#c45d1e"} }]
       }]
     });
     window.addEventListener("resize", () => chart.resize(), {once:true});
